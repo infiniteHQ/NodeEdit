@@ -24,19 +24,8 @@ bool NodeEdit::IsValidFile(const std::string &path) {
   return false;
 }
 
-void NodeEdit::StartTextEditorInstance(const std::string &path) {
-  std::string filename = fs::path(path).filename().string();
-
-  const size_t maxLen = 24;
-  if (filename.size() > maxLen) {
-    filename = filename.substr(0, maxLen - 3) + "...";
-  }
-
-  std::string window_name =
-      filename + "####" +
-      std::to_string(CNodeEdit->m_text_editor_instances.size());
-
-  auto inst = ModuleUI::TextEditorAppWindow::Create(path, window_name);
+void NodeEdit::StartNodeEditTestInstance() {
+  auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST");
   Cherry::AddAppWindow(inst->GetAppWindow());
   CNodeEdit->m_text_editor_instances.push_back(inst);
 }

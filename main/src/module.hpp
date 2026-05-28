@@ -1,4 +1,4 @@
-#include "../ui/instances/text_editor/text_editor.hpp"
+#include "../ui/instances/node_editor/node_editor.hpp"
 #include <vxcore/include/vortex.h>
 #include <vxcore/include/vortex_internals.h>
 #include <vxgui/editor/main/editor.hpp>
@@ -9,7 +9,7 @@
 namespace NodeEdit {
 struct Context {
   std::shared_ptr<ModuleInterface> m_interface;
-  std::vector<std::shared_ptr<ModuleUI::TextEditorAppWindow>>
+  std::vector<std::shared_ptr<ModuleUI::NodeEditorAppWindow>>
       m_text_editor_instances;
 };
 } // namespace NodeEdit
@@ -29,7 +29,7 @@ TEXTEDIT_API void DestroyContext();
 TEXTEDIT_API std::string GetPath(const std::string &path);
 TEXTEDIT_API void Hello();
 
-TEXTEDIT_API void StartTextEditorInstance(const std::string &path);
+TEXTEDIT_API void StartNodeEditTestInstance();
 TEXTEDIT_API bool IsValidFile(const std::string &path);
 } // namespace NodeEdit
 

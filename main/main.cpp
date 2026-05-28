@@ -14,39 +14,9 @@ public:
     CNodeEdit->m_interface =
         ModuleInterface::get_editor_module_by_name(this->name());
 
-    this->add_content_browser_item_handler(ItemHandlerInterface(
-        "file_cpp", NodeEdit::StartTextEditorInstance, "Edit",
-        "Edit this C++ file", NodeEdit::GetPath("resources/icons/edit.png")));
-    this->add_content_browser_item_handler(ItemHandlerInterface(
-        "file_lua", NodeEdit::StartTextEditorInstance, "Edit",
-        "Edit this Lua file", NodeEdit::GetPath("resources/icons/edit.png")));
-    this->add_content_browser_item_handler(ItemHandlerInterface(
-        "file_json", NodeEdit::StartTextEditorInstance, "Edit",
-        "Edit this JSON file", NodeEdit::GetPath("resources/icons/edit.png")));
-    this->add_content_browser_item_handler(
-        ItemHandlerInterface("file_hpp", NodeEdit::StartTextEditorInstance,
-                             "Edit", "Edit this C++ header file",
-                             NodeEdit::GetPath("resources/icons/edit.png")));
-    this->add_content_browser_item_handler(ItemHandlerInterface(
-        "file_c", NodeEdit::StartTextEditorInstance, "Edit", "Edit this C file",
+    this->add_toolbar_handler(ToolbarHandlerInterface(
+        NodeEdit::StartNodeEditTestInstance, "NodeEdit", "",
         NodeEdit::GetPath("resources/icons/edit.png")));
-    this->add_content_browser_item_handler(
-        ItemHandlerInterface("file_h", NodeEdit::StartTextEditorInstance,
-                             "Edit", "Edit this C header file",
-                             NodeEdit::GetPath("resources/icons/edit.png")));
-    this->add_content_browser_item_handler(
-        ItemHandlerInterface("file_python", NodeEdit::StartTextEditorInstance,
-                             "Edit", "Edit this Python file",
-                             NodeEdit::GetPath("resources/icons/edit.png")));
-
-    this->add_content_browser_item_identifier(ItemIdentifierInterface(
-        NodeEdit::IsValidFile, "text_edit:superfile", "Super file", "#553333"));
-
-    this->set_credits_file(NodeEdit::GetPath("CREDITS"));
-    this->add_documentation("Take the editor", "Edit a txt file",
-                            NodeEdit::GetPath("docs/main.md"));
-    this->add_documentation("Take the editor", "Find specific text",
-                            NodeEdit::GetPath("docs/main.md"));
   }
 
   void init_ui() override {
