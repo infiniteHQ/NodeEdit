@@ -13,11 +13,24 @@ NodeEditorAppWindow::NodeEditorAppWindow(const std::string &name) {
   m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
   m_AppWindow->SetLeftBottombarCallback([this]() { RenderBottombar(); });
   m_AppWindow->SetSaveMode(true);
+  m_AppWindow->SetInternalPaddingY(0.0f);
+  m_AppWindow->SetInternalPaddingX(0.0f);
 
   m_AppWindow->m_CloseCallback = [=]() {
     Cherry::DeleteAppWindow(m_AppWindow);
     m_AppWindow->SetVisibility(false);
   };
+
+  auto sch = node_ctx.CreateSchema("test");
+  sch->SetLabel("Test");
+
+  Cherry::NodeSystem::NodeInstance inst;
+  inst.TypeID = "test";
+  inst.InstanceID = "test1";
+  inst.Position = Cherry::NodeSystem::Vec2(40, 40);
+  inst.Size = Cherry::NodeSystem::Vec2(40, 40);
+
+  node_graph.AddNodeInstance(inst);
 
   std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
 
@@ -79,7 +92,7 @@ void NodeEditorAppWindow::RenderMenubar() {
 void NodeEditorAppWindow::Render() {
   CherryApp.PushComponentPool(&m_ComponentPool);
 
-  CherryKit::TitleFive("Test");
+  CherryKit::NodeAreaOpen("", 0, 0, &node_ctx, &node_graph);
 
   CherryApp.PopComponentPool();
 }

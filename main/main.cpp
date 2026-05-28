@@ -15,8 +15,7 @@ public:
         ModuleInterface::get_editor_module_by_name(this->name());
 
     this->add_toolbar_handler(ToolbarHandlerInterface(
-        NodeEdit::StartNodeEditTestInstance, "NodeEdit", "",
-        NodeEdit::GetPath("resources/icons/edit.png")));
+        NodeEdit::StartNodeEditTestInstance, "NodeEdit", ""));
   }
 
   void init_ui() override {

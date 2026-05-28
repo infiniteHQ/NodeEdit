@@ -24,6 +24,8 @@ private:
   std::shared_ptr<VxContext> ctx;
   bool opened;
   // Cherry
+  Cherry::NodeSystem::NodeContext node_ctx;
+  Cherry::NodeSystem::NodeGraph node_graph;
   std::shared_ptr<Cherry::AppWindow> m_AppWindow;
   ComponentsPool m_ComponentPool;
   bool m_FileEdited;
