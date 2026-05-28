@@ -1,13 +1,13 @@
 #include "module.hpp"
 
-void TextEdit::CreateContext() {
-  TextEdit::Context *ctx = new (TextEdit::Context);
-  CTextEdit = ctx;
+void NodeEdit::CreateContext() {
+  NodeEdit::Context *ctx = new (NodeEdit::Context);
+  CNodeEdit = ctx;
 }
 
-void TextEdit::DestroyContext() { free(CTextEdit); }
+void NodeEdit::DestroyContext() { free(CNodeEdit); }
 
-bool TextEdit::IsValidFile(const std::string &path) {
+bool NodeEdit::IsValidFile(const std::string &path) {
   namespace fs = std::filesystem;
 
   if (!fs::is_directory(path)) {
@@ -24,7 +24,7 @@ bool TextEdit::IsValidFile(const std::string &path) {
   return false;
 }
 
-void TextEdit::StartTextEditorInstance(const std::string &path) {
+void NodeEdit::StartTextEditorInstance(const std::string &path) {
   std::string filename = fs::path(path).filename().string();
 
   const size_t maxLen = 24;
@@ -34,15 +34,15 @@ void TextEdit::StartTextEditorInstance(const std::string &path) {
 
   std::string window_name =
       filename + "####" +
-      std::to_string(CTextEdit->m_text_editor_instances.size());
+      std::to_string(CNodeEdit->m_text_editor_instances.size());
 
   auto inst = ModuleUI::TextEditorAppWindow::Create(path, window_name);
   Cherry::AddAppWindow(inst->GetAppWindow());
-  CTextEdit->m_text_editor_instances.push_back(inst);
+  CNodeEdit->m_text_editor_instances.push_back(inst);
 }
 
-std::string TextEdit::GetPath(const std::string &path) {
-  return CTextEdit->m_interface->cook_path(path);
+std::string NodeEdit::GetPath(const std::string &path) {
+  return CNodeEdit->m_interface->cook_path(path);
 }
 
-void TextEdit::Hello() { vxe::log_info("Tt", "cc"); }
+void NodeEdit::Hello() { vxe::log_info("Tt", "cc"); }

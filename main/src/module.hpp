@@ -6,23 +6,23 @@
 #ifndef SAMPLE_MODULE_HPP
 #define SAMPLE_MODULE_HPP
 
-namespace TextEdit {
+namespace NodeEdit {
 struct Context {
   std::shared_ptr<ModuleInterface> m_interface;
   std::vector<std::shared_ptr<ModuleUI::TextEditorAppWindow>>
       m_text_editor_instances;
 };
-} // namespace TextEdit
+} // namespace NodeEdit
 
 #ifndef TEXTEDIT_API
 #define TEXTEDIT_API
 #endif
 
-#ifndef CTextEdit
-extern TEXTEDIT_API TextEdit::Context *CTextEdit;
+#ifndef CNodeEdit
+extern TEXTEDIT_API NodeEdit::Context *CNodeEdit;
 #endif
 
-namespace TextEdit {
+namespace NodeEdit {
 TEXTEDIT_API void CreateContext();
 TEXTEDIT_API void DestroyContext();
 
@@ -31,6 +31,6 @@ TEXTEDIT_API void Hello();
 
 TEXTEDIT_API void StartTextEditorInstance(const std::string &path);
 TEXTEDIT_API bool IsValidFile(const std::string &path);
-} // namespace TextEdit
+} // namespace NodeEdit
 
 #endif // SAMPLE_MODULE_HPP
