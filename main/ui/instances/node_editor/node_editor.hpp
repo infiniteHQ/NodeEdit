@@ -20,6 +20,10 @@ public:
   void RenderRightMenubar();
   void RenderBottombar();
 
+  void LoadContext(const std::string &context_id);
+  void LoadGraph(const std::string &json_path);
+  // void LoadGraph(const json& v);
+
 private:
   std::shared_ptr<VxContext> ctx;
   bool opened;

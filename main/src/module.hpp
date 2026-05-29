@@ -14,23 +14,23 @@ struct Context {
 };
 } // namespace NodeEdit
 
-#ifndef TEXTEDIT_API
-#define TEXTEDIT_API
+#ifndef NODEEDIT_API
+#define NODEEDIT_API
 #endif
 
 #ifndef CNodeEdit
-extern TEXTEDIT_API NodeEdit::Context *CNodeEdit;
+extern NODEEDIT_API NodeEdit::Context *CNodeEdit;
 #endif
 
 namespace NodeEdit {
-TEXTEDIT_API void CreateContext();
-TEXTEDIT_API void DestroyContext();
+NODEEDIT_API void CreateContext();
+NODEEDIT_API void DestroyContext();
 
-TEXTEDIT_API std::string GetPath(const std::string &path);
-TEXTEDIT_API void Hello();
+NODEEDIT_API std::string GetPath(const std::string &path);
+NODEEDIT_API void Hello();
 
-TEXTEDIT_API void StartNodeEditTestInstance();
-TEXTEDIT_API bool IsValidFile(const std::string &path);
+NODEEDIT_API void StartNodeEditTestInstance();
+NODEEDIT_API bool IsValidFile(const std::string &path);
 } // namespace NodeEdit
 
 #endif // SAMPLE_MODULE_HPP
