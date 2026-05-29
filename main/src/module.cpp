@@ -1,37 +1,36 @@
 #include "module.hpp"
 
-void NodeEdit::CreateContext() {
-  NodeEdit::Context *ctx = new (NodeEdit::Context);
+// runtime pointer
+#ifndef CNodeEdit
+std::weak_ptr<NodeEdit::Context> CNodeEdit;
+#endif
+
+std::shared_ptr<NodeEdit::Context> NodeEdit::create_context() {
+  auto ctx = std::make_shared<NodeEdit::Context>();
+
+  set_current_context(ctx);
+
+  return ctx;
+}
+
+void NodeEdit::DestroyContext(std::shared_ptr<NodeEdit::Context> ctx) {
+  set_current_context(nullptr);
+}
+
+void NodeEdit::set_current_context(std::shared_ptr<NodeEdit::Context> ctx) {
   CNodeEdit = ctx;
 }
 
-void NodeEdit::DestroyContext() { free(CNodeEdit); }
+std::shared_ptr<NodeEdit::Context> NodeEdit::get_current_context() {
+  return CNodeEdit.lock();
+}
 
-bool NodeEdit::IsValidFile(const std::string &path) {
-  namespace fs = std::filesystem;
-
-  if (!fs::is_directory(path)) {
-    return false;
-  }
-
-  for (const auto &entry : fs::directory_iterator(path)) {
-    if (entry.is_regular_file() &&
-        entry.path().filename() == "SampleConfig.txt") {
-      return true;
-    }
-  }
-
-  return false;
+std::string NodeEdit::GetPath(const std::string &path) {
+  return get_current_context()->interface->cook_path(path);
 }
 
 void NodeEdit::StartNodeEditTestInstance() {
   auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST");
   Cherry::AddAppWindow(inst->GetAppWindow());
-  CNodeEdit->editor_instances.push_back(inst);
+  get_current_context()->editor_instances.push_back(inst);
 }
-
-std::string NodeEdit::GetPath(const std::string &path) {
-  return CNodeEdit->interface->cook_path(path);
-}
-
-void NodeEdit::Hello() { vxe::log_info("Tt", "cc"); }
