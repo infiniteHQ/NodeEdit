@@ -11,7 +11,7 @@ public:
     NodeEdit::CreateContext();
 
     // Get the interface pointer
-    CNodeEdit->m_interface =
+    CNodeEdit->interface =
         ModuleInterface::get_editor_module_by_name(this->name());
 
     this->add_toolbar_handler(ToolbarHandlerInterface(
@@ -29,7 +29,7 @@ public:
     this->reset_module();
 
     // Clear windows
-    for (auto i : CNodeEdit->m_text_editor_instances) {
+    for (auto i : CNodeEdit->editor_instances) {
       CherryApp.DeleteAppWindow(i->GetAppWindow());
     }
 

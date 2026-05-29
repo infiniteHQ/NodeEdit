@@ -8,9 +8,8 @@
 
 namespace NodeEdit {
 struct Context {
-  std::shared_ptr<ModuleInterface> m_interface;
-  std::vector<std::shared_ptr<ModuleUI::NodeEditorAppWindow>>
-      m_text_editor_instances;
+  std::shared_ptr<ModuleInterface> interface;
+  std::vector<std::shared_ptr<ModuleUI::NodeEditorAppWindow>> editor_instances;
 };
 } // namespace NodeEdit
 
@@ -31,6 +30,10 @@ NODEEDIT_API void Hello();
 
 NODEEDIT_API void StartNodeEditTestInstance();
 NODEEDIT_API bool IsValidFile(const std::string &path);
+
+NODEEDIT_API void AddSchemaToContext();
+NODEEDIT_API void AddPinFormatToContext();
+
 } // namespace NodeEdit
 
 #endif // SAMPLE_MODULE_HPP

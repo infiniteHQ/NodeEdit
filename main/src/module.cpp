@@ -27,11 +27,11 @@ bool NodeEdit::IsValidFile(const std::string &path) {
 void NodeEdit::StartNodeEditTestInstance() {
   auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST");
   Cherry::AddAppWindow(inst->GetAppWindow());
-  CNodeEdit->m_text_editor_instances.push_back(inst);
+  CNodeEdit->editor_instances.push_back(inst);
 }
 
 std::string NodeEdit::GetPath(const std::string &path) {
-  return CNodeEdit->m_interface->cook_path(path);
+  return CNodeEdit->interface->cook_path(path);
 }
 
 void NodeEdit::Hello() { vxe::log_info("Tt", "cc"); }
