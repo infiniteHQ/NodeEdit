@@ -9,20 +9,71 @@
 namespace NodeEdit {
 
 // node ctx
-struct NodeEditPinFormat {};
-struct NodeEditSchema {};
-struct NodeEditContext {};
+struct NodeEditPinFormat {
+  std::string type; // Must be unique on the NodeContext
+  bool delegate = false;
+  std::string description;
+  std::string name;
+
+  // hex
+  std::string color;
+
+  // flow, circle, square, grid, round-square, diamond (def: circle)
+  std::string shape;
+};
+
+struct NodeEditPin {
+  std::string type;
+  std::string color_variant;
+  std::string name;
+  std::string id;
+};
+
+struct NodeEditSchema {
+  std::vector<NodeEditPin> input_pins;
+  std::vector<NodeEditPin> output_pins;
+  NodeEditPin header_pin;
+
+  // props
+  std::string id;
+  std::string hex_header_color;
+  std::string border_color;
+  std::string background_color;
+  std::string label;
+  std::string label_color;
+  std::string second_label;
+  std::string second_label_color;
+  std::string description_color;
+  std::string header_logo_path;
+
+  // state
+  std::string status; // active, disabled, depreciated, obsolete
+  std::string type;   // blueprint, simple, three, comment, houdini
+};
+
+struct NodeEditContext {
+  std::vector<NodeEditSchema> schemas;
+  std::vector<NodeEditPinFormat> pin_formats;
+  bool allow_comments;
+  bool allow_sequences;
+  std::string id;
+};
 
 // node graph
-struct NodeEditInstances {};
+struct NodeEditInstance {};
 struct NodeEditConnection {};
 struct NodeEditGraph {};
+struct NodeEditGraphSession {
+  NodeEditGraph graph;
+  std::string id;
+  std::string path; // json file
+};
 
 struct Context {
   std::shared_ptr<ModuleInterface> interface;
   std::vector<std::shared_ptr<ModuleUI::NodeEditorAppWindow>> editor_instances;
   std::vector<std::shared_ptr<NodeEditContext>> contexts;
-  // TODO : Loaded graphs (vector of shared_ptr<NodeEditGraph>)
+  std::vector<std::shared_ptr<NodeEditGraphSession>> graph_sessions;
 };
 } // namespace NodeEdit
 
@@ -50,6 +101,9 @@ NODEEDIT_API bool IsGraphFile(const std::string &path);
 NODEEDIT_API void AddSchemaToContext();
 NODEEDIT_API void AddPinFormatToContext();
 NODEEDIT_API void CreateContext(const std::string &name);
+NODEEDIT_API void LoadContextFromFile(const std::string &path);
+// TODO: Override existing schema/pinformat or simply add to existing context
+NODEEDIT_API void EmplaceContextFromFile(const std::string &path);
 
 // utils
 NODEEDIT_API std::string GetPath(const std::string &path);
