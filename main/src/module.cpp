@@ -34,3 +34,20 @@ void NodeEdit::StartNodeEditTestInstance() {
   Cherry::AddAppWindow(inst->GetAppWindow());
   get_current_context()->editor_instances.push_back(inst);
 }
+
+bool NodeEdit::IsGraphFile(const std::string &path) {
+  std::string filename = path + "/graph.nodegraph";
+  return fs::exists(filename);
+}
+
+void NodeEdit::OpenGraph(const std::string &path) {
+  if (!IsGraphFile(path)) {
+    get_current_context()->interface->log_error(
+        "No graph file in selected file ! (" + path + ")");
+  }
+
+  // TODO: Load graph
+  // TODO: Find context
+  // TODO: Start session
+  // TODO: Start UI
+}

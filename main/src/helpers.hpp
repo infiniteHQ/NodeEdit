@@ -1,0 +1,88 @@
+#pragma once
+
+#include <vxcore/include/vortex.h>
+#include <vxcore/include/vortex_internals.h>
+#include <vxgui/editor/main/editor.hpp>
+
+#ifndef NODEEDIT_HELPERS
+#define NODEEDIT_HELPERS
+
+namespace NodeEdit {
+
+// node ctx
+struct NodeEditPinFormat {
+  std::string type; // Must be unique on the NodeContext
+  bool delegate = false;
+  std::string description;
+  std::string name;
+
+  // hex
+  std::string color;
+
+  // flow, circle, square, grid, round-square, diamond (def: circle)
+  std::string shape;
+};
+
+struct NodeEditPin {
+  std::string type;
+  std::string color_variant;
+  std::string name;
+  std::string id;
+};
+
+struct NodeEditSchema {
+  std::vector<NodeEditPin> input_pins;
+  std::vector<NodeEditPin> output_pins;
+  NodeEditPin header_pin;
+
+  // props
+  std::string id;
+  std::string hex_header_color;
+  std::string border_color;
+  std::string background_color;
+  std::string label;
+  std::string label_color;
+  std::string second_label;
+  std::string second_label_color;
+  std::string description_color;
+  std::string header_logo_path;
+
+  // state
+  std::string status; // active, disabled, depreciated, obsolete
+  std::string type;   // blueprint, simple, three, comment, houdini
+};
+
+struct NodeEditContext {
+  std::vector<NodeEditSchema> schemas;
+  std::vector<NodeEditPinFormat> pin_formats;
+  bool allow_comments;
+  bool allow_sequences;
+  std::string id;
+};
+
+// node graph
+struct NodeEditInstance {
+  std::string type_id;
+  std::string instance_id;
+  float pos_x;
+  float pos_y;
+  float size_x;
+  float size_y;
+  nlohmann::json datas;
+};
+
+struct NodeEditConnection {
+  std::string node_instance_id_A;
+  std::string pin_id_A;
+  std::string node_instance_id_B;
+  std::string pin_id_B;
+};
+struct NodeEditGraph {};
+struct NodeEditGraphSession {
+  NodeEditGraph graph;
+  std::string id;
+  std::string path; // json file
+};
+} // namespace NodeEdit
+
+#endif // NODEEDIT_HELPERS

@@ -21,7 +21,7 @@ NodeEditorAppWindow::NodeEditorAppWindow(const std::string &name) {
     m_AppWindow->SetVisibility(false);
   };
 
-  auto sch = node_ctx.CreateSchema("test");
+  auto sch = ui_node_ctx.CreateSchema("test");
   sch->SetLabel("Test");
 
   Cherry::NodeSystem::NodeInstance inst;
@@ -30,7 +30,7 @@ NodeEditorAppWindow::NodeEditorAppWindow(const std::string &name) {
   inst.Position = Cherry::NodeSystem::Vec2(40, 40);
   inst.Size = Cherry::NodeSystem::Vec2(40, 40);
 
-  node_graph.AddNodeInstance(inst);
+  ui_node_graph.AddNodeInstance(inst);
 
   std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
 
@@ -92,7 +92,11 @@ void NodeEditorAppWindow::RenderMenubar() {
 void NodeEditorAppWindow::Render() {
   CherryApp.PushComponentPool(&m_ComponentPool);
 
-  CherryKit::NodeAreaOpen("", 0, 0, &node_ctx, &node_graph);
+  if (!refreshed) {
+    CherryKit::NodeAreaOpen("", 0, 0, &ui_node_ctx, &ui_node_graph);
+  } else {
+    refreshed = false;
+  }
 
   CherryApp.PopComponentPool();
 }
@@ -103,6 +107,20 @@ void NodeEditorAppWindow::RenderRightMenubar() {
 
 void NodeEditorAppWindow::RenderBottombar() {
   //
+}
+
+void NodeEditorAppWindow::Refresh() {
+  // TODO: Refresh Backend
+  // TODO: Refresh UI
+}
+
+void NodeEditorAppWindow::Save() {
+  // TODO: Patch backend
+  // TODO: Call SaveBackend functin from the api
+}
+
+void NodeEditorAppWindow::LoadContextFromBackend() {
+  // TODO: Simply setup ui_node_ctx from the backend ctx
 }
 
 }; // namespace ModuleUI

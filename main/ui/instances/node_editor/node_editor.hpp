@@ -1,4 +1,5 @@
 #pragma once
+#include "../../../src/helpers.hpp"
 #include <vxcore/include/vortex.h>
 #include <vxcore/include/vortex_internals.h>
 
@@ -24,6 +25,11 @@ public:
   void LoadGraph(const std::string &json_path);
   // void LoadGraph(const json& v);
 
+  void Refresh();
+  void Save();
+
+  void LoadContextFromBackend();
+  
 private:
   std::shared_ptr<VxContext> ctx;
   bool opened;
@@ -34,9 +40,15 @@ private:
   bool m_RefreshReady;
   bool m_SavePending;
 
-  // Node system
-  Cherry::NodeSystem::NodeContext node_ctx;
-  Cherry::NodeSystem::NodeGraph node_graph;
+  bool refreshed = false;
+
+  // Backend
+  std::shared_ptr<NodeEdit::NodeEditGraphSession> backend_node_graph_session;
+  std::shared_ptr<NodeEdit::NodeEditContext> backend_node_ctx;
+
+  // UI  NodeSystem
+  Cherry::NodeSystem::NodeContext ui_node_ctx;
+  Cherry::NodeSystem::NodeGraph ui_node_graph;
 };
 }; // namespace ModuleUI
 

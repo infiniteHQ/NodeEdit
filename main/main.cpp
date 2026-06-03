@@ -13,6 +13,15 @@ public:
 
     this->add_toolbar_handler(ToolbarHandlerInterface(
         NodeEdit::StartNodeEditTestInstance, "NodeEdit", ""));
+
+    this->add_content_browser_item_identifier(ItemIdentifierInterface(
+        NodeEdit::IsGraphFile, "infinitehq_nodeedit:graph", "Node Graph",
+        "#B1FF31", NodeEdit::GetPath("resources/icons/edit.png"),
+        NodeEdit::GetPath("resources/icons/edit.png")));
+
+    this->add_content_browser_item_handler(ItemHandlerInterface(
+        "infinitehq_nodeedit:graph", NodeEdit::OpenGraph, "Edit",
+        "Edit this graph", NodeEdit::GetPath("resources/icons/edit.png")));
   }
 
   void destroy() override {
