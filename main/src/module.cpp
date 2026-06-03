@@ -30,7 +30,8 @@ std::string NodeEdit::GetPath(const std::string &path) {
 }
 
 void NodeEdit::StartNodeEditTestInstance() {
-  auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST");
+  auto ctx = SetupExampleContext();
+  auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST", ctx);
   Cherry::AddAppWindow(inst->GetAppWindow());
   get_current_context()->editor_instances.push_back(inst);
 }
@@ -53,27 +54,57 @@ void NodeEdit::OpenGraph(const std::string &path) {
   // TODO: Start UI
 }
 
-void NodeEdit::SetupExampleContext() {
+std::shared_ptr<NodeEdit::NodeEditContext> NodeEdit::SetupExampleContext() {
   auto c = NodeEdit::CreateContext("efusion_blueprint");
 
   // Setup pins formats
   {
+    // TODO Input Event : add_pin_format (params : ctx and pin format object)
     NodeEditPinFormat pf;
-    NodeEdit::AddPinFormatToContext(c, pf);
+    pf.type = "bool";
+    pf.name = "Boolean";
+    pf.color = "#AF2525";
+    pf.shape = "circle";
+    pf.description = "Simple boolean";
+    NodeEdit::AddPinFormatToContext(c->id, pf);
   }
 
   // Setup schemas
   {
+    // TODO Input Event : add_schema (params : ctx and pin format object)
     NodeEditSchema s;
+    s.id = "is_cool";
+    s.type = "blueprint";
+    s.status = "active";
+    s.second_label = "This is cool";
+    s.label = "Is cool";
+    s.header_color = "#B1FF31";
+
     NodeEditPin pi_a;
+    pi_a.id = "bool1";
+    pi_a.type = "bool";
+    s.input_pins.push_back(pi_a);
     NodeEditPin pi_b;
+    pi_b.id = "bool2";
+    pi_b.type = "bool";
+    s.input_pins.push_back(pi_b);
     NodeEditPin po_a;
+    po_a.id = "bool3";
+    po_a.type = "bool";
+    s.output_pins.push_back(po_a);
     NodeEditPin po_b;
-    NodeEdit::AddSchemaToContext(c, s);
+    po_b.id = "bool4";
+    po_b.type = "bool";
+    s.output_pins.push_back(po_b);
+
+    NodeEdit::AddSchemaToContext(c->id, s);
   }
+
+  return c;
 }
 
-std::string NodeEdit::CreateContext(const std::string &name) {
+std::shared_ptr<NodeEdit::NodeEditContext>
+NodeEdit::CreateContext(const std::string &name) {
   auto &contexts = get_current_context()->contexts;
   auto existing =
       std::find_if(contexts.begin(), contexts.end(),
@@ -88,7 +119,7 @@ std::string NodeEdit::CreateContext(const std::string &name) {
 
   contexts.push_back(ctx);
 
-  return name;
+  return ctx;
 }
 
 void NodeEdit::DestroyContext(const std::string &name) {

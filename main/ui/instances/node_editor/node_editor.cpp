@@ -21,6 +21,14 @@ static const std::unordered_map<std::string, Cherry::NodeSystem::NodeType>
                 {"simple", Cherry::NodeSystem::NodeType::Simple},
                 {"tree", Cherry::NodeSystem::NodeType::Tree}};
 
+static const std::unordered_map<std::string,
+                                Cherry::NodeSystem::NodeSchemaStatus>
+    status_map = {
+        {"active", Cherry::NodeSystem::NodeSchemaStatus::Active},
+        {"depreciated", Cherry::NodeSystem::NodeSchemaStatus::Depreciated},
+        {"disabled", Cherry::NodeSystem::NodeSchemaStatus::Disabled},
+        {"obsolete", Cherry::NodeSystem::NodeSchemaStatus::Obsolete}};
+
 NodeEditorAppWindow::NodeEditorAppWindow(
     const std::string &name,
     const std::shared_ptr<NodeEdit::NodeEditContext> &ctx) {
@@ -38,17 +46,25 @@ NodeEditorAppWindow::NodeEditorAppWindow(
   };
 
   backend_node_ctx = ctx;
+  LoadContextFromBackend();
 
-  auto sch = ui_node_ctx.CreateSchema("test");
-  sch->SetLabel("Test");
+  {
+    Cherry::NodeSystem::NodeInstance inst;
+    inst.TypeID = "is_cool";
+    inst.InstanceID = "test1";
+    inst.Position = Cherry::NodeSystem::Vec2(40, 40);
+    inst.Size = Cherry::NodeSystem::Vec2(40, 40);
+    ui_node_graph.AddNodeInstance(inst);
+  }
 
-  Cherry::NodeSystem::NodeInstance inst;
-  inst.TypeID = "test";
-  inst.InstanceID = "test1";
-  inst.Position = Cherry::NodeSystem::Vec2(40, 40);
-  inst.Size = Cherry::NodeSystem::Vec2(40, 40);
-
-  ui_node_graph.AddNodeInstance(inst);
+  {
+    Cherry::NodeSystem::NodeInstance inst;
+    inst.TypeID = "is_cool";
+    inst.InstanceID = "test2";
+    inst.Position = Cherry::NodeSystem::Vec2(80, 80);
+    inst.Size = Cherry::NodeSystem::Vec2(40, 40);
+    ui_node_graph.AddNodeInstance(inst);
+  }
 
   std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
 
@@ -172,9 +188,18 @@ void NodeEditorAppWindow::LoadContextFromBackend() {
     sch->SetHexBorderColor(s.border_color);
     sch->SetHexHeaderColor(s.header_color);
 
-    auto it = type_map.find(s.type);
-    if (it != type_map.end()) {
-      sch->SetType(it->second);
+    {
+      auto it = status_map.find(s.status);
+      if (it != status_map.end()) {
+        sch->m_NodeStatus = it->second;
+      }
+    }
+
+    {
+      auto it = type_map.find(s.type);
+      if (it != type_map.end()) {
+        sch->SetType(it->second);
+      }
     }
 
     if (!s.header_logo_path.empty()) {
