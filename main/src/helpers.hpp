@@ -25,8 +25,8 @@ struct NodeEditPinFormat {
 
 struct NodeEditPin {
   std::string type;
-  std::string color_variant;
-  std::string name;
+  // std::string color_variant;
+  // std::string name; // INFO: Name is provided by the pin format
   std::string id;
 };
 
@@ -37,7 +37,7 @@ struct NodeEditSchema {
 
   // props
   std::string id;
-  std::string hex_header_color;
+  std::string header_color;
   std::string border_color;
   std::string background_color;
   std::string label;

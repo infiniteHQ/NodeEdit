@@ -10,11 +10,14 @@ namespace ModuleUI {
 class NodeEditorAppWindow
     : public std::enable_shared_from_this<NodeEditorAppWindow> {
 public:
-  NodeEditorAppWindow(const std::string &name);
+  NodeEditorAppWindow(const std::string &name,
+                      const std::shared_ptr<NodeEdit::NodeEditContext> &ctx);
 
   void menubar();
   std::shared_ptr<Cherry::AppWindow> &GetAppWindow();
-  static std::shared_ptr<NodeEditorAppWindow> Create(const std::string &name);
+  static std::shared_ptr<NodeEditorAppWindow>
+  Create(const std::string &name,
+         const std::shared_ptr<NodeEdit::NodeEditContext> &ctx);
   void SetupRenderCallback();
   void Render();
   void RenderMenubar();
@@ -29,7 +32,7 @@ public:
   void Save();
 
   void LoadContextFromBackend();
-  
+
 private:
   std::shared_ptr<VxContext> ctx;
   bool opened;

@@ -36,15 +36,20 @@ NODEEDIT_API bool IsContextFile(const std::string &path);
 NODEEDIT_API bool IsGraphFile(const std::string &path);
 
 // Node context API
-NODEEDIT_API void CreateContext(const std::string &name);
+NODEEDIT_API std::string CreateContext(const std::string &name);
+NODEEDIT_API void DestroyContext(const std::string &name);
 NODEEDIT_API void LoadContextFromFile(const std::string &path);
 // TODO: Override existing schema/pinformat or simply add to existing context
 NODEEDIT_API void EmplaceContextFromFile(const std::string &path);
 NODEEDIT_API void LoadContext(const nlohmann::json &path);
 NODEEDIT_API void EmplaceContext(const nlohmann::json &path);
 // TODO: Emplace schema, pin format etc...
-NODEEDIT_API void AddSchemaToContext();
-NODEEDIT_API void AddPinFormatToContext();
+NODEEDIT_API void AddSchemaToContext(const std::string &ctx_id,
+                                     const NodeEditSchema &schema);
+NODEEDIT_API void AddPinFormatToContext(const std::string &ctx_id,
+                                        const NodeEditPinFormat &pin_format);
+
+NODEEDIT_API json DumpContextTojson(const std::string ctx);
 
 // Graphs API
 NODEEDIT_API void OpenGraph(const std::string &path); // master (ui+backend)
@@ -62,6 +67,8 @@ NODEEDIT_API void GetConnected(const std::string &ctx_id,
 
 // UI API
 NODEEDIT_API void StartNodeEditTestInstance();
+
+NODEEDIT_API void SetupExampleContext();
 
 // TODO: Complete API to know node connections and positions
 

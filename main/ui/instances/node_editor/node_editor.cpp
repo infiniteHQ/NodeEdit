@@ -7,8 +7,24 @@
 
 namespace ModuleUI {
 
-NodeEditorAppWindow::NodeEditorAppWindow(const std::string &name) {
-  m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
+static const std::unordered_map<std::string, Cherry::NodeSystem::PinShape>
+    shape_map = {{"flow", Cherry::NodeSystem::PinShape::Flow},
+                 {"circle", Cherry::NodeSystem::PinShape::Circle},
+                 {"square", Cherry::NodeSystem::PinShape::Square},
+                 {"grid", Cherry::NodeSystem::PinShape::Grid},
+                 {"roundsquare", Cherry::NodeSystem::PinShape::RoundSquare},
+                 {"diamond", Cherry::NodeSystem::PinShape::Diamond}};
+static const std::unordered_map<std::string, Cherry::NodeSystem::NodeType>
+    type_map = {{"blueprint", Cherry::NodeSystem::NodeType::Blueprint},
+                {"comment", Cherry::NodeSystem::NodeType::Comment},
+                {"houdini", Cherry::NodeSystem::NodeType::Houdini},
+                {"simple", Cherry::NodeSystem::NodeType::Simple},
+                {"tree", Cherry::NodeSystem::NodeType::Tree}};
+
+NodeEditorAppWindow::NodeEditorAppWindow(
+    const std::string &name,
+    const std::shared_ptr<NodeEdit::NodeEditContext> &ctx) {
+  m_AppWindow = std::make_shared<Cherry::AppWindow>("NODEGRAPH", "NODEGRAPH");
   m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
   m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
   m_AppWindow->SetLeftBottombarCallback([this]() { RenderBottombar(); });
@@ -20,6 +36,8 @@ NodeEditorAppWindow::NodeEditorAppWindow(const std::string &name) {
     Cherry::DeleteAppWindow(m_AppWindow);
     m_AppWindow->SetVisibility(false);
   };
+
+  backend_node_ctx = ctx;
 
   auto sch = ui_node_ctx.CreateSchema("test");
   sch->SetLabel("Test");
@@ -41,10 +59,11 @@ std::shared_ptr<Cherry::AppWindow> &NodeEditorAppWindow::GetAppWindow() {
   return m_AppWindow;
 }
 
-std::shared_ptr<NodeEditorAppWindow>
-NodeEditorAppWindow::Create(const std::string &name) {
+std::shared_ptr<NodeEditorAppWindow> NodeEditorAppWindow::Create(
+    const std::string &name,
+    const std::shared_ptr<NodeEdit::NodeEditContext> &ctx) {
   auto instance =
-      std::shared_ptr<NodeEditorAppWindow>(new NodeEditorAppWindow(name));
+      std::shared_ptr<NodeEditorAppWindow>(new NodeEditorAppWindow(name, ctx));
   instance->SetupRenderCallback();
   return instance;
 }
@@ -120,7 +139,60 @@ void NodeEditorAppWindow::Save() {
 }
 
 void NodeEditorAppWindow::LoadContextFromBackend() {
-  // TODO: Simply setup ui_node_ctx from the backend ctx
+  if (!backend_node_ctx) {
+    return;
+  }
+  auto &pin_formats = backend_node_ctx->pin_formats;
+  auto &schemas = backend_node_ctx->schemas;
+
+  for (auto &pf : pin_formats) {
+    Cherry::NodeSystem::PinFormat pin_format;
+    pin_format.m_Color = pf.color;
+    pin_format.m_Delegate = pf.delegate;
+
+    auto it = shape_map.find(pf.shape);
+    if (it != shape_map.end()) {
+      pin_format.m_Shape = it->second;
+    }
+
+    pin_format.m_TypeDescription = pf.description;
+    pin_format.m_TypeID = pf.type;
+    pin_format.m_TypeName = pf.name;
+    ui_node_ctx.SetupPinFormat(pin_format);
+  }
+
+  for (auto &s : schemas) {
+    auto sch = ui_node_ctx.CreateSchema(s.id);
+    sch->SetLabel(s.label);
+    sch->SetLabelHexColor(s.label_color);
+    sch->SetSecondLabel(s.second_label);
+    sch->SetSecondLabelHexColor(s.second_label_color);
+    sch->SetDescriptionHexColor(s.description_color);
+    sch->SetHexBackgroundColor(s.background_color);
+    sch->SetHexBorderColor(s.border_color);
+    sch->SetHexHeaderColor(s.header_color);
+
+    auto it = type_map.find(s.type);
+    if (it != type_map.end()) {
+      sch->SetType(it->second);
+    }
+
+    if (!s.header_logo_path.empty()) {
+      sch->SetLogoPath(s.header_logo_path);
+    }
+
+    for (auto &sip : s.input_pins) {
+      sch->AddInputPin(sip.id, sip.type);
+    }
+
+    for (auto &sop : s.output_pins) {
+      sch->AddOutputPin(sop.id, sop.type);
+    }
+
+    if (!s.header_pin.id.empty()) {
+      sch->AddHeaderPin(s.header_pin.id, s.header_pin.type);
+    }
+  }
 }
 
 }; // namespace ModuleUI
