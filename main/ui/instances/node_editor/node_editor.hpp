@@ -30,8 +30,13 @@ public:
 
   void Refresh();
   void Save();
+  void PatchBackend(); // Patch modification from UI (note to save in the final
+                       // file !)
+  void RefreshFrontend(); // Get the backend and populate front
 
   void LoadContextFromBackend();
+  void SpawnNodeInstance(const std::string &sch_id, const float &x,
+                         const float &y, const std::string &connID);
 
 private:
   std::shared_ptr<VxContext> ctx;

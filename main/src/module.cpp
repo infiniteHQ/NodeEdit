@@ -54,12 +54,21 @@ void NodeEdit::OpenGraph(const std::string &path) {
   // TODO: Start UI
 }
 
+/*
+Input events :
+add_pin_format (params : ctx and pin format object)
+add_schema (params : ctx and pin format object)
+get_connection (id/name of I/O pin )
+get_connection (only type and if Input or Ouput) (for sequences pins for
+example)
+
+*/
+
 std::shared_ptr<NodeEdit::NodeEditContext> NodeEdit::SetupExampleContext() {
   auto c = NodeEdit::CreateContext("efusion_blueprint");
 
   // Setup pins formats
   {
-    // TODO Input Event : add_pin_format (params : ctx and pin format object)
     NodeEditPinFormat pf;
     pf.type = "bool";
     pf.name = "Boolean";
@@ -71,7 +80,6 @@ std::shared_ptr<NodeEdit::NodeEditContext> NodeEdit::SetupExampleContext() {
 
   // Setup schemas
   {
-    // TODO Input Event : add_schema (params : ctx and pin format object)
     NodeEditSchema s;
     s.id = "is_cool";
     s.type = "blueprint";
@@ -96,6 +104,14 @@ std::shared_ptr<NodeEdit::NodeEditContext> NodeEdit::SetupExampleContext() {
     po_b.id = "bool4";
     po_b.type = "bool";
     s.output_pins.push_back(po_b);
+
+    s.spawnable = true;
+    s.spawn_possibility.category = "base";
+    s.spawn_possibility.proper_description = "Spwan a is cool node";
+    s.spawn_possibility.proper_logo =
+        NodeEdit::GetPath("resources/icons/edit.png");
+    s.spawn_possibility.proper_name = "Is Cool";
+    s.spawn_possibility.schema_id = "is_cool";
 
     NodeEdit::AddSchemaToContext(c->id, s);
   }

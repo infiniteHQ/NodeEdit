@@ -48,12 +48,17 @@ NodeEditorAppWindow::NodeEditorAppWindow(
   backend_node_ctx = ctx;
   LoadContextFromBackend();
 
+  ui_node_graph.m_NodeSpawnCallback = [this](const std::string &sch_id, float x,
+                                             float y,
+                                             const std::string &connID) {
+    SpawnNodeInstance(sch_id, x, y, connID);
+  };
+
   {
     Cherry::NodeSystem::NodeInstance inst;
     inst.TypeID = "is_cool";
     inst.InstanceID = "test1";
     inst.Position = Cherry::NodeSystem::Vec2(40, 40);
-    inst.Size = Cherry::NodeSystem::Vec2(40, 40);
     ui_node_graph.AddNodeInstance(inst);
   }
 
@@ -62,14 +67,13 @@ NodeEditorAppWindow::NodeEditorAppWindow(
     inst.TypeID = "is_cool";
     inst.InstanceID = "test2";
     inst.Position = Cherry::NodeSystem::Vec2(80, 80);
-    inst.Size = Cherry::NodeSystem::Vec2(40, 40);
     ui_node_graph.AddNodeInstance(inst);
   }
 
   std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
 
   this->ctx = vxe::get_current_context();
-}
+} // namespace ModuleUI
 
 std::shared_ptr<Cherry::AppWindow> &NodeEditorAppWindow::GetAppWindow() {
   return m_AppWindow;
@@ -127,9 +131,10 @@ void NodeEditorAppWindow::RenderMenubar() {
 void NodeEditorAppWindow::Render() {
   CherryApp.PushComponentPool(&m_ComponentPool);
 
-  if (!refreshed) {
-    CherryKit::NodeAreaOpen("", 0, 0, &ui_node_ctx, &ui_node_graph);
-  } else {
+  auto &cmp = CherryKit::NodeAreaOpen("", 0, 0, &ui_node_ctx, &ui_node_graph);
+
+  if (refreshed) {
+    cmp.SetProperty("refresh", "true");
     refreshed = false;
   }
 
@@ -145,8 +150,35 @@ void NodeEditorAppWindow::RenderBottombar() {
 }
 
 void NodeEditorAppWindow::Refresh() {
-  // TODO: Refresh Backend
-  // TODO: Refresh UI
+  // TODO : Call Refresh from backend before
+
+  if (!backend_node_graph_session) {
+    return;
+  }
+
+  auto &instances = backend_node_graph_session->graph.instances;
+  auto &connections = backend_node_graph_session->graph.connections;
+
+  for (auto &ni : instances) {
+    Cherry::NodeSystem::NodeInstance inst;
+    inst.TypeID = ni.type_id;
+    inst.InstanceID = ni.instance_id;
+    inst.Position = Cherry::NodeSystem::Vec2(ni.pos_x, ni.pos_y);
+
+    ui_node_graph.AddNodeInstance(inst);
+  }
+
+  for (auto &c : connections) {
+    Cherry::NodeSystem::NodeConnection conn;
+    conn.NodeInstanceIDA = c.node_instance_id_A;
+    conn.NodeInstanceIDB = c.node_instance_id_B;
+    conn.PinIDA = c.pin_id_A;
+    conn.PinIDB = c.pin_id_B;
+
+    ui_node_graph.AddConnection(conn);
+  }
+
+  refreshed = true;
 }
 
 void NodeEditorAppWindow::Save() {
@@ -217,7 +249,40 @@ void NodeEditorAppWindow::LoadContextFromBackend() {
     if (!s.header_pin.id.empty()) {
       sch->AddHeaderPin(s.header_pin.id, s.header_pin.type);
     }
+
+    if (s.spawnable) {
+      Cherry::NodeSystem::NodeSpawnPossibility p;
+      p.category = s.spawn_possibility.category;
+      p.schema_id = s.spawn_possibility.schema_id;
+      p.proper_logo = s.spawn_possibility.proper_logo;
+      p.proper_name = s.spawn_possibility.proper_name;
+      p.proper_description = s.spawn_possibility.proper_description;
+      ui_node_graph.AddPossibility(p);
+    }
   }
 }
 
+void NodeEditorAppWindow::PatchBackend() {
+  // m_InstanciatedNodes
+  /// ui_node_graph.
+}
+
+void NodeEditorAppWindow::SpawnNodeInstance(const std::string &sch_id,
+                                            const float &x, const float &y,
+                                            const std::string &connID) {
+  // Save local UI state from the edit graph pos
+  Cherry::NodeSystem::NodeInstance inst;
+  inst.TypeID = sch_id;
+  inst.InstanceID = "24325";
+  inst.Position = Cherry::NodeSystem::Vec2(50, 50);
+  inst.Size = Cherry::NodeSystem::Vec2(50, 50);
+
+  if (!connID.empty()) {
+    // TODO: Auto connect
+  }
+
+  ui_node_graph.AddNodeInstance(inst);
+
+  refreshed = true;
+}
 }; // namespace ModuleUI

@@ -30,10 +30,21 @@ struct NodeEditPin {
   std::string id;
 };
 
+struct NodeEditSpawnPossibility {
+  std::string proper_name;
+  std::string proper_description;
+  std::string proper_logo;
+  std::string category;
+  std::string schema_id;
+};
+
 struct NodeEditSchema {
   std::vector<NodeEditPin> input_pins;
   std::vector<NodeEditPin> output_pins;
   NodeEditPin header_pin;
+
+  bool spawnable = false;
+  NodeEditSpawnPossibility spawn_possibility;
 
   // props
   std::string id;
@@ -77,7 +88,12 @@ struct NodeEditConnection {
   std::string node_instance_id_B;
   std::string pin_id_B;
 };
-struct NodeEditGraph {};
+
+struct NodeEditGraph {
+  std::vector<NodeEditInstance> instances;
+  std::vector<NodeEditConnection> connections;
+};
+
 struct NodeEditGraphSession {
   NodeEditGraph graph;
   std::string id;
