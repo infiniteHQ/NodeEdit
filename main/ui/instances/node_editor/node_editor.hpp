@@ -49,6 +49,7 @@ private:
   bool m_SavePending;
 
   bool refreshed = false;
+  bool save_incoming = false;
 
   // Backend
   std::shared_ptr<NodeEdit::NodeEditGraphSession> backend_node_graph_session;

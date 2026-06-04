@@ -62,9 +62,9 @@ NODEEDIT_API std::string GetPath(const std::string &path);
 
 // Main API
 
-NODEEDIT_API bool
+NODEEDIT_API void
 SaveGraphSession(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
-NODEEDIT_API bool RefreshGraphSession(
+NODEEDIT_API void RefreshGraphSession(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
 
 NODEEDIT_API void GetConnected(const std::string &ctx_id,
@@ -77,7 +77,7 @@ NODEEDIT_API void StartNodeEditTestInstance();
 NODEEDIT_API std::shared_ptr<NodeEditContext> SetupExampleContext();
 NODEEDIT_API std::shared_ptr<NodeEditGraphSession> SetupExampleGraphSession();
 
-NODEEDIT_API nlohmann::json DumpGraph(std::shared_ptr<NodeEditGraph> graph);
+NODEEDIT_API nlohmann::json DumpGraph(const NodeEdit::NodeEditGraph &graph);
 NODEEDIT_API NodeEditGraph PopulateGraph(const nlohmann::json &j);
 NODEEDIT_API std::string GetGraphContextName(const nlohmann::json &j);
 NODEEDIT_API nlohmann::json GetGraph(const nlohmann::json &j);

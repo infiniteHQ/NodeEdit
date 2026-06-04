@@ -44,6 +44,7 @@ bool NodeEdit::IsGraphFile(const std::string &path) {
 
 void NodeEdit::OpenGraph(const std::string &path) {
   auto ctx = SetupExampleContext();
+
   if (!IsGraphFile(path)) {
     get_current_context()->interface->log_error(
         "No graph file in selected file ! (" + path + ")");
@@ -79,10 +80,13 @@ void NodeEdit::OpenGraph(const std::string &path) {
 
   auto gs = std::make_shared<NodeEdit::NodeEditGraphSession>();
   gs->name = path;
-  gs->path = path;
+  gs->path = fullpath;
   gs->graph = graph;
+  gs->context_id = ctx_name;
 
   auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST", ctx, gs);
+  Cherry::AddAppWindow(inst->GetAppWindow());
+  get_current_context()->editor_instances.push_back(inst);
 }
 
 /*
@@ -241,22 +245,73 @@ void NodeEdit::AddPinFormatToContext(const std::string &ctx_id,
   (*c)->pin_formats.push_back(pin_format);
 }
 
-bool NodeEdit::SaveGraphSession(
-    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
-  // save to session file
+void NodeEdit::SaveGraphSession(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &gs) {
+  if (!gs) {
+    return;
+  }
+
+  auto file_path = gs->path;
+
+  auto json = DumpGraph(gs->graph);
+  std::string graph_raw = json.dump();
+  std::string context_id = gs->context_id;
+
+  nlohmann::json output;
+  output["context_id"] = context_id;
+  output["graph"] = json;
+
+  std::ofstream file(file_path);
+  if (!file.is_open()) {
+    return;
+  }
+  file << output.dump(4);
+  file.close();
 }
 
-bool NodeEdit::RefreshGraphSession(
-    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
-  // refresh from session file
+void NodeEdit::RefreshGraphSession(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &gs) {
+  if (!gs) {
+    return;
+  }
+
+  auto file_path = gs->path;
+
+  std::ifstream file(file_path);
+  if (!file.is_open()) {
+    get_current_context()->interface->log_error("Failed to open file : (" +
+                                                file_path + ")");
+    return;
+  }
+
+  nlohmann::json j;
+  try {
+    file >> j;
+  } catch (const nlohmann::json::parse_error &e) {
+    get_current_context()->interface->log_error(
+        "Failed to parse graph file : (" + file_path + ") -> " + e.what());
+    return;
+  }
+
+  std::string ctx_name = GetGraphContextName(j);
+
+  if (!IsContextExist(ctx_name)) {
+    get_current_context()->interface->log_error(
+        "This graph contain an unknown graph context : (" + file_path +
+        "). Did you have a missing module ?");
+    return;
+  }
+
+  auto graph = PopulateGraph(GetGraph(j));
+
+  gs->graph = graph;
 }
 
-nlohmann::json
-NodeEdit::DumpGraph(std::shared_ptr<NodeEdit::NodeEditGraph> graph) {
+nlohmann::json NodeEdit::DumpGraph(const NodeEdit::NodeEditGraph &graph) {
   nlohmann::json j;
 
   j["instances"] = nlohmann::json::array();
-  for (const auto &inst : graph->instances) {
+  for (const auto &inst : graph.instances) {
     nlohmann::json node;
     node["type_id"] = inst.type_id;
     node["instance_id"] = inst.instance_id;
@@ -269,7 +324,7 @@ NodeEdit::DumpGraph(std::shared_ptr<NodeEdit::NodeEditGraph> graph) {
   }
 
   j["connections"] = nlohmann::json::array();
-  for (const auto &conn : graph->connections) {
+  for (const auto &conn : graph.connections) {
     nlohmann::json c;
     c["node_instance_id_A"] = conn.node_instance_id_A;
     c["pin_id_A"] = conn.pin_id_A;

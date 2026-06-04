@@ -94,7 +94,7 @@ void NodeEditorAppWindow::RenderMenubar() {
   if (CherryKit::ButtonImage(
           NodeEdit::GetPath("/resources/icons/icon_save.png"))
           .GetDataAs<bool>("isClicked")) {
-    Save();
+    save_incoming = true;
   }
 
   CherryNextComponent.SetProperty("padding_y", "5.5f");
@@ -115,6 +115,16 @@ void NodeEditorAppWindow::Render() {
   if (refreshed) {
     cmp.SetProperty("refresh", "true");
     refreshed = false;
+  }
+
+  if (save_incoming) {
+    cmp.SetProperty("save", "true");
+    save_incoming = false;
+  }
+
+  if (cmp.GetDataAs<bool>("graph_saved")) {
+    Save();
+    cmp.SetData("graph_saved", "false;");
   }
 
   CherryApp.PopComponentPool();
@@ -234,7 +244,6 @@ void NodeEditorAppWindow::Refresh() {
     c.PinIDB = conn.pin_id_B;
     ui_node_graph.m_Connections.push_back(c);
   }
-  std::cout << "Refreshed" << std::endl;
   refreshed = true;
 }
 
@@ -275,13 +284,14 @@ void NodeEditorAppWindow::Save() {
   NodeEdit::SaveGraphSession(backend_node_graph_session);
 }
 
+static int id_counter = 1;
 void NodeEditorAppWindow::SpawnNodeInstance(const std::string &sch_id,
                                             const float &x, const float &y,
                                             const std::string &connID) {
   // Save local UI state from the edit graph pos
   Cherry::NodeSystem::NodeInstance inst;
   inst.TypeID = sch_id;
-  inst.InstanceID = "24325";
+  inst.InstanceID = std::to_string(id_counter++);
   inst.Position = Cherry::NodeSystem::Vec2(50, 50);
   inst.Size = Cherry::NodeSystem::Vec2(50, 50);
 
