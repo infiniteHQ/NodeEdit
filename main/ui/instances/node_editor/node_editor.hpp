@@ -10,14 +10,17 @@ namespace ModuleUI {
 class NodeEditorAppWindow
     : public std::enable_shared_from_this<NodeEditorAppWindow> {
 public:
-  NodeEditorAppWindow(const std::string &name,
-                      const std::shared_ptr<NodeEdit::NodeEditContext> &ctx);
+  NodeEditorAppWindow(
+      const std::string &name,
+      const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
+      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
 
   void menubar();
   std::shared_ptr<Cherry::AppWindow> &GetAppWindow();
   static std::shared_ptr<NodeEditorAppWindow>
   Create(const std::string &name,
-         const std::shared_ptr<NodeEdit::NodeEditContext> &ctx);
+         const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
+         const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
   void SetupRenderCallback();
   void Render();
   void RenderMenubar();
@@ -30,9 +33,6 @@ public:
 
   void Refresh();
   void Save();
-  void PatchBackend(); // Patch modification from UI (note to save in the final
-                       // file !)
-  void RefreshFrontend(); // Get the backend and populate front
 
   void LoadContextFromBackend();
   void SpawnNodeInstance(const std::string &sch_id, const float &x,

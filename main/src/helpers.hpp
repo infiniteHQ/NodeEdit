@@ -96,7 +96,8 @@ struct NodeEditGraph {
 
 struct NodeEditGraphSession {
   NodeEditGraph graph;
-  std::string id;
+  std::string name;
+  std::string context_id;
   std::string path; // json file
 };
 } // namespace NodeEdit

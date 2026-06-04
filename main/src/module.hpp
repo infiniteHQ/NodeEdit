@@ -34,6 +34,7 @@ NODEEDIT_API std::shared_ptr<NodeEdit::Context> get_current_context();
 // Content browser utils
 NODEEDIT_API bool IsContextFile(const std::string &path);
 NODEEDIT_API bool IsGraphFile(const std::string &path);
+NODEEDIT_API bool IsContextExist(const std::string &ctx_name);
 
 // Node context API
 NODEEDIT_API std::shared_ptr<NodeEditContext>
@@ -60,8 +61,12 @@ NODEEDIT_API void CreateGraphSessionFromFile(const std::string &path);
 NODEEDIT_API std::string GetPath(const std::string &path);
 
 // Main API
-// SAVE_GRAPH_SESSION
-// REFRESH_GRAPH_SESSION
+
+NODEEDIT_API bool
+SaveGraphSession(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
+NODEEDIT_API bool RefreshGraphSession(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
+
 NODEEDIT_API void GetConnected(const std::string &ctx_id,
                                const std::string &node_id,
                                const std::string &pin_id); // Get the nodeID
@@ -70,7 +75,12 @@ NODEEDIT_API void GetConnected(const std::string &ctx_id,
 NODEEDIT_API void StartNodeEditTestInstance();
 
 NODEEDIT_API std::shared_ptr<NodeEditContext> SetupExampleContext();
+NODEEDIT_API std::shared_ptr<NodeEditGraphSession> SetupExampleGraphSession();
 
+NODEEDIT_API nlohmann::json DumpGraph(std::shared_ptr<NodeEditGraph> graph);
+NODEEDIT_API NodeEditGraph PopulateGraph(const nlohmann::json &j);
+NODEEDIT_API std::string GetGraphContextName(const nlohmann::json &j);
+NODEEDIT_API nlohmann::json GetGraph(const nlohmann::json &j);
 // TODO: Complete API to know node connections and positions
 
 } // namespace NodeEdit

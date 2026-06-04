@@ -31,27 +31,58 @@ std::string NodeEdit::GetPath(const std::string &path) {
 
 void NodeEdit::StartNodeEditTestInstance() {
   auto ctx = SetupExampleContext();
-  auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST", ctx);
+  auto gs = SetupExampleGraphSession();
+  auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST", ctx, gs);
   Cherry::AddAppWindow(inst->GetAppWindow());
   get_current_context()->editor_instances.push_back(inst);
 }
 
 bool NodeEdit::IsGraphFile(const std::string &path) {
-  std::string filename = path + "/graph.nodegraph";
-  return fs::exists(filename);
+  std::string fullpath = path + "/graph.nodegraph";
+  return fs::exists(fullpath);
 }
 
 void NodeEdit::OpenGraph(const std::string &path) {
+  auto ctx = SetupExampleContext();
   if (!IsGraphFile(path)) {
     get_current_context()->interface->log_error(
         "No graph file in selected file ! (" + path + ")");
   }
 
-  // TODO: Verify graph ctx
-  // TODO: Find context
-  // TODO: Load graph
-  // TODO: Start session
-  // TODO: Start UI
+  std::string fullpath = path + "/graph.nodegraph";
+
+  std::ifstream file(fullpath);
+  if (!file.is_open()) {
+    get_current_context()->interface->log_error("Failed to open file : (" +
+                                                fullpath + ")");
+    return;
+  }
+
+  nlohmann::json j;
+  try {
+    file >> j;
+  } catch (const nlohmann::json::parse_error &e) {
+    get_current_context()->interface->log_error(
+        "Failed to parse graph file : (" + fullpath + ") -> " + e.what());
+    return;
+  }
+
+  std::string ctx_name = GetGraphContextName(j);
+
+  if (!IsContextExist(ctx_name)) {
+    get_current_context()->interface->log_error(
+        "This graph contain an unknown graph context : (" + fullpath +
+        "). Did you have a missing module ?");
+  }
+
+  auto graph = PopulateGraph(GetGraph(j));
+
+  auto gs = std::make_shared<NodeEdit::NodeEditGraphSession>();
+  gs->name = path;
+  gs->path = path;
+  gs->graph = graph;
+
+  auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST", ctx, gs);
 }
 
 /*
@@ -119,6 +150,31 @@ std::shared_ptr<NodeEdit::NodeEditContext> NodeEdit::SetupExampleContext() {
   return c;
 }
 
+std::shared_ptr<NodeEdit::NodeEditGraphSession>
+NodeEdit::SetupExampleGraphSession() {
+  auto gs = std::make_shared<NodeEdit::NodeEditGraphSession>();
+
+  {
+    NodeEdit::NodeEditInstance inst;
+    inst.type_id = "is_cool";
+    inst.instance_id = "test1";
+    inst.pos_x = 40;
+    inst.pos_y = 40;
+    gs->graph.instances.push_back(inst);
+  }
+
+  {
+    NodeEdit::NodeEditInstance inst;
+    inst.type_id = "is_cool";
+    inst.instance_id = "test2";
+    inst.pos_x = 100;
+    inst.pos_y = 100;
+    gs->graph.instances.push_back(inst);
+  }
+
+  return gs;
+}
+
 std::shared_ptr<NodeEdit::NodeEditContext>
 NodeEdit::CreateContext(const std::string &name) {
   auto &contexts = get_current_context()->contexts;
@@ -183,4 +239,106 @@ void NodeEdit::AddPinFormatToContext(const std::string &ctx_id,
   }
 
   (*c)->pin_formats.push_back(pin_format);
+}
+
+bool NodeEdit::SaveGraphSession(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
+  // save to session file
+}
+
+bool NodeEdit::RefreshGraphSession(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
+  // refresh from session file
+}
+
+nlohmann::json
+NodeEdit::DumpGraph(std::shared_ptr<NodeEdit::NodeEditGraph> graph) {
+  nlohmann::json j;
+
+  j["instances"] = nlohmann::json::array();
+  for (const auto &inst : graph->instances) {
+    nlohmann::json node;
+    node["type_id"] = inst.type_id;
+    node["instance_id"] = inst.instance_id;
+    node["pos_x"] = inst.pos_x;
+    node["pos_y"] = inst.pos_y;
+    node["size_x"] = inst.size_x;
+    node["size_y"] = inst.size_y;
+    node["datas"] = inst.datas;
+    j["instances"].push_back(node);
+  }
+
+  j["connections"] = nlohmann::json::array();
+  for (const auto &conn : graph->connections) {
+    nlohmann::json c;
+    c["node_instance_id_A"] = conn.node_instance_id_A;
+    c["pin_id_A"] = conn.pin_id_A;
+    c["node_instance_id_B"] = conn.node_instance_id_B;
+    c["pin_id_B"] = conn.pin_id_B;
+    j["connections"].push_back(c);
+  }
+
+  return j;
+}
+
+NodeEdit::NodeEditGraph NodeEdit::PopulateGraph(const nlohmann::json &j) {
+  NodeEdit::NodeEditGraph graph;
+
+  if (j.contains("instances") && j["instances"].is_array()) {
+    for (const auto &node : j["instances"]) {
+      NodeEdit::NodeEditInstance inst;
+      inst.type_id = node.value("type_id", "");
+      inst.instance_id = node.value("instance_id", "");
+      inst.pos_x = node.value("pos_x", 0.0f);
+      inst.pos_y = node.value("pos_y", 0.0f);
+      inst.size_x = node.value("size_x", 0.0f);
+      inst.size_y = node.value("size_y", 0.0f);
+      inst.datas =
+          node.contains("datas") ? node["datas"] : nlohmann::json::object();
+      graph.instances.push_back(std::move(inst));
+    }
+  }
+
+  if (j.contains("connections") && j["connections"].is_array()) {
+    for (const auto &c : j["connections"]) {
+      NodeEdit::NodeEditConnection conn;
+      conn.node_instance_id_A = c.value("node_instance_id_A", "");
+      conn.pin_id_A = c.value("pin_id_A", "");
+      conn.node_instance_id_B = c.value("node_instance_id_B", "");
+      conn.pin_id_B = c.value("pin_id_B", "");
+      graph.connections.push_back(std::move(conn));
+    }
+  }
+
+  return graph;
+}
+
+bool NodeEdit::IsContextExist(const std::string &ctx_name) {
+  for (auto &c : get_current_context()->contexts) {
+    if (!c) {
+      return false;
+    }
+    if (c->id == ctx_name) {
+      return true;
+    }
+  }
+  return false;
+}
+
+std::string NodeEdit::GetGraphContextName(const nlohmann::json &j) {
+  std::string context_name = "";
+
+  if (j.contains("context_id") && j["context_id"].is_string()) {
+    context_name = j.value("context_id", "");
+  }
+
+  return context_name;
+}
+
+nlohmann::json NodeEdit::GetGraph(const nlohmann::json &j) {
+  if (j.contains("graph") && j["graph"].is_object()) {
+    return j["graph"];
+  }
+
+  return nlohmann::json::object();
 }

@@ -31,7 +31,8 @@ static const std::unordered_map<std::string,
 
 NodeEditorAppWindow::NodeEditorAppWindow(
     const std::string &name,
-    const std::shared_ptr<NodeEdit::NodeEditContext> &ctx) {
+    const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
   m_AppWindow = std::make_shared<Cherry::AppWindow>("NODEGRAPH", "NODEGRAPH");
   m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
   m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
@@ -47,28 +48,13 @@ NodeEditorAppWindow::NodeEditorAppWindow(
 
   backend_node_ctx = ctx;
   LoadContextFromBackend();
+  backend_node_graph_session = graph;
 
   ui_node_graph.m_NodeSpawnCallback = [this](const std::string &sch_id, float x,
                                              float y,
                                              const std::string &connID) {
     SpawnNodeInstance(sch_id, x, y, connID);
   };
-
-  {
-    Cherry::NodeSystem::NodeInstance inst;
-    inst.TypeID = "is_cool";
-    inst.InstanceID = "test1";
-    inst.Position = Cherry::NodeSystem::Vec2(40, 40);
-    ui_node_graph.AddNodeInstance(inst);
-  }
-
-  {
-    Cherry::NodeSystem::NodeInstance inst;
-    inst.TypeID = "is_cool";
-    inst.InstanceID = "test2";
-    inst.Position = Cherry::NodeSystem::Vec2(80, 80);
-    ui_node_graph.AddNodeInstance(inst);
-  }
 
   std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
 
@@ -81,9 +67,10 @@ std::shared_ptr<Cherry::AppWindow> &NodeEditorAppWindow::GetAppWindow() {
 
 std::shared_ptr<NodeEditorAppWindow> NodeEditorAppWindow::Create(
     const std::string &name,
-    const std::shared_ptr<NodeEdit::NodeEditContext> &ctx) {
-  auto instance =
-      std::shared_ptr<NodeEditorAppWindow>(new NodeEditorAppWindow(name, ctx));
+    const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
+  auto instance = std::shared_ptr<NodeEditorAppWindow>(
+      new NodeEditorAppWindow(name, ctx, graph));
   instance->SetupRenderCallback();
   return instance;
 }
@@ -100,10 +87,6 @@ void NodeEditorAppWindow::SetupRenderCallback() {
 void NodeEditorAppWindow::RenderMenubar() {
   CherryGUI::SetCursorPosX(CherryGUI::GetCursorPosX() + 3.0f);
 
-  if (!m_FileEdited) {
-    CherryGUI::BeginDisabled();
-  }
-
   CherryNextComponent.SetProperty("padding_y", "5.5f");
   CherryNextComponent.SetProperty("padding_x", "6.0f");
   CherryNextComponent.SetProperty("size_x", "18");
@@ -111,11 +94,7 @@ void NodeEditorAppWindow::RenderMenubar() {
   if (CherryKit::ButtonImage(
           NodeEdit::GetPath("/resources/icons/icon_save.png"))
           .GetDataAs<bool>("isClicked")) {
-    m_SavePending = true;
-  }
-
-  if (!m_FileEdited) {
-    CherryGUI::EndDisabled();
+    Save();
   }
 
   CherryNextComponent.SetProperty("padding_y", "5.5f");
@@ -125,7 +104,7 @@ void NodeEditorAppWindow::RenderMenubar() {
   if (CherryKit::ButtonImage(
           NodeEdit::GetPath("/resources/icons/icon_refresh.png"))
           .GetDataAs<bool>("isClicked")) {
-    m_RefreshReady = true;
+    Refresh();
   }
 }
 void NodeEditorAppWindow::Render() {
@@ -147,43 +126,6 @@ void NodeEditorAppWindow::RenderRightMenubar() {
 
 void NodeEditorAppWindow::RenderBottombar() {
   //
-}
-
-void NodeEditorAppWindow::Refresh() {
-  // TODO : Call Refresh from backend before
-
-  if (!backend_node_graph_session) {
-    return;
-  }
-
-  auto &instances = backend_node_graph_session->graph.instances;
-  auto &connections = backend_node_graph_session->graph.connections;
-
-  for (auto &ni : instances) {
-    Cherry::NodeSystem::NodeInstance inst;
-    inst.TypeID = ni.type_id;
-    inst.InstanceID = ni.instance_id;
-    inst.Position = Cherry::NodeSystem::Vec2(ni.pos_x, ni.pos_y);
-
-    ui_node_graph.AddNodeInstance(inst);
-  }
-
-  for (auto &c : connections) {
-    Cherry::NodeSystem::NodeConnection conn;
-    conn.NodeInstanceIDA = c.node_instance_id_A;
-    conn.NodeInstanceIDB = c.node_instance_id_B;
-    conn.PinIDA = c.pin_id_A;
-    conn.PinIDB = c.pin_id_B;
-
-    ui_node_graph.AddConnection(conn);
-  }
-
-  refreshed = true;
-}
-
-void NodeEditorAppWindow::Save() {
-  // TODO: Patch backend
-  // TODO: Call SaveBackend functin from the api
 }
 
 void NodeEditorAppWindow::LoadContextFromBackend() {
@@ -262,9 +204,75 @@ void NodeEditorAppWindow::LoadContextFromBackend() {
   }
 }
 
-void NodeEditorAppWindow::PatchBackend() {
-  // m_InstanciatedNodes
-  /// ui_node_graph.
+void NodeEditorAppWindow::Refresh() {
+  if (!backend_node_graph_session) {
+    return;
+  }
+
+  NodeEdit::RefreshGraphSession(backend_node_graph_session);
+
+  auto &instances = backend_node_graph_session->graph.instances;
+  auto &connections = backend_node_graph_session->graph.connections;
+
+  ui_node_graph.m_InstanciatedNodes.clear();
+  for (auto &i : instances) {
+    Cherry::NodeSystem::NodeInstance n;
+    n.InstanceID = i.instance_id;
+    n.Position.x = i.pos_x;
+    n.Position.y = i.pos_y;
+    n.TypeID = i.type_id;
+    // TODO custom data of nodes
+    ui_node_graph.m_InstanciatedNodes.push_back(n);
+  }
+
+  ui_node_graph.m_Connections.clear();
+  for (auto &conn : connections) {
+    Cherry::NodeSystem::NodeConnection c;
+    c.NodeInstanceIDA = conn.node_instance_id_A;
+    c.NodeInstanceIDB = conn.node_instance_id_B;
+    c.PinIDA = conn.pin_id_A;
+    c.PinIDB = conn.pin_id_B;
+    ui_node_graph.m_Connections.push_back(c);
+  }
+  std::cout << "Refreshed" << std::endl;
+  refreshed = true;
+}
+
+void NodeEditorAppWindow::Save() {
+  if (!backend_node_graph_session) {
+    return;
+  }
+
+  auto &instances = backend_node_graph_session->graph.instances;
+  auto &connections = backend_node_graph_session->graph.connections;
+
+  connections.clear();
+  instances.clear();
+
+  for (auto n : ui_node_graph.m_InstanciatedNodes) {
+    NodeEdit::NodeEditInstance i;
+
+    i.type_id = n.TypeID;
+    i.instance_id = n.InstanceID;
+    i.pos_x = n.Position.x;
+    i.pos_y = n.Position.y;
+    // TODO custom data of nodes
+
+    instances.push_back(i);
+  }
+
+  for (auto c : ui_node_graph.m_Connections) {
+    NodeEdit::NodeEditConnection conn;
+
+    conn.node_instance_id_A = c.NodeInstanceIDA;
+    conn.node_instance_id_B = c.NodeInstanceIDB;
+    conn.pin_id_A = c.PinIDA;
+    conn.pin_id_B = c.PinIDB;
+
+    connections.push_back(conn);
+  }
+
+  NodeEdit::SaveGraphSession(backend_node_graph_session);
 }
 
 void NodeEditorAppWindow::SpawnNodeInstance(const std::string &sch_id,
