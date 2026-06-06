@@ -32,7 +32,7 @@ std::string NodeEdit::GetPath(const std::string &path) {
 void NodeEdit::StartNodeEditTestInstance() {
   auto ctx = SetupExampleContext();
   auto gs = SetupExampleGraphSession();
-  auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST", ctx, gs);
+  auto inst = ModuleUI::NodeEditorAppWindow::Create("Main graph", ctx, gs);
   Cherry::AddAppWindow(inst->GetAppWindow());
   get_current_context()->editor_instances.push_back(inst);
 }
@@ -84,7 +84,7 @@ void NodeEdit::OpenGraph(const std::string &path) {
   gs->graph = graph;
   gs->context_id = ctx_name;
 
-  auto inst = ModuleUI::NodeEditorAppWindow::Create("TEST", ctx, gs);
+  auto inst = ModuleUI::NodeEditorAppWindow::Create("Node graph", ctx, gs);
   Cherry::AddAppWindow(inst->GetAppWindow());
   get_current_context()->editor_instances.push_back(inst);
 }
@@ -125,6 +125,7 @@ std::shared_ptr<NodeEdit::NodeEditContext> NodeEdit::SetupExampleContext() {
 
     NodeEditPin pi_a;
     pi_a.id = "bool1";
+    pi_a.name = "Bool One";
     pi_a.type = "bool";
     s.input_pins.push_back(pi_a);
     NodeEditPin pi_b;
@@ -137,6 +138,7 @@ std::shared_ptr<NodeEdit::NodeEditContext> NodeEdit::SetupExampleContext() {
     s.output_pins.push_back(po_a);
     NodeEditPin po_b;
     po_b.id = "bool4";
+    po_b.name = "Bool Four";
     po_b.type = "bool";
     s.output_pins.push_back(po_b);
 
@@ -210,7 +212,7 @@ void NodeEdit::DestroyContext(const std::string &name) {
 }
 
 void NodeEdit::AddSchemaToContext(const std::string &ctx_id,
-                                  const NodeEditSchema &schema) {
+                                  const NodeEdit::NodeEditSchema &schema) {
   auto &contexts = get_current_context()->contexts;
 
   auto c = std::find_if(contexts.begin(), contexts.end(),
@@ -227,8 +229,8 @@ void NodeEdit::AddSchemaToContext(const std::string &ctx_id,
   (*c)->schemas.push_back(schema);
 }
 
-void NodeEdit::AddPinFormatToContext(const std::string &ctx_id,
-                                     const NodeEditPinFormat &pin_format) {
+void NodeEdit::AddPinFormatToContext(
+    const std::string &ctx_id, const NodeEdit::NodeEditPinFormat &pin_format) {
   auto &contexts = get_current_context()->contexts;
 
   auto c = std::find_if(contexts.begin(), contexts.end(),

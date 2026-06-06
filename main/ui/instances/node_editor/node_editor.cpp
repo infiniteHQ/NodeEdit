@@ -33,10 +33,12 @@ NodeEditorAppWindow::NodeEditorAppWindow(
     const std::string &name,
     const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
-  m_AppWindow = std::make_shared<Cherry::AppWindow>("NODEGRAPH", "NODEGRAPH");
-  m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
-  m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
-  m_AppWindow->SetLeftBottombarCallback([this]() { RenderBottombar(); });
+  m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
+
+  // TODO IF save/refresh not handled
+  // m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
+  // m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
+  // m_AppWindow->SetLeftBottombarCallback([this]() { RenderBottombar(); });
   m_AppWindow->SetSaveMode(true);
   m_AppWindow->SetInternalPaddingY(0.0f);
   m_AppWindow->SetInternalPaddingX(0.0f);
@@ -191,11 +193,11 @@ void NodeEditorAppWindow::LoadContextFromBackend() {
     }
 
     for (auto &sip : s.input_pins) {
-      sch->AddInputPin(sip.id, sip.type);
+      sch->AddInputPin(sip.id, sip.type, sip.name);
     }
 
     for (auto &sop : s.output_pins) {
-      sch->AddOutputPin(sop.id, sop.type);
+      sch->AddOutputPin(sop.id, sop.type, sop.name);
     }
 
     if (!s.header_pin.id.empty()) {

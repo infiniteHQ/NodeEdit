@@ -27,6 +27,7 @@ struct NodeEditPin {
   std::string type;
   // std::string color_variant;
   // std::string name; // INFO: Name is provided by the pin format
+  std::string name; // optionnal: custom name
   std::string id;
 };
 
