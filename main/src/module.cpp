@@ -77,10 +77,18 @@ void NodeEdit::OpenGraph(const std::string &path) {
   gs->path = fullpath;
   gs->graph = graph;
   gs->context_id = ctx_name;
+  {
 
-  auto inst = ModuleUI::NodeEditorAppWindow::Create("Node graph", ctx, gs);
-  Cherry::AddAppWindow(inst->GetAppWindow());
-  get_current_context()->editor_instances.push_back(inst);
+    auto inst = ModuleUI::NodeEditorAppWindow::Create("Node graph", ctx, gs);
+    Cherry::AddAppWindow(inst->GetAppWindow());
+    get_current_context()->editor_instances.push_back(inst);
+  }
+
+  {
+    auto inst = ModuleUI::NodeEditorDebugger::Create("Node debug", gs);
+    Cherry::AddAppWindow(inst->GetAppWindow());
+    get_current_context()->editor_debuggers.push_back(inst);
+  }
 }
 
 /*
@@ -512,4 +520,60 @@ std::string NodeEdit::SearchNodeType(
       return inst.instance_id;
   }
   return {};
+}
+
+NODEEDIT_API std::vector<std::pair<std::string, std::string>>
+NodeEdit::GetAllNodeInputPins(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid) {
+  if (!graph)
+    return {};
+
+  const auto *inst = FindInstance(graph->graph, nodeid);
+  if (!inst)
+    return {};
+
+  const auto *ctx = FindContext(graph->context_id);
+  if (!ctx)
+    return {};
+
+  const auto *schema = FindSchema(*ctx, inst->type_id);
+  if (!schema)
+    return {};
+
+  std::vector<std::pair<std::string, std::string>> result;
+  result.reserve(schema->input_pins.size());
+
+  for (const auto &pin : schema->input_pins)
+    result.emplace_back(pin.type, pin.id);
+
+  return result;
+}
+
+NODEEDIT_API std::vector<std::pair<std::string, std::string>>
+NodeEdit::GetAllNodeOutputPins(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid) {
+  if (!graph)
+    return {};
+
+  const auto *inst = FindInstance(graph->graph, nodeid);
+  if (!inst)
+    return {};
+
+  const auto *ctx = FindContext(graph->context_id);
+  if (!ctx)
+    return {};
+
+  const auto *schema = FindSchema(*ctx, inst->type_id);
+  if (!schema)
+    return {};
+
+  std::vector<std::pair<std::string, std::string>> result;
+  result.reserve(schema->output_pins.size());
+
+  for (const auto &pin : schema->output_pins)
+    result.emplace_back(pin.type, pin.id);
+
+  return result;
 }

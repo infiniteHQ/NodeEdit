@@ -1,3 +1,4 @@
+#include "../ui/instances/node_debugger/node_debugger.hpp"
 #include "../ui/instances/node_editor/node_editor.hpp"
 #include "./helpers.hpp"
 #include <vxcore/include/vortex.h>
@@ -15,6 +16,7 @@ namespace NodeEdit {
 struct Context {
   std::shared_ptr<ModuleInterface> interface;
   std::vector<std::shared_ptr<ModuleUI::NodeEditorAppWindow>> editor_instances;
+  std::vector<std::shared_ptr<ModuleUI::NodeEditorDebugger>> editor_debuggers;
   std::vector<std::shared_ptr<NodeEditContext>> contexts;
   std::vector<std::shared_ptr<NodeEditGraphSession>> graph_sessions;
 };
@@ -118,6 +120,16 @@ FindSchema(const NodeEdit::NodeEditContext &ctx, const std::string &type_id);
 
 NODEEDIT_API const NodeEdit::NodeEditContext *
 FindContext(const std::string &context_id);
+
+NODEEDIT_API std::vector<std::pair<std::string, std::string>>
+GetAllNodeInputPins(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid);
+
+NODEEDIT_API std::vector<std::pair<std::string, std::string>>
+GetAllNodeOutputPins(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid);
 
 } // namespace NodeEdit
 
