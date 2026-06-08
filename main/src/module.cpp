@@ -29,13 +29,7 @@ std::string NodeEdit::GetPath(const std::string &path) {
   return get_current_context()->interface->cook_path(path);
 }
 
-void NodeEdit::StartNodeEditTestInstance() {
-  auto ctx = SetupExampleContext();
-  auto gs = SetupExampleGraphSession();
-  auto inst = ModuleUI::NodeEditorAppWindow::Create("Main graph", ctx, gs);
-  Cherry::AddAppWindow(inst->GetAppWindow());
-  get_current_context()->editor_instances.push_back(inst);
-}
+void NodeEdit::StartNodeEditTestInstance() { std::cout << "sdf" << std::endl; }
 
 bool NodeEdit::IsGraphFile(const std::string &path) {
   std::string fullpath = path + "/graph.nodegraph";
