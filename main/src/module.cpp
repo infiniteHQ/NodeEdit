@@ -393,3 +393,123 @@ nlohmann::json NodeEdit::GetGraph(const nlohmann::json &j) {
 
   return nlohmann::json::object();
 }
+
+const NodeEdit::NodeEditInstance *
+NodeEdit::FindInstance(const NodeEdit::NodeEditGraph &graph,
+                       const std::string &instance_id) {
+  for (const auto &inst : graph.instances)
+    if (inst.instance_id == instance_id)
+      return &inst;
+  return nullptr;
+}
+
+const NodeEdit::NodeEditSchema *
+NodeEdit::FindSchema(const NodeEdit::NodeEditContext &ctx,
+                     const std::string &type_id) {
+  for (const auto &schema : ctx.schemas)
+    if (schema.id == type_id)
+      return &schema;
+  return nullptr;
+}
+
+const NodeEdit::NodeEditContext *
+NodeEdit::FindContext(const std::string &context_id) {
+  for (const auto &ctx : get_current_context()->contexts)
+    if (ctx->id == context_id)
+      return ctx.get();
+  return nullptr;
+}
+
+std::string NodeEdit::GetNextNode(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid, const std::string &outputid) {
+  if (!graph)
+    return {};
+
+  for (const auto &conn : graph->graph.connections) {
+    if (conn.node_instance_id_A == nodeid && conn.pin_id_A == outputid)
+      return conn.node_instance_id_B;
+  }
+  return {};
+}
+
+std::string NodeEdit::GetPreviousNode(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid, const std::string &inputid) {
+  if (!graph)
+    return {};
+
+  for (const auto &conn : graph->graph.connections) {
+    if (conn.node_instance_id_B == nodeid && conn.pin_id_B == inputid)
+      return conn.node_instance_id_A;
+  }
+  return {};
+}
+
+std::string NodeEdit::SearchNodeOutputPinByType(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid, const std::string &type) {
+  if (!graph)
+    return {};
+
+  const auto *inst = FindInstance(graph->graph, nodeid);
+  if (!inst)
+    return {};
+
+  const auto *ctx = FindContext(graph->context_id);
+  if (!ctx)
+    return {};
+
+  const auto *schema = FindSchema(*ctx, inst->type_id);
+  if (!schema)
+    return {};
+
+  for (const auto &pin : schema->output_pins)
+    if (pin.type == type)
+      return pin.id;
+
+  return {};
+}
+
+std::string NodeEdit::SearchNodeInputPinByType(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid, const std::string &type) {
+  if (!graph)
+    return {};
+
+  const auto *inst = FindInstance(graph->graph, nodeid);
+  if (!inst)
+    return {};
+
+  const auto *ctx = FindContext(graph->context_id);
+  if (!ctx)
+    return {};
+
+  const auto *schema = FindSchema(*ctx, inst->type_id);
+  if (!schema)
+    return {};
+
+  for (const auto &pin : schema->input_pins)
+    if (pin.type == type)
+      return pin.id;
+
+  return {};
+}
+
+std::string NodeEdit::SearchNodeType(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &type) {
+  if (!graph)
+    return {};
+
+  const auto *ctx = FindContext(graph->context_id);
+  if (!ctx)
+    return {};
+
+  for (const auto &inst : graph->graph.instances) {
+    const auto *schema = FindSchema(*ctx, inst.type_id);
+    if (schema && schema->type == type)
+      return inst.instance_id;
+  }
+  return {};
+}

@@ -36,9 +36,9 @@ NodeEditorAppWindow::NodeEditorAppWindow(
   m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
 
   // TODO IF save/refresh not handled
-  // m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
-  // m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
-  // m_AppWindow->SetLeftBottombarCallback([this]() { RenderBottombar(); });
+  m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
+  m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
+  m_AppWindow->SetLeftBottombarCallback([this]() { RenderBottombar(); });
   m_AppWindow->SetSaveMode(true);
   m_AppWindow->SetInternalPaddingY(0.0f);
   m_AppWindow->SetInternalPaddingX(0.0f);

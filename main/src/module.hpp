@@ -81,7 +81,43 @@ NODEEDIT_API nlohmann::json DumpGraph(const NodeEdit::NodeEditGraph &graph);
 NODEEDIT_API NodeEditGraph PopulateGraph(const nlohmann::json &j);
 NODEEDIT_API std::string GetGraphContextName(const nlohmann::json &j);
 NODEEDIT_API nlohmann::json GetGraph(const nlohmann::json &j);
-// TODO: Complete API to know node connections and positions
+
+// Nodegraph API
+
+// Get the nodeID
+NODEEDIT_API std::string
+GetNextNode(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+            const std::string &nodeid,
+            const std::string &outputid); // instance_id
+
+NODEEDIT_API std::string
+GetPreviousNode(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+                const std::string &nodeid,
+                const std::string &inputid); // instance_id
+
+NODEEDIT_API std::string SearchNodeOutputPinByType(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid,
+    const std::string &type); //  id (from NodeEditPin)
+
+NODEEDIT_API std::string SearchNodeInputPinByType(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid,
+    const std::string &type); // id (from NodeEditPin)
+NODEEDIT_API std::string
+SearchNodeType(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+               const std::string &type); // return instance_id
+
+// helpers
+NODEEDIT_API const NodeEdit::NodeEditInstance *
+FindInstance(const NodeEdit::NodeEditGraph &graph,
+             const std::string &instance_id);
+
+NODEEDIT_API const NodeEdit::NodeEditSchema *
+FindSchema(const NodeEdit::NodeEditContext &ctx, const std::string &type_id);
+
+NODEEDIT_API const NodeEdit::NodeEditContext *
+FindContext(const std::string &context_id);
 
 } // namespace NodeEdit
 
