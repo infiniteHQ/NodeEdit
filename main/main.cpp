@@ -11,8 +11,15 @@ public:
     auto m = ModuleInterface::get_editor_module_by_name(this->name());
     NodeEdit::get_current_context()->interface = m;
 
-    this->add_toolbar_handler(ToolbarHandlerInterface(
-        NodeEdit::StartNodeEditTestInstance, "NodeEdit", ""));
+    // TODO  sub topics Handler topics Tools/Basic Nodes/etc...
+    // TODO Textures/Topic association for BeginMenuImages with icons on sub
+    // topics
+    this->toolbar_main_logo_path(NodeEdit::GetPath("resources/icons/edit.png"));
+
+    this->add_toolbar_handler(
+        ToolbarHandlerInterface(NodeEdit::StartNodeEditTestInstance, "NodeEdit",
+                                "Node edit related tools", "",
+                                NodeEdit::GetPath("resources/icons/edit.png")));
 
     this->add_content_browser_item_identifier(ItemIdentifierInterface(
         NodeEdit::IsGraphFile, "infinitehq_nodeedit:graph", "Node Graph",
