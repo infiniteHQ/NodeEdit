@@ -131,6 +131,27 @@ GetAllNodeOutputPins(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid);
 
+// Effect API
+NODEEDIT_API void
+AddEffectToNode(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+                const NodeEditNodeEffect &e);
+
+NODEEDIT_API void AddEffectToConnection(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const NodeEditConnectionEffect &e);
+
+NODEEDIT_API void RemoveNodeEffectsFromNode(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid);
+
+NODEEDIT_API void RemoveConnectionEffectsFromNode(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid);
+
+NODEEDIT_API void RemoveConnectionEffectsFromPin(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid, const std::string &pin_id);
+
 } // namespace NodeEdit
 
 #endif // SAMPLE_MODULE_HPP

@@ -522,8 +522,7 @@ std::string NodeEdit::SearchNodeType(
   return {};
 }
 
-NODEEDIT_API std::vector<std::pair<std::string, std::string>>
-NodeEdit::GetAllNodeInputPins(
+std::vector<std::pair<std::string, std::string>> NodeEdit::GetAllNodeInputPins(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid) {
   if (!graph)
@@ -550,8 +549,7 @@ NodeEdit::GetAllNodeInputPins(
   return result;
 }
 
-NODEEDIT_API std::vector<std::pair<std::string, std::string>>
-NodeEdit::GetAllNodeOutputPins(
+std::vector<std::pair<std::string, std::string>> NodeEdit::GetAllNodeOutputPins(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid) {
   if (!graph)
@@ -576,4 +574,74 @@ NodeEdit::GetAllNodeOutputPins(
     result.emplace_back(pin.type, pin.id);
 
   return result;
+}
+
+// Effect API
+void NodeEdit::AddEffectToNode(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const NodeEdit::NodeEditNodeEffect &e) {
+  if (!graph) {
+    return;
+  }
+  graph->graph.node_effects.push_back(e);
+  graph->graph.refresh_effects = true;
+}
+
+void NodeEdit::AddEffectToConnection(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const NodeEdit::NodeEditConnectionEffect &e) {
+  if (!graph) {
+    return;
+  }
+  graph->graph.connection_effects.push_back(e);
+  graph->graph.refresh_effects = true;
+}
+
+void NodeEdit::RemoveNodeEffectsFromNode(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid) {
+  if (!graph) {
+    return;
+  }
+  auto &effects = graph->graph.node_effects;
+  effects.erase(std::remove_if(effects.begin(), effects.end(),
+                               [&nodeid](const NodeEditNodeEffect &e) {
+                                 return e.instance_id == nodeid;
+                               }),
+                effects.end());
+  graph->graph.refresh_effects = true;
+}
+
+void NodeEdit::RemoveConnectionEffectsFromNode(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid) {
+  if (!graph) {
+    return;
+  }
+  auto &effects = graph->graph.connection_effects;
+  effects.erase(std::remove_if(effects.begin(), effects.end(),
+                               [&nodeid](const NodeEditConnectionEffect &e) {
+                                 return e.node_instance_id_A == nodeid ||
+                                        e.node_instance_id_B == nodeid;
+                               }),
+                effects.end());
+  graph->graph.refresh_effects = true;
+}
+
+void NodeEdit::RemoveConnectionEffectsFromPin(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &nodeid, const std::string &pin_id) {
+  if (!graph) {
+    return;
+  }
+  auto &effects = graph->graph.connection_effects;
+  effects.erase(
+      std::remove_if(effects.begin(), effects.end(),
+                     [&nodeid, &pin_id](const NodeEditConnectionEffect &e) {
+                       return (e.node_instance_id_A == nodeid ||
+                               e.node_instance_id_B == nodeid) &&
+                              (e.pin_id_A == pin_id || e.pin_id_B == pin_id);
+                     }),
+      effects.end());
+  graph->graph.refresh_effects = true;
 }

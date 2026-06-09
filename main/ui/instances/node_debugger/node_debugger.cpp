@@ -58,15 +58,8 @@ void NodeEditorDebugger::Render() {
   ImGui::SetNextItemWidth(-1);
 
   CherryKit::InputString("Entry", &m_EntryInput);
-  if (CherryKit::ButtonText("Go").GetDataAs<bool>("isClicked")) {
-    if (!m_EntryInput.empty()) {
-      m_History.clear();
-      m_CurrentNode = m_EntryInput;
-    }
-  }
-
   ImGui::SameLine();
-  if (ImGui::SmallButton("Go")) {
+  if (CherryKit::ButtonText("Go").GetDataAs<bool>("isClicked")) {
     if (!m_EntryInput.empty()) {
       m_History.clear();
       m_CurrentNode = m_EntryInput;

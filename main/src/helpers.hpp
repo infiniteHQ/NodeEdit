@@ -26,9 +26,35 @@ struct NodeEditPinFormat {
 struct NodeEditPin {
   std::string type;
   // std::string color_variant;
-  // std::string name; // INFO: Name is provided by the pin format
   std::string name; // optionnal: custom name
   std::string id;
+};
+
+struct NodeEditNodeEffect {
+  std::string instance_id;
+
+  std::string type; // message
+  std::string text;
+  std::string text_color;
+  std::string bg_color;
+};
+
+struct NodeEditConnectionEffect {
+  std::string node_instance_id_A;
+  std::string pin_id_A;
+  std::string node_instance_id_B;
+  std::string pin_id_B;
+
+  std::string type; // pulse, flow
+
+  float pulsating_intensity = 1.0f;
+  float pulsating_rate = 2.0f;
+  std::string pulsating_color = "#FF4444FF";
+
+  float flow_intensity = 1.0f;
+  float flow_speed = 120.0f;
+  bool flow_reverse = false;
+  std::string flow_color = "#44AAFFFF";
 };
 
 struct NodeEditSpawnPossibility {
@@ -93,6 +119,11 @@ struct NodeEditConnection {
 struct NodeEditGraph {
   std::vector<NodeEditInstance> instances;
   std::vector<NodeEditConnection> connections;
+
+  // effects
+  std::vector<NodeEditConnectionEffect> connection_effects;
+  std::vector<NodeEditNodeEffect> node_effects;
+  bool refresh_effects;
 };
 
 struct NodeEditGraphSession {
