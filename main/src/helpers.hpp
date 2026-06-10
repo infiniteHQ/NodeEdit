@@ -131,6 +131,7 @@ struct NodeEditGraphSession {
   std::string name;
   std::string context_id;
   std::string path; // json file
+  bool use_native_saving_system = true;
 };
 } // namespace NodeEdit
 

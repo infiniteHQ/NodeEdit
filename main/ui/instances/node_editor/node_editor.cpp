@@ -36,9 +36,12 @@ NodeEditorAppWindow::NodeEditorAppWindow(
   m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
 
   // TODO IF save/refresh not handled
-  m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
-  m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
-  m_AppWindow->SetLeftBottombarCallback([this]() { RenderBottombar(); });
+  if (graph) {
+    if (graph->use_native_saving_system) {
+      m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
+      m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
+    }
+  }
   m_AppWindow->SetSaveMode(true);
   m_AppWindow->SetInternalPaddingY(0.0f);
   m_AppWindow->SetInternalPaddingX(0.0f);
@@ -58,8 +61,9 @@ NodeEditorAppWindow::NodeEditorAppWindow(
     SpawnNodeInstance(sch_id, x, y, connID);
   };
 
-  std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
+  Refresh();
 
+  std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
   this->ctx = vxe::get_current_context();
 } // namespace ModuleUI
 
@@ -199,7 +203,8 @@ void NodeEditorAppWindow::Render() {
 
       if (hasEffect) {
         if (ImGui::SmallButton("Remove effect")) {
-          ui_node_graph.RemoveNodeEffect(node.InstanceID);
+          NodeEdit::RemoveNodeEffectsFromNode(backend_node_graph_session,
+                                              node.InstanceID);
         }
       } else {
         if (ImGui::SmallButton("Add: Error")) {
@@ -295,11 +300,10 @@ void NodeEditorAppWindow::Render() {
       ImGui::TextUnformatted("Pulsating:");
       ImGui::SameLine();
       if (existingPulse) {
-        if (ImGui::SmallButton("Remove##p"))
-          ui_node_graph.RemoveConnectionEffect(
-              conn.NodeInstanceIDA, conn.PinIDA, conn.NodeInstanceIDB,
-              conn.PinIDB,
-              Cherry::NodeSystem::EffectType::Connection::Pulsating);
+        if (ImGui::SmallButton("Remove##p")) {
+          NodeEdit::RemoveConnectionEffectsFromPin(
+              backend_node_graph_session, conn.NodeInstanceIDA, conn.PinIDA);
+        }
         ImGui::SameLine();
 
         ImGui::SetNextItemWidth(60);
@@ -328,10 +332,10 @@ void NodeEditorAppWindow::Render() {
       ImGui::TextUnformatted("Flow:");
       ImGui::SameLine();
       if (existingFlow) {
-        if (ImGui::SmallButton("Remove##f"))
-          ui_node_graph.RemoveConnectionEffect(
-              conn.NodeInstanceIDA, conn.PinIDA, conn.NodeInstanceIDB,
-              conn.PinIDB, Cherry::NodeSystem::EffectType::Connection::Flow);
+        if (ImGui::SmallButton("Remove##f")) {
+          NodeEdit::RemoveConnectionEffectsFromPin(
+              backend_node_graph_session, conn.NodeInstanceIDB, conn.PinIDB);
+        }
         ImGui::SameLine();
         ImGui::SetNextItemWidth(60);
         ImGui::DragFloat("Speed##f", &existingFlow->params.flowSpeed, 1.0f,
