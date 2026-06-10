@@ -220,15 +220,15 @@ void NodeEditorAppWindow::Render() {
       pi_a.type = "int";
       s.input_pins.push_back(pi_a);
       NodeEdit::NodeEditPin pi_b;
-      pi_b.id = "int1";
+      pi_b.id = "int2";
       pi_b.type = "int";
       s.input_pins.push_back(pi_b);
       NodeEdit::NodeEditPin po_a;
-      po_a.id = "int1";
+      po_a.id = "int3";
       po_a.type = "int";
       s.output_pins.push_back(po_a);
       NodeEdit::NodeEditPin po_b;
-      po_b.id = "int1";
+      po_b.id = "int4";
       po_b.name = "Bool Four";
       po_b.type = "int";
       s.output_pins.push_back(po_b);
@@ -442,6 +442,62 @@ void NodeEditorAppWindow::Refresh() {
 
   NodeEdit::RefreshGraphSession(backend_node_graph_session);
 
+  for (const auto &extpf : backend_node_graph_session->graph.ext.pin_formats) {
+    NodeEdit::NodeEditPinFormat pf;
+    pf.type = extpf.type;
+    pf.name = extpf.name;
+    pf.color = extpf.color;
+    pf.shape = extpf.shape;
+    pf.description = extpf.description;
+    NodeEdit::AddPinFormatToGraphCtxExt(backend_node_graph_session, pf);
+  }
+
+  for (const auto &exts : backend_node_graph_session->graph.ext.schemas) {
+    NodeEdit::NodeEditSchema s;
+    s.id = exts.id;
+    s.type = exts.type;
+    s.status = exts.status;
+    s.second_label_color = exts.second_label_color;
+    s.second_label = exts.second_label;
+    s.label = exts.label;
+    s.label_color = exts.label_color;
+    s.background_color = exts.background_color;
+
+    s.header_color = exts.header_color;
+    s.header_logo_path = exts.header_logo_path;
+    s.header_pin.id = exts.header_pin.id;
+    s.header_pin.name = exts.header_pin.name;
+    s.header_pin.type = exts.header_pin.type;
+
+    for (const auto &extpi : exts.input_pins) {
+      NodeEdit::NodeEditPin pi;
+      pi.id = extpi.id;
+      pi.name = extpi.name;
+      pi.type = extpi.type;
+      s.input_pins.push_back(pi);
+    }
+
+    for (const auto &extpo : exts.output_pins) {
+      NodeEdit::NodeEditPin po;
+      po.id = extpo.id;
+      po.name = extpo.name;
+      po.type = extpo.type;
+      s.output_pins.push_back(po);
+    }
+
+    if (exts.spawnable) {
+      s.spawnable = exts.spawnable;
+      s.spawn_possibility.category = exts.spawn_possibility.category;
+      s.spawn_possibility.proper_description =
+          exts.spawn_possibility.proper_description;
+      s.spawn_possibility.proper_logo = exts.spawn_possibility.proper_logo;
+      s.spawn_possibility.proper_name = exts.spawn_possibility.proper_name;
+      s.spawn_possibility.schema_id = exts.spawn_possibility.schema_id;
+    }
+
+    NodeEdit::AddSchemaToGraphCtxExt(backend_node_graph_session, s);
+  }
+
   auto &instances = backend_node_graph_session->graph.instances;
   auto &connections = backend_node_graph_session->graph.connections;
 
@@ -466,6 +522,7 @@ void NodeEditorAppWindow::Refresh() {
     c.PinIDB = conn.pin_id_B;
     ui_node_graph.m_Connections.push_back(c);
   }
+
   refreshed = true;
 }
 
