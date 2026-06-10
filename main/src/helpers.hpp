@@ -98,6 +98,11 @@ struct NodeEditContext {
   std::string id;
 };
 
+struct NodeEditGraphContextExtensions {
+  std::vector<NodeEditSchema> schemas;
+  std::vector<NodeEditPinFormat> pin_formats;
+};
+
 // node graph
 struct NodeEditInstance {
   std::string type_id;
@@ -123,7 +128,14 @@ struct NodeEditGraph {
   // effects
   std::vector<NodeEditConnectionEffect> connection_effects;
   std::vector<NodeEditNodeEffect> node_effects;
+
+  // ctx modifications/extension
+  NodeEditGraphContextExtensions ext;
+
+  std::string graph_title;
+
   bool refresh_effects;
+  bool refresh_ctx;
 };
 
 struct NodeEditGraphSession {

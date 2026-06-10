@@ -71,6 +71,8 @@ void NodeEdit::OpenGraph(const std::string &path) {
   }
 
   auto graph = PopulateGraph(GetGraph(j));
+  graph.graph_title = "Node graph";
+  graph.refresh_effects = true;
 
   auto gs = std::make_shared<NodeEdit::NodeEditGraphSession>();
   gs->name = path;
@@ -78,12 +80,10 @@ void NodeEdit::OpenGraph(const std::string &path) {
   gs->graph = graph;
   gs->context_id = ctx_name;
   {
-
     auto inst = ModuleUI::NodeEditorAppWindow::Create("Node graph", ctx, gs);
     Cherry::AddAppWindow(inst->GetAppWindow());
     get_current_context()->editor_instances.push_back(inst);
   }
-
   {
     auto inst = ModuleUI::NodeEditorDebugger::Create("Node debug", gs);
     Cherry::AddAppWindow(inst->GetAppWindow());
@@ -337,6 +337,73 @@ nlohmann::json NodeEdit::DumpGraph(const NodeEdit::NodeEditGraph &graph) {
     j["connections"].push_back(c);
   }
 
+  j["ctx_ext"] = nlohmann::json::object();
+
+  j["ctx_ext"]["pin_formats"] = nlohmann::json::array();
+  for (const auto &pf : graph.ext.pin_formats) {
+    nlohmann::json c;
+    c["type"] = pf.type;
+    c["delegate"] = pf.delegate;
+    c["description"] = pf.description;
+    c["name"] = pf.name;
+    c["color"] = pf.color;
+    c["shape"] = pf.shape;
+    j["ctx_ext"]["pin_formats"].push_back(c);
+  }
+
+  j["ctx_ext"]["schemas"] = nlohmann::json::array();
+  for (const auto &s : graph.ext.schemas) {
+    nlohmann::json schema;
+
+    schema["input_pins"] = nlohmann::json::array();
+    for (const auto &pin : s.input_pins) {
+      nlohmann::json p;
+      p["type"] = pin.type;
+      p["name"] = pin.name;
+      p["id"] = pin.id;
+      schema["input_pins"].push_back(p);
+    }
+
+    schema["output_pins"] = nlohmann::json::array();
+    for (const auto &pin : s.output_pins) {
+      nlohmann::json p;
+      p["type"] = pin.type;
+      p["name"] = pin.name;
+      p["id"] = pin.id;
+      schema["output_pins"].push_back(p);
+    }
+
+    schema["header_pin"]["type"] = s.header_pin.type;
+    schema["header_pin"]["name"] = s.header_pin.name;
+    schema["header_pin"]["id"] = s.header_pin.id;
+
+    schema["spawnable"] = s.spawnable;
+    if (s.spawnable) {
+      nlohmann::json sp;
+      sp["proper_name"] = s.spawn_possibility.proper_name;
+      sp["proper_description"] = s.spawn_possibility.proper_description;
+      sp["proper_logo"] = s.spawn_possibility.proper_logo;
+      sp["category"] = s.spawn_possibility.category;
+      sp["schema_id"] = s.spawn_possibility.schema_id;
+      schema["spawn_possibility"] = sp;
+    }
+
+    schema["id"] = s.id;
+    schema["header_color"] = s.header_color;
+    schema["border_color"] = s.border_color;
+    schema["background_color"] = s.background_color;
+    schema["label"] = s.label;
+    schema["label_color"] = s.label_color;
+    schema["second_label"] = s.second_label;
+    schema["second_label_color"] = s.second_label_color;
+    schema["description_color"] = s.description_color;
+    schema["header_logo_path"] = s.header_logo_path;
+    schema["status"] = s.status;
+    schema["type"] = s.type;
+
+    j["ctx_ext"]["schemas"].push_back(schema);
+  }
+
   return j;
 }
 
@@ -366,6 +433,82 @@ NodeEdit::NodeEditGraph NodeEdit::PopulateGraph(const nlohmann::json &j) {
       conn.node_instance_id_B = c.value("node_instance_id_B", "");
       conn.pin_id_B = c.value("pin_id_B", "");
       graph.connections.push_back(std::move(conn));
+    }
+  }
+
+  if (j.contains("ctx_ext") && j["ctx_ext"].is_object()) {
+    const auto &ext = j["ctx_ext"];
+
+    if (ext.contains("pin_formats") && ext["pin_formats"].is_array()) {
+      for (const auto &c : ext["pin_formats"]) {
+        NodeEdit::NodeEditPinFormat pf;
+        pf.type = c.value("type", "");
+        pf.delegate = c.value("delegate", false);
+        pf.description = c.value("description", "");
+        pf.name = c.value("name", "");
+        pf.color = c.value("color", "");
+        pf.shape = c.value("shape", "circle");
+        graph.ext.pin_formats.push_back(std::move(pf));
+      }
+    }
+
+    if (ext.contains("schemas") && ext["schemas"].is_array()) {
+      for (const auto &s : ext["schemas"]) {
+        NodeEdit::NodeEditSchema schema;
+
+        if (s.contains("input_pins") && s["input_pins"].is_array()) {
+          for (const auto &p : s["input_pins"]) {
+            NodeEdit::NodeEditPin pin;
+            pin.type = p.value("type", "");
+            pin.name = p.value("name", "");
+            pin.id = p.value("id", "");
+            schema.input_pins.push_back(std::move(pin));
+          }
+        }
+
+        if (s.contains("output_pins") && s["output_pins"].is_array()) {
+          for (const auto &p : s["output_pins"]) {
+            NodeEdit::NodeEditPin pin;
+            pin.type = p.value("type", "");
+            pin.name = p.value("name", "");
+            pin.id = p.value("id", "");
+            schema.output_pins.push_back(std::move(pin));
+          }
+        }
+
+        if (s.contains("header_pin") && s["header_pin"].is_object()) {
+          schema.header_pin.type = s["header_pin"].value("type", "");
+          schema.header_pin.name = s["header_pin"].value("name", "");
+          schema.header_pin.id = s["header_pin"].value("id", "");
+        }
+
+        schema.spawnable = s.value("spawnable", false);
+        if (schema.spawnable && s.contains("spawn_possibility") &&
+            s["spawn_possibility"].is_object()) {
+          const auto &sp = s["spawn_possibility"];
+          schema.spawn_possibility.proper_name = sp.value("proper_name", "");
+          schema.spawn_possibility.proper_description =
+              sp.value("proper_description", "");
+          schema.spawn_possibility.proper_logo = sp.value("proper_logo", "");
+          schema.spawn_possibility.category = sp.value("category", "");
+          schema.spawn_possibility.schema_id = sp.value("schema_id", "");
+        }
+
+        schema.id = s.value("id", "");
+        schema.header_color = s.value("header_color", "");
+        schema.border_color = s.value("border_color", "");
+        schema.background_color = s.value("background_color", "");
+        schema.label = s.value("label", "");
+        schema.label_color = s.value("label_color", "");
+        schema.second_label = s.value("second_label", "");
+        schema.second_label_color = s.value("second_label_color", "");
+        schema.description_color = s.value("description_color", "");
+        schema.header_logo_path = s.value("header_logo_path", "");
+        schema.status = s.value("status", "");
+        schema.type = s.value("type", "");
+
+        graph.ext.schemas.push_back(std::move(schema));
+      }
     }
   }
 
@@ -644,4 +787,36 @@ void NodeEdit::RemoveConnectionEffectsFromPin(
                      }),
       effects.end());
   graph->graph.refresh_effects = true;
+}
+
+void NodeEdit::SetGraphTitle(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &title) {
+  if (!graph) {
+    return;
+  }
+
+  graph->graph.graph_title = title;
+  graph->graph.refresh_effects = true;
+}
+
+void NodeEdit::AddSchemaToGraphCtxExt(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const NodeEdit::NodeEditSchema &schema) {
+  if (!graph) {
+    return;
+  }
+
+  graph->graph.ext.schemas.push_back(schema);
+  graph->graph.refresh_ctx = true;
+}
+
+void NodeEdit::AddPinFormatToGraphCtxExt(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const NodeEdit::NodeEditPinFormat &pin_format) {
+  if (!graph) {
+    return;
+  }
+  graph->graph.ext.pin_formats.push_back(pin_format);
+  graph->graph.refresh_ctx = true;
 }

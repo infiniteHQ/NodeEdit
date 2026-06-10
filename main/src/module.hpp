@@ -12,6 +12,10 @@
 #define NODEEDIT_API
 #endif
 
+// TODO :
+// Graph context extensions
+// Vortex Events APi
+
 namespace NodeEdit {
 struct Context {
   std::shared_ptr<ModuleInterface> interface;
@@ -131,6 +135,13 @@ GetAllNodeOutputPins(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid);
 
+NODEEDIT_API void AddSchemaToGraphCtxExt(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const NodeEditSchema &schema);
+NODEEDIT_API void AddPinFormatToGraphCtxExt(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const NodeEditPinFormat &pin_format);
+
 // Effect API
 NODEEDIT_API void
 AddEffectToNode(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
@@ -151,6 +162,10 @@ NODEEDIT_API void RemoveConnectionEffectsFromNode(
 NODEEDIT_API void RemoveConnectionEffectsFromPin(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid, const std::string &pin_id);
+
+NODEEDIT_API void
+SetGraphTitle(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+              const std::string &title);
 
 } // namespace NodeEdit
 

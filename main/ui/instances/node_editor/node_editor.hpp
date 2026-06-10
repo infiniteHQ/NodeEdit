@@ -27,7 +27,6 @@ public:
   void RenderRightMenubar();
   void RenderBottombar();
 
-  void LoadContext(const std::string &context_id);
   void LoadGraph(const std::string &json_path);
   // void LoadGraph(const json& v);
 
@@ -35,10 +34,14 @@ public:
   void Save();
 
   void LoadContextFromBackend();
+  void RefreshContextFromBackend();
   void SpawnNodeInstance(const std::string &sch_id, const float &x,
                          const float &y, const std::string &connID);
 
+  std::string GenerateUniqueNodeInstanceID();
+
 private:
+  int node_instances_counter_ = 1;
   std::shared_ptr<VxContext> ctx;
   bool opened;
   // Cherry

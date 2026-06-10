@@ -114,6 +114,10 @@ void NodeEditorAppWindow::RenderMenubar() {
   }
 }
 
+void NodeEditorAppWindow::RefreshContextFromBackend() {
+  LoadContextFromBackend();
+}
+
 void NodeEditorAppWindow::Render() {
   CherryApp.PushComponentPool(&m_ComponentPool);
   auto &cmp = CherryKit::NodeAreaOpen("", 0, 0, &ui_node_ctx, &ui_node_graph);
@@ -130,9 +134,18 @@ void NodeEditorAppWindow::Render() {
     cmp.SetData("graph_saved", "false;");
   }
 
+  ui_node_graph.SetGraphTitle("TEST GRAPH");
   if (backend_node_graph_session) {
+    if (backend_node_graph_session->graph.refresh_ctx) {
+      RefreshContextFromBackend();
+    }
+
     if (backend_node_graph_session->graph.refresh_effects) {
       ui_node_graph.ClearAllEffects();
+      if (!backend_node_graph_session->graph.graph_title.empty()) {
+        ui_node_graph.SetGraphTitle(
+            backend_node_graph_session->graph.graph_title);
+      }
 
       for (const auto &e : backend_node_graph_session->graph.node_effects) {
         Cherry::NodeSystem::NodeEffect ne;
@@ -176,6 +189,91 @@ void NodeEditorAppWindow::Render() {
   }
 
   CherryApp.PopComponentPool();
+
+  ImGui::Begin("DEBUG_NODEGRAPH");
+
+  if (CherryKit::ButtonText("AddTOCTX").GetDataAs<bool>("isClicked")) {
+    // Setup pins formats
+    {
+      NodeEdit::NodeEditPinFormat pf;
+      pf.type = "int";
+      pf.name = "Integer";
+      pf.color = "#ebc034";
+      pf.shape = "circle";
+      pf.description = "Simple integer";
+      NodeEdit::AddPinFormatToGraphCtxExt(backend_node_graph_session, pf);
+    }
+
+    // Setup schemas
+    {
+      NodeEdit::NodeEditSchema s;
+      s.id = "is_into";
+      s.type = "blueprint";
+      s.status = "active";
+      s.second_label = "This is into";
+      s.label = "Is into";
+      s.header_color = "#ebc034";
+
+      NodeEdit::NodeEditPin pi_a;
+      pi_a.id = "int1";
+      pi_a.name = "Int One";
+      pi_a.type = "int";
+      s.input_pins.push_back(pi_a);
+      NodeEdit::NodeEditPin pi_b;
+      pi_b.id = "int1";
+      pi_b.type = "int";
+      s.input_pins.push_back(pi_b);
+      NodeEdit::NodeEditPin po_a;
+      po_a.id = "int1";
+      po_a.type = "int";
+      s.output_pins.push_back(po_a);
+      NodeEdit::NodeEditPin po_b;
+      po_b.id = "int1";
+      po_b.name = "Bool Four";
+      po_b.type = "int";
+      s.output_pins.push_back(po_b);
+
+      s.spawnable = true;
+      s.spawn_possibility.category = "base";
+      s.spawn_possibility.proper_description = "Spwan a is cool node";
+      s.spawn_possibility.proper_logo =
+          NodeEdit::GetPath("resources/icons/edit.png");
+      s.spawn_possibility.proper_name = "Is Into";
+      s.spawn_possibility.schema_id = "is_into";
+
+      NodeEdit::AddSchemaToGraphCtxExt(backend_node_graph_session, s);
+    }
+    {
+      NodeEdit::NodeEditSchema s;
+      s.id = "convert";
+      s.type = "simple";
+      s.status = "active";
+      s.second_label = "This is into";
+      s.label = "Convert";
+      s.header_color = "#ebc034";
+
+      NodeEdit::NodeEditPin pi_a;
+      pi_a.id = "bool1";
+      pi_a.type = "bool";
+      s.input_pins.push_back(pi_a);
+      NodeEdit::NodeEditPin po_a;
+      po_a.id = "int1";
+      po_a.type = "int";
+      s.output_pins.push_back(po_a);
+
+      s.spawnable = true;
+      s.spawn_possibility.category = "base";
+      s.spawn_possibility.proper_description = "Spwan a is cool node";
+      s.spawn_possibility.proper_logo =
+          NodeEdit::GetPath("resources/icons/edit.png");
+      s.spawn_possibility.proper_name = "Converter";
+      s.spawn_possibility.schema_id = "convert";
+
+      NodeEdit::AddSchemaToGraphCtxExt(backend_node_graph_session, s);
+    }
+  }
+
+  ImGui::End();
 }
 
 void NodeEditorAppWindow::RenderRightMenubar() {
@@ -260,6 +358,81 @@ void NodeEditorAppWindow::LoadContextFromBackend() {
       ui_node_graph.AddPossibility(p);
     }
   }
+
+  // Load graph context extensions
+  if (!backend_node_graph_session) {
+    return;
+  }
+  auto &ext_pin_formats = backend_node_graph_session->graph.ext.pin_formats;
+  auto &ext_schemas = backend_node_graph_session->graph.ext.schemas;
+
+  for (auto &pf : ext_pin_formats) {
+    Cherry::NodeSystem::PinFormat pin_format;
+    pin_format.m_Color = pf.color;
+    pin_format.m_Delegate = pf.delegate;
+
+    auto it = shape_map.find(pf.shape);
+    if (it != shape_map.end()) {
+      pin_format.m_Shape = it->second;
+    }
+
+    pin_format.m_TypeDescription = pf.description;
+    pin_format.m_TypeID = pf.type;
+    pin_format.m_TypeName = pf.name;
+    ui_node_ctx.SetupPinFormat(pin_format);
+  }
+
+  for (auto &s : ext_schemas) {
+    auto sch = ui_node_ctx.CreateSchema(s.id);
+    sch->SetLabel(s.label);
+    sch->SetLabelHexColor(s.label_color);
+    sch->SetSecondLabel(s.second_label);
+    sch->SetSecondLabelHexColor(s.second_label_color);
+    sch->SetDescriptionHexColor(s.description_color);
+    sch->SetHexBackgroundColor(s.background_color);
+    sch->SetHexBorderColor(s.border_color);
+    sch->SetHexHeaderColor(s.header_color);
+
+    {
+      auto it = status_map.find(s.status);
+      if (it != status_map.end()) {
+        sch->m_NodeStatus = it->second;
+      }
+    }
+
+    {
+      auto it = type_map.find(s.type);
+      if (it != type_map.end()) {
+        sch->SetType(it->second);
+      }
+    }
+
+    if (!s.header_logo_path.empty()) {
+      sch->SetLogoPath(s.header_logo_path);
+    }
+
+    for (auto &sip : s.input_pins) {
+      sch->AddInputPin(sip.id, sip.type, sip.name);
+    }
+
+    for (auto &sop : s.output_pins) {
+      sch->AddOutputPin(sop.id, sop.type, sop.name);
+    }
+
+    if (!s.header_pin.id.empty()) {
+      sch->AddHeaderPin(s.header_pin.id, s.header_pin.type);
+    }
+
+    if (s.spawnable) {
+      Cherry::NodeSystem::NodeSpawnPossibility p;
+      p.category = s.spawn_possibility.category;
+      p.schema_id = s.spawn_possibility.schema_id;
+      p.proper_logo = s.spawn_possibility.proper_logo;
+      p.proper_name = s.spawn_possibility.proper_name;
+      p.proper_description = s.spawn_possibility.proper_description;
+      ui_node_graph.AddPossibility(p);
+    }
+  }
 }
 
 void NodeEditorAppWindow::Refresh() {
@@ -281,6 +454,7 @@ void NodeEditorAppWindow::Refresh() {
     n.TypeID = i.type_id;
     // TODO custom data of nodes
     ui_node_graph.m_InstanciatedNodes.push_back(n);
+    node_instances_counter_++;
   }
 
   ui_node_graph.m_Connections.clear();
@@ -332,14 +506,37 @@ void NodeEditorAppWindow::Save() {
   NodeEdit::SaveGraphSession(backend_node_graph_session);
 }
 
-static int id_counter = 1;
+// TODO : Optimize that with a local unordered_set ?
+std::string NodeEditorAppWindow::GenerateUniqueNodeInstanceID() {
+  static thread_local std::mt19937 rng(std::random_device{}());
+  static std::uniform_int_distribution<int> dist(0, 999999);
+
+  while (true) {
+    const int randomPart = dist(rng);
+
+    std::ostringstream oss;
+    oss << std::setw(6) << std::setfill('0') << randomPart << std::setw(6)
+        << std::setfill('0') << ++node_instances_counter_;
+
+    const std::string candidate = oss.str();
+
+    const bool exists =
+        std::any_of(ui_node_graph.m_InstanciatedNodes.begin(),
+                    ui_node_graph.m_InstanciatedNodes.end(),
+                    [&](const auto &ni) { return ni.InstanceID == candidate; });
+
+    if (!exists)
+      return candidate;
+  }
+}
+
 void NodeEditorAppWindow::SpawnNodeInstance(const std::string &sch_id,
                                             const float &x, const float &y,
                                             const std::string &connID) {
   // Save local UI state from the edit graph pos
   Cherry::NodeSystem::NodeInstance inst;
   inst.TypeID = sch_id;
-  inst.InstanceID = std::to_string(id_counter++);
+  inst.InstanceID = GenerateUniqueNodeInstanceID();
   inst.Position = Cherry::NodeSystem::Vec2(50, 50);
   inst.Size = Cherry::NodeSystem::Vec2(50, 50);
 
