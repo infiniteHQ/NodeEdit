@@ -38,7 +38,20 @@ void NodeEdit::open_graph(const std::string &path) {
   NodeEdit::open_graph_and_get_session(path);
 }
 
-std::shared_ptr<NodeEdit::NodeEditGraphSession> NodeEdit::open_graph_and_get_session(const std::string &path) {
+void NodeEdit::open_graphDEBUG(const std::string &path) {
+  {
+    nlohmann::json j;
+    j["path"] = path;
+    auto ret = ReturnValues();
+    auto args = ArgumentValues(j.dump());
+    vxe::call_input_event("infinitehq.nodeedit", "open_graph", args, ret);
+
+    std::cout << ret.get_json() << std::endl;
+  }
+}
+
+std::shared_ptr<NodeEdit::NodeEditGraphSession>
+NodeEdit::open_graph_and_get_session(const std::string &path, const std::string &parent, const bool &disable_native_save) {
   if (!is_graph_file(path)) {
     get_current_context()->interface->log_error("No graph file in selected file ! (" + path + ")");
   }
@@ -76,7 +89,10 @@ std::shared_ptr<NodeEdit::NodeEditGraphSession> NodeEdit::open_graph_and_get_ses
   gs->session_id = path;
   gs->path = fullpath;
   gs->graph = graph;
+  gs->disable_native_save_system = disable_native_save;
+  gs->parent_appwindow = parent;
   gs->context_id = ctx_name;
+
   {
     auto inst = ModuleUI::NodeEditorAppWindow::Create("Node graph", ctx, gs);
     Cherry::AddAppWindow(inst->GetAppWindow());

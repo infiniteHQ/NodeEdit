@@ -39,7 +39,7 @@ namespace ModuleUI {
 
     // TODO IF save/refresh not handled
     if (graph) {
-      if (graph->use_native_saving_system) {
+      if (!graph->disable_native_save_system) {
         m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
         m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
       }
@@ -114,6 +114,20 @@ namespace ModuleUI {
   }
 
   void NodeEditorAppWindow::Render() {
+    if (backend_node_graph_session) {
+      if (backend_node_graph_session->disable_native_save_system) {
+        if (backend_node_graph_session->ask_for_refresh) {
+          Refresh();
+          backend_node_graph_session->ask_for_refresh = false;
+        }
+
+        if (backend_node_graph_session->ask_for_save) {
+          save_incoming = true;
+          backend_node_graph_session->ask_for_save = false;
+        }
+      }
+    }
+
     CherryApp.PushComponentPool(&m_ComponentPool);
     auto &cmp = CherryKit::NodeAreaOpen("", 0, 0, &ui_node_ctx, &ui_node_graph);
     if (refreshed) {

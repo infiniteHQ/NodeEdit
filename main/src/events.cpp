@@ -170,7 +170,18 @@ void NodeEdit::ie_open_graph(ArgumentValues &args, ReturnValues &ret) {
     return;
   const std::string path = args.get_json()["path"];
 
-  auto gs = NodeEdit::open_graph_and_get_session(path);
+  bool disable_saving_system = false;
+  std::string parent_appwindow = "";  // nothing by default
+
+  if (args.get_json().contains("disable_saving_system") && args.get_json()["disable_saving_system"].is_boolean()) {
+    disable_saving_system = args.get_json()["disable_saving_system"];
+  }
+
+  if (args.get_json().contains("parent_appwindow") && args.get_json()["parent_appwindow"].is_string()) {
+    parent_appwindow = args.get_json()["parent_appwindow"];
+  }
+
+  auto gs = NodeEdit::open_graph_and_get_session(path, parent_appwindow, disable_saving_system);
   std::string id = gs->session_id;
 
   nlohmann::json result;
@@ -493,4 +504,34 @@ void NodeEdit::ie_get_all_node_output_pins(ArgumentValues &args, ReturnValues &r
 
     ret.set_json({ { "output_pins", pins } });
   }
+}
+
+void NodeEdit::ie_save_nodegraph(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+
+  if (!j.contains("session_id") || !j["session_id"].is_string())
+    return;
+  const std::string session_id = j["session_id"].get<std::string>();
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    return;
+  }
+
+  gs->ask_for_save = true;
+}
+
+void NodeEdit::ie_refresh_nodegraph(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+
+  if (!j.contains("session_id") || !j["session_id"].is_string())
+    return;
+  const std::string session_id = j["session_id"].get<std::string>();
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    return;
+  }
+
+  gs->ask_for_refresh = true;
 }

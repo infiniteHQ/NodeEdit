@@ -143,8 +143,11 @@ namespace NodeEdit {
     NodeEditGraph graph;
     std::string session_id;
     std::string context_id;
+    std::string parent_appwindow;
     std::string path;  // json file
-    bool use_native_saving_system = true;
+    bool disable_native_save_system = false;
+    bool ask_for_save = false;
+    bool ask_for_refresh = false;
   };
 }  // namespace NodeEdit
 

@@ -25,6 +25,13 @@ class Module : public ModuleInterface {
         "Edit this graph",
         NodeEdit::get_path("resources/icons/edit.png")));
 
+    this->add_content_browser_item_handler(ItemHandlerInterface(
+        "infinitehq_nodeedit:graph",
+        NodeEdit::open_graphDEBUG,
+        "Edit DEBUG",
+        "Edit this graph",
+        NodeEdit::get_path("resources/icons/edit.png")));
+
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_create_node_context, "create_node_context"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_setup_pin_format, "setup_pin_format"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_setup_schema, "setup_schema"));
@@ -45,7 +52,7 @@ class Module : public ModuleInterface {
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_input_pin_by_type, "search_node_input_pin_by_type"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_type, "search_node_type"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_node_input_pins, "get_all_node_input_pins"));
-    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_node_outputs_pins, "get_all_node_outputs_pins"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_node_output_pins, "get_all_node_outputs_pins"));
 
     NodeEdit::setup_example_context();
   }

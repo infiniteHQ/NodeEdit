@@ -55,8 +55,12 @@ namespace NodeEdit {
   NODEEDIT_API NodeEditGraph populate_graph(const nlohmann::json &j);
   NODEEDIT_API std::string get_graph_context_name(const nlohmann::json &j);
   NODEEDIT_API nlohmann::json get_graph_in_json(const nlohmann::json &j);
-  NODEEDIT_API std::shared_ptr<NodeEdit::NodeEditGraphSession> open_graph_and_get_session(const std::string &path);
+  NODEEDIT_API std::shared_ptr<NodeEdit::NodeEditGraphSession> open_graph_and_get_session(
+      const std::string &path,
+      const std::string &parent = "",
+      const bool &disable_native_save = false);
   NODEEDIT_API void open_graph(const std::string &path);
+  NODEEDIT_API void open_graphDEBUG(const std::string &path);
   NODEEDIT_API void create_graph_session_from_file(const std::string &path);
   NODEEDIT_API bool is_graph_file(const std::string &path);
   NODEEDIT_API bool is_context_exist(const std::string &ctx_name);
@@ -161,6 +165,9 @@ namespace NodeEdit {
   NODEEDIT_API void ie_search_node_type(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_get_all_node_input_pins(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_get_all_node_output_pins(ArgumentValues &args, ReturnValues &ret);
+
+  NODEEDIT_API void ie_save_nodegraph(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_refresh_nodegraph(ArgumentValues &args, ReturnValues &ret);
 
 }  // namespace NodeEdit
 
