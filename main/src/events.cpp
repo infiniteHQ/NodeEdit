@@ -14,7 +14,7 @@ NODEEDIT_API void NodeEdit::ie_setup_pin_format(ArgumentValues &args, ReturnValu
   if (args.get_json().contains("context_name")) {
     const std::string ctx_name = args.get_json()["context_name"];
     auto c = NodeEdit::get_node_context(ctx_name);
-    // TODO: Use IsContextExist;
+    // TODO: Use is_context_exist;
 
     if (!c) {
       // TODO error
@@ -64,7 +64,7 @@ NODEEDIT_API void NodeEdit::ie_setup_pin_format(ArgumentValues &args, ReturnValu
       pf.delegate = delegate;
     }
 
-    NodeEdit::AddPinFormatToContext(c->id, pf);
+    NodeEdit::add_pin_format_to_context(c->id, pf);
 
   } else {
   }
@@ -80,6 +80,7 @@ NODEEDIT_API void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &
   auto c = NodeEdit::get_node_context(ctx_name);
   if (!c) {
     get_current_context()->interface->log_error("Cannot create schema for ctx: (" + ctx_name + "). Context not found.");
+    // TODO err in return values
     return;
   }
 
@@ -161,13 +162,18 @@ NODEEDIT_API void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &
       s.spawn_possibility.schema_id = sp["schema_id"];
   }
 
-  NodeEdit::AddSchemaToContext(c->id, s);
+  NodeEdit::add_schema_to_context(c->id, s);
 }
+
 NODEEDIT_API void NodeEdit::ie_open_graph(ArgumentValues &args, ReturnValues &ret) {
   if (!args.get_json().contains("path"))
     return;
-
   const std::string path = args.get_json()["path"];
 
-  NodeEdit::OpenGraph(path);
+  auto gs = NodeEdit::open_graph_and_get_session(path);
+  std::string id = gs->context_id;
+
+  nlohmann::json result;
+  result["id"] = id;
+  ret = ReturnValues(result.dump());
 }

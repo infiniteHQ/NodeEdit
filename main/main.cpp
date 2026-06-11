@@ -12,25 +12,25 @@ class Module : public ModuleInterface {
     NodeEdit::get_current_context()->interface = m;
 
     this->add_content_browser_item_identifier(ItemIdentifierInterface(
-        NodeEdit::IsGraphFile,
+        NodeEdit::is_graph_file,
         "infinitehq_nodeedit:graph",
         "Node Graph",
         "#0DFFEB",
-        NodeEdit::GetPath("resources/icons/cb_i.png")));
+        NodeEdit::get_path("resources/icons/cb_i.png")));
 
     this->add_content_browser_item_handler(ItemHandlerInterface(
         "infinitehq_nodeedit:graph",
-        NodeEdit::OpenGraph,
+        NodeEdit::open_graph,
         "Edit",
         "Edit this graph",
-        NodeEdit::GetPath("resources/icons/edit.png")));
+        NodeEdit::get_path("resources/icons/edit.png")));
 
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_create_node_context, "create_node_context"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_setup_pin_format, "setup_pin_format"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_setup_schema, "setup_schema"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_open_graph, "open_graph"));
 
-    NodeEdit::SetupExampleContext();
+    NodeEdit::setup_example_context();
   }
 
   void destroy() override {
@@ -40,7 +40,7 @@ class Module : public ModuleInterface {
       CherryApp.DeleteAppWindow(i->GetAppWindow());
     }
 
-    NodeEdit::DestroyContext(ctx);
+    NodeEdit::destroy_context(ctx);
     ctx.reset();
   }
 };

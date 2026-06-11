@@ -13,7 +13,7 @@ std::shared_ptr<NodeEdit::Context> NodeEdit::create_context() {
   return ctx;
 }
 
-void NodeEdit::DestroyContext(std::shared_ptr<NodeEdit::Context> ctx) {
+void NodeEdit::destroy_context(std::shared_ptr<NodeEdit::Context> ctx) {
   set_current_context(nullptr);
 }
 
@@ -25,21 +25,21 @@ std::shared_ptr<NodeEdit::Context> NodeEdit::get_current_context() {
   return CNodeEdit.lock();
 }
 
-std::string NodeEdit::GetPath(const std::string &path) {
+std::string NodeEdit::get_path(const std::string &path) {
   return get_current_context()->interface->cook_path(path);
 }
 
-void NodeEdit::StartNodeEditTestInstance() {
-  std::cout << "sdf" << std::endl;
-}
-
-bool NodeEdit::IsGraphFile(const std::string &path) {
+bool NodeEdit::is_graph_file(const std::string &path) {
   std::string fullpath = path + "/graph.nodegraph";
   return fs::exists(fullpath);
 }
 
-void NodeEdit::OpenGraph(const std::string &path) {
-  if (!IsGraphFile(path)) {
+void open_graph(const std::string &path) {
+  NodeEdit::open_graph_and_get_session(path);
+}
+
+std::shared_ptr<NodeEdit::NodeEditGraphSession> NodeEdit::open_graph_and_get_session(const std::string &path) {
+  if (!is_graph_file(path)) {
     get_current_context()->interface->log_error("No graph file in selected file ! (" + path + ")");
   }
 
@@ -48,7 +48,7 @@ void NodeEdit::OpenGraph(const std::string &path) {
   std::ifstream file(fullpath);
   if (!file.is_open()) {
     get_current_context()->interface->log_error("Failed to open file : (" + fullpath + ")");
-    return;
+    return nullptr;
   }
 
   nlohmann::json j;
@@ -56,19 +56,19 @@ void NodeEdit::OpenGraph(const std::string &path) {
     file >> j;
   } catch (const nlohmann::json::parse_error &e) {
     get_current_context()->interface->log_error("Failed to parse graph file : (" + fullpath + ") -> " + e.what());
-    return;
+    return nullptr;
   }
 
-  std::string ctx_name = GetGraphContextName(j);
+  std::string ctx_name = get_graph_context_name(j);
 
-  if (!IsContextExist(ctx_name)) {
+  if (!is_context_exist(ctx_name)) {
     get_current_context()->interface->log_error(
         "This graph contain an unknown graph context : (" + fullpath + "). Did you have a missing module ?");
   }
 
   auto ctx = NodeEdit::get_node_context(ctx_name);
 
-  auto graph = PopulateGraph(GetGraph(j));
+  auto graph = populate_graph(get_graph_in_json(j));
   graph.graph_title = "Node graph";
   graph.refresh_effects = true;
 
@@ -87,6 +87,8 @@ void NodeEdit::OpenGraph(const std::string &path) {
     Cherry::AddAppWindow(inst->GetAppWindow());
     get_current_context()->editor_debuggers.push_back(inst);
   }
+
+  return gs;
 }
 
 /*
@@ -99,7 +101,7 @@ example)
 
 */
 
-void NodeEdit::SetupExampleContext() {
+void NodeEdit::setup_example_context() {
   // Create node context
   {
     auto args = ArgumentValues(R"({
@@ -195,7 +197,7 @@ std::shared_ptr<NodeEdit::NodeEditContext> NodeEdit::get_node_context(const std:
   return *existing;
 }
 
-void NodeEdit::DestroyContext(const std::string &name) {
+void NodeEdit::destroy_node_context(const std::string &name) {
   auto &contexts = get_current_context()->contexts;
 
   contexts.erase(
@@ -206,7 +208,7 @@ void NodeEdit::DestroyContext(const std::string &name) {
       contexts.end());
 }
 
-void NodeEdit::AddSchemaToContext(const std::string &ctx_id, const NodeEdit::NodeEditSchema &schema) {
+void NodeEdit::add_schema_to_context(const std::string &ctx_id, const NodeEdit::NodeEditSchema &schema) {
   auto &contexts = get_current_context()->contexts;
 
   auto c = std::find_if(contexts.begin(), contexts.end(), [&ctx_id](const std::shared_ptr<NodeEditContext> &ptr) {
@@ -221,7 +223,7 @@ void NodeEdit::AddSchemaToContext(const std::string &ctx_id, const NodeEdit::Nod
   (*c)->schemas.push_back(schema);
 }
 
-void NodeEdit::AddPinFormatToContext(const std::string &ctx_id, const NodeEdit::NodeEditPinFormat &pin_format) {
+void NodeEdit::add_pin_format_to_context(const std::string &ctx_id, const NodeEdit::NodeEditPinFormat &pin_format) {
   auto &contexts = get_current_context()->contexts;
 
   auto c = std::find_if(contexts.begin(), contexts.end(), [&ctx_id](const std::shared_ptr<NodeEditContext> &ptr) {
@@ -236,14 +238,14 @@ void NodeEdit::AddPinFormatToContext(const std::string &ctx_id, const NodeEdit::
   (*c)->pin_formats.push_back(pin_format);
 }
 
-void NodeEdit::SaveGraphSession(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &gs) {
+void NodeEdit::save_graph_session(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &gs) {
   if (!gs) {
     return;
   }
 
   auto file_path = gs->path;
 
-  auto json = DumpGraph(gs->graph);
+  auto json = dump_graph_to_json(gs->graph);
   std::string graph_raw = json.dump();
   std::string context_id = gs->context_id;
 
@@ -259,7 +261,7 @@ void NodeEdit::SaveGraphSession(const std::shared_ptr<NodeEdit::NodeEditGraphSes
   file.close();
 }
 
-void NodeEdit::RefreshGraphSession(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &gs) {
+void NodeEdit::refresh_graph_session(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &gs) {
   if (!gs) {
     return;
   }
@@ -280,20 +282,20 @@ void NodeEdit::RefreshGraphSession(const std::shared_ptr<NodeEdit::NodeEditGraph
     return;
   }
 
-  std::string ctx_name = GetGraphContextName(j);
+  std::string ctx_name = get_graph_context_name(j);
 
-  if (!IsContextExist(ctx_name)) {
+  if (!is_context_exist(ctx_name)) {
     get_current_context()->interface->log_error(
         "This graph contain an unknown graph context : (" + file_path + "). Did you have a missing module ?");
     return;
   }
 
-  auto graph = PopulateGraph(GetGraph(j));
+  auto graph = populate_graph(get_graph_in_json(j));
 
   gs->graph = graph;
 }
 
-nlohmann::json NodeEdit::DumpGraph(const NodeEdit::NodeEditGraph &graph) {
+nlohmann::json NodeEdit::dump_graph_to_json(const NodeEdit::NodeEditGraph &graph) {
   nlohmann::json j;
 
   j["instances"] = nlohmann::json::array();
@@ -389,7 +391,7 @@ nlohmann::json NodeEdit::DumpGraph(const NodeEdit::NodeEditGraph &graph) {
   return j;
 }
 
-NodeEdit::NodeEditGraph NodeEdit::PopulateGraph(const nlohmann::json &j) {
+NodeEdit::NodeEditGraph NodeEdit::populate_graph(const nlohmann::json &j) {
   NodeEdit::NodeEditGraph graph;
 
   if (j.contains("instances") && j["instances"].is_array()) {
@@ -494,7 +496,7 @@ NodeEdit::NodeEditGraph NodeEdit::PopulateGraph(const nlohmann::json &j) {
   return graph;
 }
 
-bool NodeEdit::IsContextExist(const std::string &ctx_name) {
+bool NodeEdit::is_context_exist(const std::string &ctx_name) {
   for (auto &c : get_current_context()->contexts) {
     if (!c) {
       return false;
@@ -506,7 +508,7 @@ bool NodeEdit::IsContextExist(const std::string &ctx_name) {
   return false;
 }
 
-std::string NodeEdit::GetGraphContextName(const nlohmann::json &j) {
+std::string NodeEdit::get_graph_context_name(const nlohmann::json &j) {
   std::string context_name = "";
 
   if (j.contains("context_id") && j["context_id"].is_string()) {
@@ -516,7 +518,7 @@ std::string NodeEdit::GetGraphContextName(const nlohmann::json &j) {
   return context_name;
 }
 
-nlohmann::json NodeEdit::GetGraph(const nlohmann::json &j) {
+nlohmann::json NodeEdit::get_graph_in_json(const nlohmann::json &j) {
   if (j.contains("graph") && j["graph"].is_object()) {
     return j["graph"];
   }
@@ -524,7 +526,7 @@ nlohmann::json NodeEdit::GetGraph(const nlohmann::json &j) {
   return nlohmann::json::object();
 }
 
-const NodeEdit::NodeEditInstance *NodeEdit::FindInstance(
+const NodeEdit::NodeEditInstance *NodeEdit::find_instance(
     const NodeEdit::NodeEditGraph &graph,
     const std::string &instance_id) {
   for (const auto &inst : graph.instances)
@@ -533,21 +535,21 @@ const NodeEdit::NodeEditInstance *NodeEdit::FindInstance(
   return nullptr;
 }
 
-const NodeEdit::NodeEditSchema *NodeEdit::FindSchema(const NodeEdit::NodeEditContext &ctx, const std::string &type_id) {
+const NodeEdit::NodeEditSchema *NodeEdit::find_schema(const NodeEdit::NodeEditContext &ctx, const std::string &type_id) {
   for (const auto &schema : ctx.schemas)
     if (schema.id == type_id)
       return &schema;
   return nullptr;
 }
 
-const NodeEdit::NodeEditContext *NodeEdit::FindContext(const std::string &context_id) {
+const NodeEdit::NodeEditContext *NodeEdit::find_context(const std::string &context_id) {
   for (const auto &ctx : get_current_context()->contexts)
     if (ctx->id == context_id)
       return ctx.get();
   return nullptr;
 }
 
-std::string NodeEdit::GetNextNode(
+std::string NodeEdit::get_next_node(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid,
     const std::string &outputid) {
@@ -561,7 +563,7 @@ std::string NodeEdit::GetNextNode(
   return {};
 }
 
-std::string NodeEdit::GetPreviousNode(
+std::string NodeEdit::get_previous_node(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid,
     const std::string &inputid) {
@@ -575,22 +577,22 @@ std::string NodeEdit::GetPreviousNode(
   return {};
 }
 
-std::string NodeEdit::SearchNodeOutputPinByType(
+std::string NodeEdit::search_node_output_pin_by_type(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid,
     const std::string &type) {
   if (!graph)
     return {};
 
-  const auto *inst = FindInstance(graph->graph, nodeid);
+  const auto *inst = find_instance(graph->graph, nodeid);
   if (!inst)
     return {};
 
-  const auto *ctx = FindContext(graph->context_id);
+  const auto *ctx = find_context(graph->context_id);
   if (!ctx)
     return {};
 
-  const auto *schema = FindSchema(*ctx, inst->type_id);
+  const auto *schema = find_schema(*ctx, inst->type_id);
   if (!schema)
     return {};
 
@@ -601,22 +603,22 @@ std::string NodeEdit::SearchNodeOutputPinByType(
   return {};
 }
 
-std::string NodeEdit::SearchNodeInputPinByType(
+std::string NodeEdit::search_node_input_pin_by_type(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid,
     const std::string &type) {
   if (!graph)
     return {};
 
-  const auto *inst = FindInstance(graph->graph, nodeid);
+  const auto *inst = find_instance(graph->graph, nodeid);
   if (!inst)
     return {};
 
-  const auto *ctx = FindContext(graph->context_id);
+  const auto *ctx = find_context(graph->context_id);
   if (!ctx)
     return {};
 
-  const auto *schema = FindSchema(*ctx, inst->type_id);
+  const auto *schema = find_schema(*ctx, inst->type_id);
   if (!schema)
     return {};
 
@@ -627,37 +629,39 @@ std::string NodeEdit::SearchNodeInputPinByType(
   return {};
 }
 
-std::string NodeEdit::SearchNodeType(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph, const std::string &type) {
+std::string NodeEdit::search_node_type(
+    const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+    const std::string &type) {
   if (!graph)
     return {};
 
-  const auto *ctx = FindContext(graph->context_id);
+  const auto *ctx = find_context(graph->context_id);
   if (!ctx)
     return {};
 
   for (const auto &inst : graph->graph.instances) {
-    const auto *schema = FindSchema(*ctx, inst.type_id);
+    const auto *schema = find_schema(*ctx, inst.type_id);
     if (schema && schema->type == type)
       return inst.instance_id;
   }
   return {};
 }
 
-std::vector<std::pair<std::string, std::string>> NodeEdit::GetAllNodeInputPins(
+std::vector<std::pair<std::string, std::string>> NodeEdit::get_all_node_input_pins(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid) {
   if (!graph)
     return {};
 
-  const auto *inst = FindInstance(graph->graph, nodeid);
+  const auto *inst = find_instance(graph->graph, nodeid);
   if (!inst)
     return {};
 
-  const auto *ctx = FindContext(graph->context_id);
+  const auto *ctx = find_context(graph->context_id);
   if (!ctx)
     return {};
 
-  const auto *schema = FindSchema(*ctx, inst->type_id);
+  const auto *schema = find_schema(*ctx, inst->type_id);
   if (!schema)
     return {};
 
@@ -670,21 +674,21 @@ std::vector<std::pair<std::string, std::string>> NodeEdit::GetAllNodeInputPins(
   return result;
 }
 
-std::vector<std::pair<std::string, std::string>> NodeEdit::GetAllNodeOutputPins(
+std::vector<std::pair<std::string, std::string>> NodeEdit::get_all_node_output_pins(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid) {
   if (!graph)
     return {};
 
-  const auto *inst = FindInstance(graph->graph, nodeid);
+  const auto *inst = find_instance(graph->graph, nodeid);
   if (!inst)
     return {};
 
-  const auto *ctx = FindContext(graph->context_id);
+  const auto *ctx = find_context(graph->context_id);
   if (!ctx)
     return {};
 
-  const auto *schema = FindSchema(*ctx, inst->type_id);
+  const auto *schema = find_schema(*ctx, inst->type_id);
   if (!schema)
     return {};
 
@@ -698,7 +702,7 @@ std::vector<std::pair<std::string, std::string>> NodeEdit::GetAllNodeOutputPins(
 }
 
 // Effect API
-void NodeEdit::AddEffectToNode(
+void NodeEdit::add_effect_to_node(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const NodeEdit::NodeEditNodeEffect &e) {
   if (!graph) {
@@ -708,7 +712,7 @@ void NodeEdit::AddEffectToNode(
   graph->graph.refresh_effects = true;
 }
 
-void NodeEdit::AddEffectToConnection(
+void NodeEdit::add_effect_to_connection(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const NodeEdit::NodeEditConnectionEffect &e) {
   if (!graph) {
@@ -718,7 +722,7 @@ void NodeEdit::AddEffectToConnection(
   graph->graph.refresh_effects = true;
 }
 
-void NodeEdit::RemoveNodeEffectsFromNode(
+void NodeEdit::remove_node_effects_from_node(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid) {
   if (!graph) {
@@ -732,7 +736,7 @@ void NodeEdit::RemoveNodeEffectsFromNode(
   graph->graph.refresh_effects = true;
 }
 
-void NodeEdit::RemoveConnectionEffectsFromNode(
+void NodeEdit::remove_connection_effects_from_node(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid) {
   if (!graph) {
@@ -750,7 +754,7 @@ void NodeEdit::RemoveConnectionEffectsFromNode(
   graph->graph.refresh_effects = true;
 }
 
-void NodeEdit::RemoveConnectionEffectsFromPin(
+void NodeEdit::remove_connection_effects_from_pin(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid,
     const std::string &pin_id) {
@@ -770,7 +774,7 @@ void NodeEdit::RemoveConnectionEffectsFromPin(
   graph->graph.refresh_effects = true;
 }
 
-void NodeEdit::SetGraphTitle(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph, const std::string &title) {
+void NodeEdit::set_graph_title(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph, const std::string &title) {
   if (!graph) {
     return;
   }
@@ -779,7 +783,7 @@ void NodeEdit::SetGraphTitle(const std::shared_ptr<NodeEdit::NodeEditGraphSessio
   graph->graph.refresh_effects = true;
 }
 
-void NodeEdit::AddSchemaToGraphCtxExt(
+void NodeEdit::add_schema_to_graph_ctx_ext(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const NodeEdit::NodeEditSchema &schema) {
   if (!graph) {
@@ -790,7 +794,7 @@ void NodeEdit::AddSchemaToGraphCtxExt(
   graph->graph.refresh_ctx = true;
 }
 
-void NodeEdit::AddPinFormatToGraphCtxExt(
+void NodeEdit::add_pin_format_to_graph_ctx_ext(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const NodeEdit::NodeEditPinFormat &pin_format) {
   if (!graph) {

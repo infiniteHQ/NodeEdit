@@ -54,7 +54,7 @@ namespace ModuleUI {
     };
 
     backend_node_ctx = ctx;
-    LoadContextFromBackend();
+    load_node_contextFromBackend();
     backend_node_graph_session = graph;
 
     ui_node_graph.m_NodeSpawnCallback = [this](const std::string &sch_id, float x, float y, const std::string &connID) {
@@ -96,7 +96,7 @@ namespace ModuleUI {
     CherryNextComponent.SetProperty("padding_x", "6.0f");
     CherryNextComponent.SetProperty("size_x", "18");
     CherryNextComponent.SetProperty("size_y", "18");
-    if (CherryKit::ButtonImage(NodeEdit::GetPath("/resources/icons/icon_save.png")).GetDataAs<bool>("isClicked")) {
+    if (CherryKit::ButtonImage(NodeEdit::get_path("/resources/icons/icon_save.png")).GetDataAs<bool>("isClicked")) {
       save_incoming = true;
     }
 
@@ -104,13 +104,13 @@ namespace ModuleUI {
     CherryNextComponent.SetProperty("padding_x", "6.0f");
     CherryNextComponent.SetProperty("size_x", "18");
     CherryNextComponent.SetProperty("size_y", "18");
-    if (CherryKit::ButtonImage(NodeEdit::GetPath("/resources/icons/icon_refresh.png")).GetDataAs<bool>("isClicked")) {
+    if (CherryKit::ButtonImage(NodeEdit::get_path("/resources/icons/icon_refresh.png")).GetDataAs<bool>("isClicked")) {
       Refresh();
     }
   }
 
   void NodeEditorAppWindow::RefreshContextFromBackend() {
-    LoadContextFromBackend();
+    load_node_contextFromBackend();
   }
 
   void NodeEditorAppWindow::Render() {
@@ -192,7 +192,7 @@ namespace ModuleUI {
     //
   }
 
-  void NodeEditorAppWindow::LoadContextFromBackend() {
+  void NodeEditorAppWindow::load_node_contextFromBackend() {
     if (!backend_node_ctx) {
       return;
     }
@@ -350,7 +350,7 @@ namespace ModuleUI {
       return;
     }
 
-    NodeEdit::RefreshGraphSession(backend_node_graph_session);
+    NodeEdit::refresh_graph_session(backend_node_graph_session);
 
     for (const auto &extpf : backend_node_graph_session->graph.ext.pin_formats) {
       NodeEdit::NodeEditPinFormat pf;
@@ -469,7 +469,7 @@ namespace ModuleUI {
       connections.push_back(conn);
     }
 
-    NodeEdit::SaveGraphSession(backend_node_graph_session);
+    NodeEdit::save_graph_session(backend_node_graph_session);
   }
 
   // TODO : Optimize that with a local unordered_set ?
