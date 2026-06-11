@@ -154,6 +154,14 @@ namespace NodeEdit {
   NODEEDIT_API void ie_remove_connection_effects_from_pin(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_set_graph_title(ArgumentValues &args, ReturnValues &ret);
 
+  NODEEDIT_API void ie_get_next_node(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_previous_node(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_search_node_output_pin_by_type(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_search_node_input_pin_by_type(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_search_node_type(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_node_input_pins(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_node_output_pins(ArgumentValues &args, ReturnValues &ret);
+
 }  // namespace NodeEdit
 
 #endif  // SAMPLE_MODULE_HPP

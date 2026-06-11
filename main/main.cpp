@@ -30,6 +30,23 @@ class Module : public ModuleInterface {
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_setup_schema, "setup_schema"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_open_graph, "open_graph"));
 
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_add_effect_to_node, "add_effect_to_node"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_add_effect_to_connection, "add_effect_to_connection"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_remove_node_effects_from_node, "remove_node_effects_from_node"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_set_graph_title, "set_graph_title"));
+    this->add_input_event(
+        ModuleInputEvent(NodeEdit::ie_remove_connection_effects_from_node, "remove_connection_effects_from_node"));
+    this->add_input_event(
+        ModuleInputEvent(NodeEdit::ie_remove_connection_effects_from_pin, "remove_connection_effects_from_pin"));
+
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_next_node, "get_next_node"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_previous_node, "get_previous_node"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_output_pin_by_type, "search_node_output_pin_by_type"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_input_pin_by_type, "search_node_input_pin_by_type"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_type, "search_node_type"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_node_input_pins, "get_all_node_input_pins"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_node_outputs_pins, "get_all_node_outputs_pins"));
+
     NodeEdit::setup_example_context();
   }
 
