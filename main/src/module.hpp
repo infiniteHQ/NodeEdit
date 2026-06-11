@@ -60,6 +60,7 @@ namespace NodeEdit {
   NODEEDIT_API void create_graph_session_from_file(const std::string &path);
   NODEEDIT_API bool is_graph_file(const std::string &path);
   NODEEDIT_API bool is_context_exist(const std::string &ctx_name);
+  NODEEDIT_API std::shared_ptr<NodeEdit::NodeEditGraphSession> get_graph_session_by_id(const std::string &session_id);
 
   // debug
   NODEEDIT_API void setup_example_context();
@@ -145,6 +146,13 @@ namespace NodeEdit {
   NODEEDIT_API void ie_setup_pin_format(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_setup_schema(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_open_graph(ArgumentValues &args, ReturnValues &ret);
+
+  NODEEDIT_API void ie_add_effect_to_node(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_add_effect_to_connection(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_remove_node_effects_from_node(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_remove_connection_effects_from_node(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_remove_connection_effects_from_pin(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_set_graph_title(ArgumentValues &args, ReturnValues &ret);
 
 }  // namespace NodeEdit
 

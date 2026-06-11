@@ -1,6 +1,6 @@
 #include "module.hpp"
 
-NODEEDIT_API void NodeEdit::ie_create_node_context(ArgumentValues &args, ReturnValues &ret) {
+void NodeEdit::ie_create_node_context(ArgumentValues &args, ReturnValues &ret) {
   if (args.get_json().contains("name")) {
     const std::string ctx_name = args.get_json()["name"];
     NodeEdit::create_node_context(ctx_name);
@@ -10,7 +10,7 @@ NODEEDIT_API void NodeEdit::ie_create_node_context(ArgumentValues &args, ReturnV
   }
 }
 
-NODEEDIT_API void NodeEdit::ie_setup_pin_format(ArgumentValues &args, ReturnValues &ret) {
+void NodeEdit::ie_setup_pin_format(ArgumentValues &args, ReturnValues &ret) {
   if (args.get_json().contains("context_name")) {
     const std::string ctx_name = args.get_json()["context_name"];
     auto c = NodeEdit::get_node_context(ctx_name);
@@ -70,7 +70,7 @@ NODEEDIT_API void NodeEdit::ie_setup_pin_format(ArgumentValues &args, ReturnValu
   }
 }
 
-NODEEDIT_API void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &ret) {
+void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &ret) {
   const auto &j = args.get_json();
 
   if (!j.contains("context_name"))
@@ -165,15 +165,176 @@ NODEEDIT_API void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &
   NodeEdit::add_schema_to_context(c->id, s);
 }
 
-NODEEDIT_API void NodeEdit::ie_open_graph(ArgumentValues &args, ReturnValues &ret) {
+void NodeEdit::ie_open_graph(ArgumentValues &args, ReturnValues &ret) {
   if (!args.get_json().contains("path"))
     return;
   const std::string path = args.get_json()["path"];
 
   auto gs = NodeEdit::open_graph_and_get_session(path);
-  std::string id = gs->context_id;
+  std::string id = gs->session_id;
 
   nlohmann::json result;
   result["id"] = id;
   ret = ReturnValues(result.dump());
+}
+
+void NodeEdit::ie_add_effect_to_node(ArgumentValues &args, ReturnValues &ret) {
+  if (!args.get_json().contains("session_id"))
+    return;
+  const std::string session_id = args.get_json()["session_id"];
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    // TODO: error
+    return;
+  }
+
+  NodeEdit::NodeEditNodeEffect e;
+
+  if (args.get_json().contains("bg_color"))
+    e.bg_color = args.get_json()["bg_color"];
+
+  if (args.get_json().contains("instance_id"))
+    e.instance_id = args.get_json()["instance_id"];
+
+  if (args.get_json().contains("text"))
+    e.text = args.get_json()["text"];
+
+  if (args.get_json().contains("text_color"))
+    e.text_color = args.get_json()["text_color"];
+
+  if (args.get_json().contains("type"))
+    e.type = args.get_json()["type"];
+
+  NodeEdit::add_effect_to_node(gs, e);
+}
+
+void NodeEdit::ie_add_effect_to_connection(ArgumentValues &args, ReturnValues &ret) {
+  if (!args.get_json().contains("session_id"))
+    return;
+  const std::string session_id = args.get_json()["session_id"];
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    // TODO: error
+    return;
+  }
+
+  NodeEdit::NodeEditConnectionEffect e;
+
+  if (args.get_json().contains("flow_color"))
+    e.flow_color = args.get_json()["flow_color"];
+
+  if (args.get_json().contains("flow_intensity"))
+    e.flow_intensity = args.get_json()["flow_intensity"];
+
+  if (args.get_json().contains("flow_reverse"))
+    e.flow_reverse = args.get_json()["flow_reverse"];
+
+  if (args.get_json().contains("flow_speed"))
+    e.flow_speed = args.get_json()["flow_speed"];
+
+  if (args.get_json().contains("node_instance_id_A"))
+    e.node_instance_id_A = args.get_json()["node_instance_id_A"];
+
+  if (args.get_json().contains("node_instance_id_B"))
+    e.node_instance_id_B = args.get_json()["node_instance_id_B"];
+
+  if (args.get_json().contains("pin_id_A"))
+    e.pin_id_A = args.get_json()["pin_id_A"];
+
+  if (args.get_json().contains("pin_id_B"))
+    e.pin_id_B = args.get_json()["pin_id_B"];
+
+  if (args.get_json().contains("pulsating_color"))
+    e.pulsating_color = args.get_json()["pulsating_color"];
+
+  if (args.get_json().contains("pulsating_intensity"))
+    e.pulsating_intensity = args.get_json()["pulsating_intensity"];
+
+  if (args.get_json().contains("pulsating_rate"))
+    e.pulsating_rate = args.get_json()["pulsating_rate"];
+
+  if (args.get_json().contains("type"))
+    e.type = args.get_json()["type"];
+
+  NodeEdit::add_effect_to_connection(gs, e);
+}
+
+void NodeEdit::ie_remove_node_effects_from_node(ArgumentValues &args, ReturnValues &ret) {
+  if (!args.get_json().contains("session_id"))
+    return;
+  const std::string session_id = args.get_json()["session_id"];
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    // TODO: error
+    return;
+  }
+
+  if (args.get_json().contains("node_id")) {
+    const std::string node_id = args.get_json()["node_id"];
+    NodeEdit::remove_node_effects_from_node(gs, node_id);
+  } else {
+    // TODO: error
+  }
+}
+
+void NodeEdit::ie_remove_connection_effects_from_node(ArgumentValues &args, ReturnValues &ret) {
+  if (!args.get_json().contains("session_id"))
+    return;
+  const std::string session_id = args.get_json()["session_id"];
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    // TODO: error
+    return;
+  }
+
+  if (args.get_json().contains("node_id")) {
+    const std::string node_id = args.get_json()["node_id"];
+    NodeEdit::remove_connection_effects_from_node(gs, node_id);
+  } else {
+    // TODO: error
+  }
+}
+
+void NodeEdit::ie_remove_connection_effects_from_pin(ArgumentValues &args, ReturnValues &ret) {
+  if (!args.get_json().contains("session_id"))
+    return;
+  const std::string session_id = args.get_json()["session_id"];
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    // TODO: error
+    return;
+  }
+
+  if (args.get_json().contains("node_id") && args.get_json().contains("pin_id")) {
+    const std::string node_id = args.get_json()["node_id"];
+    const std::string pin_id = args.get_json()["pin_id"];
+
+    NodeEdit::remove_connection_effects_from_pin(gs, node_id, pin_id);
+  } else {
+    // TODO: error
+  }
+}
+
+void NodeEdit::ie_set_graph_title(ArgumentValues &args, ReturnValues &ret) {
+  if (!args.get_json().contains("session_id"))
+    return;
+  const std::string session_id = args.get_json()["session_id"];
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    // TODO: error
+    return;
+  }
+
+  if (args.get_json().contains("title")) {
+    const std::string title = args.get_json()["title"];
+    NodeEdit::set_graph_title(gs, title);
+  } else {
+    // TODO: error
+  }
 }

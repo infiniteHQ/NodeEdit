@@ -73,7 +73,7 @@ std::shared_ptr<NodeEdit::NodeEditGraphSession> NodeEdit::open_graph_and_get_ses
   graph.refresh_effects = true;
 
   auto gs = std::make_shared<NodeEdit::NodeEditGraphSession>();
-  gs->name = path;
+  gs->session_id = path;
   gs->path = fullpath;
   gs->graph = graph;
   gs->context_id = ctx_name;
@@ -802,4 +802,13 @@ void NodeEdit::add_pin_format_to_graph_ctx_ext(
   }
   graph->graph.ext.pin_formats.push_back(pin_format);
   graph->graph.refresh_ctx = true;
+}
+
+std::shared_ptr<NodeEdit::NodeEditGraphSession> NodeEdit::get_graph_session_by_id(const std::string &session_id) {
+  for (const auto &gs : get_current_context()->graph_sessions) {
+    if (gs->session_id == session_id) {
+      return gs;
+    }
+  }
+  return nullptr;
 }
