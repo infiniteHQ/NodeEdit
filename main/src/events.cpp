@@ -184,6 +184,10 @@ void NodeEdit::ie_open_graph(ArgumentValues &args, ReturnValues &ret) {
   auto gs = NodeEdit::open_graph_and_get_session(path, parent_appwindow, disable_saving_system);
   std::string id = gs->session_id;
 
+  if (args.get_json().contains("graph_title") && args.get_json()["graph_title"].is_string()) {
+    gs->graph.graph_title = args.get_json()["graph_title"];
+  }
+
   nlohmann::json result;
   result["session_id"] = id;
   ret = ReturnValues(result.dump());

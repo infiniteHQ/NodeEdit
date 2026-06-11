@@ -115,6 +115,10 @@ namespace ModuleUI {
 
   void NodeEditorAppWindow::Render() {
     if (backend_node_graph_session) {
+      if (!backend_node_graph_session->graph.graph_title.empty()) {
+        ui_node_graph.SetGraphTitle(backend_node_graph_session->graph.graph_title);
+      }
+
       if (backend_node_graph_session->disable_native_save_system) {
         if (backend_node_graph_session->ask_for_refresh) {
           Refresh();
@@ -143,7 +147,6 @@ namespace ModuleUI {
       cmp.SetData("graph_saved", "false;");
     }
 
-    ui_node_graph.SetGraphTitle("TEST GRAPH");
     if (backend_node_graph_session) {
       if (backend_node_graph_session->graph.refresh_ctx) {
         RefreshContextFromBackend();
@@ -152,9 +155,6 @@ namespace ModuleUI {
 
       if (backend_node_graph_session->graph.refresh_effects) {
         ui_node_graph.ClearAllEffects();
-        if (!backend_node_graph_session->graph.graph_title.empty()) {
-          ui_node_graph.SetGraphTitle(backend_node_graph_session->graph.graph_title);
-        }
 
         for (const auto &e : backend_node_graph_session->graph.node_effects) {
           Cherry::NodeSystem::NodeEffect ne;
