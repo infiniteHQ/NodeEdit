@@ -359,7 +359,7 @@ namespace ModuleUI {
       pf.color = extpf.color;
       pf.shape = extpf.shape;
       pf.description = extpf.description;
-      NodeEdit::AddPinFormatToGraphCtxExt(backend_node_graph_session, pf);
+      NodeEdit::add_pin_format_to_graph_ctx_ext(backend_node_graph_session, pf);
     }
 
     for (const auto &exts : backend_node_graph_session->graph.ext.schemas) {
@@ -404,7 +404,7 @@ namespace ModuleUI {
         s.spawn_possibility.schema_id = exts.spawn_possibility.schema_id;
       }
 
-      NodeEdit::AddSchemaToGraphCtxExt(backend_node_graph_session, s);
+      NodeEdit::add_schema_to_graph_ctx_ext(backend_node_graph_session, s);
     }
 
     auto &instances = backend_node_graph_session->graph.instances;

@@ -34,7 +34,7 @@ bool NodeEdit::is_graph_file(const std::string &path) {
   return fs::exists(fullpath);
 }
 
-void open_graph(const std::string &path) {
+void NodeEdit::open_graph(const std::string &path) {
   NodeEdit::open_graph_and_get_session(path);
 }
 
