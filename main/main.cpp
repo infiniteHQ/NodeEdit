@@ -53,6 +53,9 @@ class Module : public ModuleInterface {
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_type, "search_node_type"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_node_input_pins, "get_all_node_input_pins"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_node_output_pins, "get_all_node_outputs_pins"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_node_input_pins, "get_all_node_input_pins"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_refresh_nodegraph, "refresh_nodegraph"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_save_nodegraph, "save_nodegraph"));
 
     NodeEdit::setup_example_context();
   }

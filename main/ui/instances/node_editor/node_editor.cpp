@@ -267,7 +267,6 @@ namespace ModuleUI {
       }
 
       if (!s.header_pin.id.empty()) {
-        std::cout << "HEADERR" << std::endl;
         sch->AddHeaderPin(s.header_pin.id, s.header_pin.type, s.header_pin.name);
       }
 
@@ -343,7 +342,6 @@ namespace ModuleUI {
       }
 
       if (!s.header_pin.id.empty()) {
-        std::cout << "HEADERR" << std::endl;
         sch->AddHeaderPin(s.header_pin.id, s.header_pin.type, s.header_pin.name);
       }
 

@@ -39,14 +39,23 @@ void NodeEdit::open_graph(const std::string &path) {
 }
 
 void NodeEdit::open_graphDEBUG(const std::string &path) {
+  std::string id;
   {
     nlohmann::json j;
     j["path"] = path;
+    j["disable_native_saving_system"] = true;
     auto ret = ReturnValues();
     auto args = ArgumentValues(j.dump());
     vxe::call_input_event("infinitehq.nodeedit", "open_graph", args, ret);
 
-    std::cout << ret.get_json() << std::endl;
+    id = ret.get_json()["session_id"];
+  }
+  {
+    nlohmann::json j;
+    j["session_id"] = id;
+    auto args = ArgumentValues(j.dump());
+    auto ret = ReturnValues();
+    vxe::call_input_event("infinitehq.nodeedit", "refresh_nodegraph", args, ret);
   }
 }
 
@@ -86,7 +95,7 @@ NodeEdit::open_graph_and_get_session(const std::string &path, const std::string 
   graph.refresh_effects = true;
 
   auto gs = std::make_shared<NodeEdit::NodeEditGraphSession>();
-  gs->session_id = path;
+  gs->session_id = "0101";  // TODO generate uniques ids
   gs->path = fullpath;
   gs->graph = graph;
   gs->disable_native_save_system = disable_native_save;
@@ -103,6 +112,8 @@ NodeEdit::open_graph_and_get_session(const std::string &path, const std::string 
     Cherry::AddAppWindow(inst->GetAppWindow());
     get_current_context()->editor_debuggers.push_back(inst);
   }
+
+  get_current_context()->graph_sessions.push_back(gs);
 
   return gs;
 }
