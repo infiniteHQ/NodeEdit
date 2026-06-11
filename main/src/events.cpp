@@ -58,6 +58,12 @@ NODEEDIT_API void NodeEdit::ie_setup_pin_format(ArgumentValues &args, ReturnValu
       return;
     }
 
+    // optional
+    if (args.get_json().contains("delegate")) {
+      const bool delegate = args.get_json()["delegate"];
+      pf.delegate = delegate;
+    }
+
     NodeEdit::AddPinFormatToContext(c->id, pf);
 
   } else {
@@ -65,7 +71,7 @@ NODEEDIT_API void NodeEdit::ie_setup_pin_format(ArgumentValues &args, ReturnValu
 }
 
 NODEEDIT_API void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &ret) {
-  const auto &j = args.get_json();  // ← UNE seule fois, par référence const
+  const auto &j = args.get_json();
 
   if (!j.contains("context_name"))
     return;
@@ -74,7 +80,7 @@ NODEEDIT_API void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &
   auto c = NodeEdit::get_node_context(ctx_name);
   if (!c) {
     get_current_context()->interface->log_error("Cannot create schema for ctx: (" + ctx_name + "). Context not found.");
-    return;  // ← tu manquais ce return !
+    return;
   }
 
   NodeEditSchema s;

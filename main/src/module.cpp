@@ -122,6 +122,19 @@ void NodeEdit::SetupExampleContext() {
     auto ret = ReturnValues();
     vxe::call_input_event("infinitehq.nodeedit", "setup_pin_format", args, ret);
   }
+  {
+    auto args = ArgumentValues(R"({
+    "context_name": "efusion_blueprint",
+    "type":         "eee",
+    "name":         "Boolean",
+    "color":        "#FF0000",
+    "delegate":         true,
+    "shape":        "circle",
+    "description":  "Simple eee"
+  })");
+    auto ret = ReturnValues();
+    vxe::call_input_event("infinitehq.nodeedit", "setup_pin_format", args, ret);
+  }
 
   // Setup schemas
   {
@@ -135,16 +148,12 @@ void NodeEdit::SetupExampleContext() {
     "label": "Is cool",
     "label_color": "Is cool",
     "header_color": "#B1FF31",
-    "header_pin": {
-      "id": "hbool",
-      "name": "test",
-      "type": "bool"
-    },
     "input_pins": [
       { "id": "bool1", "name": "Bool One", "type": "bool" },
       { "id": "bool2", "type": "bool" }
     ],
     "output_pins": [
+      { "id": "bool5", "name": "Bool One", "type": "eee" },
       { "id": "bool3", "type": "bool" },
       { "id": "bool4", "name": "Bool Four", "type": "bool" }
     ],

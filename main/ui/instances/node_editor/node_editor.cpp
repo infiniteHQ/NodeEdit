@@ -133,6 +133,7 @@ namespace ModuleUI {
     if (backend_node_graph_session) {
       if (backend_node_graph_session->graph.refresh_ctx) {
         RefreshContextFromBackend();
+        backend_node_graph_session->graph.refresh_ctx = false;
       }
 
       if (backend_node_graph_session->graph.refresh_effects) {
@@ -252,6 +253,7 @@ namespace ModuleUI {
       }
 
       if (!s.header_pin.id.empty()) {
+        std::cout << "HEADERR" << std::endl;
         sch->AddHeaderPin(s.header_pin.id, s.header_pin.type, s.header_pin.name);
       }
 
@@ -327,7 +329,8 @@ namespace ModuleUI {
       }
 
       if (!s.header_pin.id.empty()) {
-        sch->AddHeaderPin(s.header_pin.id, s.header_pin.type);
+        std::cout << "HEADERR" << std::endl;
+        sch->AddHeaderPin(s.header_pin.id, s.header_pin.type, s.header_pin.name);
       }
 
       if (s.spawnable) {
