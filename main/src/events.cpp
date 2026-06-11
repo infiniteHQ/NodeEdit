@@ -174,7 +174,7 @@ void NodeEdit::ie_open_graph(ArgumentValues &args, ReturnValues &ret) {
   std::string id = gs->session_id;
 
   nlohmann::json result;
-  result["id"] = id;
+  result["session_id"] = id;
   ret = ReturnValues(result.dump());
 }
 
