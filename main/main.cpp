@@ -46,8 +46,8 @@ class Module : public ModuleInterface {
     this->add_input_event(
         ModuleInputEvent(NodeEdit::ie_remove_connection_effects_from_pin, "remove_connection_effects_from_pin"));
 
-    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_next_node, "get_next_node"));
-    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_previous_node, "get_previous_node"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_next_nodes, "get_next_nodes"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_previous_nodes, "get_previous_nodes"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_output_pin_by_type, "search_node_output_pin_by_type"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_input_pin_by_type, "search_node_input_pin_by_type"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_type, "search_node_type"));

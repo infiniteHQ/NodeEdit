@@ -355,45 +355,43 @@ void NodeEdit::ie_set_graph_title(ArgumentValues &args, ReturnValues &ret) {
   }
 }
 
-void NodeEdit::ie_get_next_node(ArgumentValues &args, ReturnValues &ret) {
+void NodeEdit::ie_get_next_nodes(ArgumentValues &args, ReturnValues &ret) {
   const auto &j = args.get_json();
-
   if (!j.contains("session_id") || !j["session_id"].is_string())
     return;
   const std::string session_id = j["session_id"].get<std::string>();
-
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    // TODO: error
+    get_current_context()->interface->log_error("Graph session not found! (" + session_id + ")");
     return;
   }
-
   if (j.contains("node_id") && j.contains("output_id") && j["node_id"].is_string() && j["output_id"].is_string()) {
     const std::string node_id = j["node_id"].get<std::string>();
     const std::string output_id = j["output_id"].get<std::string>();
-    const std::string result = NodeEdit::get_next_node(gs, node_id, output_id);
-    ret.set_json({ { "node_id", result } });
+    const std::vector<std::string> result = NodeEdit::get_next_nodes(gs, node_id, output_id);
+    ret.set_json({ { "node_ids", result } });
+  } else {
+    get_current_context()->interface->log_error("Cannot fetch next nodes, cannot find output_id or node_id");
   }
 }
 
-void NodeEdit::ie_get_previous_node(ArgumentValues &args, ReturnValues &ret) {
+void NodeEdit::ie_get_previous_nodes(ArgumentValues &args, ReturnValues &ret) {
   const auto &j = args.get_json();
-
   if (!j.contains("session_id") || !j["session_id"].is_string())
     return;
   const std::string session_id = j["session_id"].get<std::string>();
-
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    // TODO: error
+    get_current_context()->interface->log_error("Graph session not found! (" + session_id + ")");
     return;
   }
-
   if (j.contains("node_id") && j.contains("input_id") && j["node_id"].is_string() && j["input_id"].is_string()) {
     const std::string node_id = j["node_id"].get<std::string>();
     const std::string input_id = j["input_id"].get<std::string>();
-    const std::string result = NodeEdit::get_previous_node(gs, node_id, input_id);
-    ret.set_json({ { "node_id", result } });
+    const std::vector<std::string> result = NodeEdit::get_previous_nodes(gs, node_id, input_id);
+    ret.set_json({ { "node_ids", result } });
+  } else {
+    get_current_context()->interface->log_error("Cannot fetch previous nodes, cannot find input_id or node_id");
   }
 }
 
@@ -477,8 +475,8 @@ void NodeEdit::ie_get_all_node_input_pins(ArgumentValues &args, ReturnValues &re
     const std::vector<std::pair<std::string, std::string>> result = NodeEdit::get_all_node_input_pins(gs, node_id);
 
     nlohmann::json pins = nlohmann::json::array();
-    for (const auto &[pin_id, pin_name] : result) {
-      pins.push_back({ { "pin_id", pin_id }, { "pin_name", pin_name } });
+    for (const auto &[pin_type, pin_id] : result) {
+      pins.push_back({ { "pin_type", pin_type }, { "pin_id", pin_id } });
     }
 
     ret.set_json({ { "input_pins", pins } });
@@ -503,8 +501,8 @@ void NodeEdit::ie_get_all_node_output_pins(ArgumentValues &args, ReturnValues &r
     const std::vector<std::pair<std::string, std::string>> result = NodeEdit::get_all_node_output_pins(gs, node_id);
 
     nlohmann::json pins = nlohmann::json::array();
-    for (const auto &[pin_id, pin_name] : result) {
-      pins.push_back({ { "pin_id", pin_id }, { "pin_name", pin_name } });
+    for (const auto &[pin_type, pin_id] : result) {
+      pins.push_back({ { "pin_type", pin_type }, { "pin_id", pin_id } });
     }
 
     ret.set_json({ { "output_pins", pins } });

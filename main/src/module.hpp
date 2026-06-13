@@ -74,12 +74,12 @@ namespace NodeEdit {
   NODEEDIT_API void refresh_graph_session(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
 
   // node graph api
-  NODEEDIT_API std::string get_next_node(
+  NODEEDIT_API std::vector<std::string> get_next_nodes(
       const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
       const std::string &nodeid,
       const std::string &outputid);  // instance_id
 
-  NODEEDIT_API std::string get_previous_node(
+  NODEEDIT_API std::vector<std::string> get_previous_nodes(
       const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
       const std::string &nodeid,
       const std::string &inputid);  // instance_id
@@ -158,8 +158,8 @@ namespace NodeEdit {
   NODEEDIT_API void ie_remove_connection_effects_from_pin(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_set_graph_title(ArgumentValues &args, ReturnValues &ret);
 
-  NODEEDIT_API void ie_get_next_node(ArgumentValues &args, ReturnValues &ret);
-  NODEEDIT_API void ie_get_previous_node(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_next_nodes(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_previous_nodes(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_search_node_output_pin_by_type(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_search_node_input_pin_by_type(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_search_node_type(ArgumentValues &args, ReturnValues &ret);

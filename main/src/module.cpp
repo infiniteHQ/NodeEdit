@@ -576,32 +576,32 @@ const NodeEdit::NodeEditContext *NodeEdit::find_context(const std::string &conte
   return nullptr;
 }
 
-std::string NodeEdit::get_next_node(
+std::vector<std::string> NodeEdit::get_next_nodes(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid,
     const std::string &outputid) {
   if (!graph)
     return {};
-
+  std::vector<std::string> result;
   for (const auto &conn : graph->graph.connections) {
     if (conn.node_instance_id_A == nodeid && conn.pin_id_A == outputid)
-      return conn.node_instance_id_B;
+      result.push_back(conn.node_instance_id_B);
   }
-  return {};
+  return result;
 }
 
-std::string NodeEdit::get_previous_node(
+std::vector<std::string> NodeEdit::get_previous_nodes(
     const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
     const std::string &nodeid,
     const std::string &inputid) {
   if (!graph)
     return {};
-
+  std::vector<std::string> result;
   for (const auto &conn : graph->graph.connections) {
     if (conn.node_instance_id_B == nodeid && conn.pin_id_B == inputid)
-      return conn.node_instance_id_A;
+      result.push_back(conn.node_instance_id_A);
   }
-  return {};
+  return result;
 }
 
 std::string NodeEdit::search_node_output_pin_by_type(

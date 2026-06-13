@@ -56,7 +56,6 @@ namespace ModuleUI {
 
     ImGui::TextDisabled("Entry point");
     ImGui::SetNextItemWidth(-1);
-
     CherryKit::InputString("Entry", &m_EntryInput);
     ImGui::SameLine();
     if (CherryKit::ButtonText("Go").GetDataAs<bool>("isClicked")) {
@@ -68,7 +67,6 @@ namespace ModuleUI {
 
     ImGui::Separator();
     ImGui::TextDisabled("History");
-
     for (int i = 0; i < (int)m_History.size(); ++i) {
       std::string label = std::to_string(i) + "  " + m_History[i].substr(0, 18);
       if (ImGui::Selectable(label.c_str(), false)) {
@@ -78,9 +76,7 @@ namespace ModuleUI {
     }
 
     ImGui::EndChild();
-
     ImGui::SameLine();
-
     ImGui::BeginChild("##debug_right", ImVec2(avail.x - PANEL_W - 8.0f, avail.y), false);
 
     if (m_CurrentNode.empty()) {
@@ -90,39 +86,70 @@ namespace ModuleUI {
       return;
     }
 
-    const NodeEdit::NodeEditInstance *inst = nullptr;
-    if (graph_) {
-      for (const auto &n : graph_->graph.instances)
-        if (n.instance_id == m_CurrentNode) {
-          inst = &n;
-          break;
-        }
+    std::vector<std::pair<std::string, std::string>> inputPins;
+    std::vector<std::pair<std::string, std::string>> outputPins;
+
+    {
+      nlohmann::json j;
+      j["session_id"] = graph_->session_id;
+      j["node_id"] = m_CurrentNode;
+      auto args = ArgumentValues(j.dump());
+
+      auto retIn = ReturnValues();
+      vxe::call_input_event("infinitehq.nodeedit", "get_all_node_input_pins", args, retIn);
+      auto rjIn = retIn.get_json();
+      if (rjIn.contains("input_pins") && rjIn["input_pins"].is_array())
+        for (const auto &pin : rjIn["input_pins"])
+          inputPins.emplace_back(pin.value("pin_type", ""), pin.value("pin_id", ""));
+
+      auto retOut = ReturnValues();
+      vxe::call_input_event("infinitehq.nodeedit", "get_all_node_outputs_pins", args, retOut);
+      auto rjOut = retOut.get_json();
+      if (rjOut.contains("output_pins") && rjOut["output_pins"].is_array())
+        for (const auto &pin : rjOut["output_pins"])
+          outputPins.emplace_back(pin.value("pin_type", ""), pin.value("pin_id", ""));
     }
 
-    if (!inst) {
+    if (inputPins.empty() && outputPins.empty()) {
       ImGui::TextColored(ImVec4(1, 0.3f, 0.3f, 1), "Node not found: %s", m_CurrentNode.c_str());
       ImGui::EndChild();
       CherryApp.PopComponentPool();
       return;
     }
 
-    ImGui::TextColored(ImVec4(0.4f, 0.9f, 0.6f, 1.0f), "[%s]", inst->type_id.c_str());
-    ImGui::SameLine();
-    ImGui::TextDisabled("%s", inst->instance_id.c_str());
+    std::vector<std::vector<std::string>> prevNodes(inputPins.size());
+    for (size_t i = 0; i < inputPins.size(); ++i) {
+      nlohmann::json j;
+      j["session_id"] = graph_->session_id;
+      j["node_id"] = m_CurrentNode;
+      j["input_id"] = inputPins[i].second;
+      auto args = ArgumentValues(j.dump());
+      auto ret = ReturnValues();
+      vxe::call_input_event("infinitehq.nodeedit", "get_previous_nodes", args, ret);
+      auto rj = ret.get_json();
+      std::cout << rj << std::endl;
+      if (rj.contains("node_ids") && rj["node_ids"].is_array())
+        prevNodes[i] = rj["node_ids"].get<std::vector<std::string>>();
+    }
 
+    std::vector<std::vector<std::string>> nextNodes(outputPins.size());
+    for (size_t i = 0; i < outputPins.size(); ++i) {
+      nlohmann::json j;
+      j["session_id"] = graph_->session_id;
+      j["node_id"] = m_CurrentNode;
+      j["output_id"] = outputPins[i].second;
+      auto args = ArgumentValues(j.dump());
+      auto ret = ReturnValues();
+      vxe::call_input_event("infinitehq.nodeedit", "get_next_nodes", args, ret);
+      auto rj = ret.get_json();
+      std::cout << rj << std::endl;
+      if (rj.contains("node_ids") && rj["node_ids"].is_array())
+        nextNodes[i] = rj["node_ids"].get<std::vector<std::string>>();
+    }
+
+    ImGui::TextDisabled("%s", m_CurrentNode.c_str());
     ImGui::Separator();
-
-    ImGui::TextDisabled("pos  ");
-    ImGui::SameLine();
-    ImGui::Text("%.1f, %.1f", inst->pos_x, inst->pos_y);
-    ImGui::TextDisabled("size ");
-    ImGui::SameLine();
-    ImGui::Text("%.1f x %.1f", inst->size_x, inst->size_y);
-
     ImGui::Spacing();
-
-    auto inputPins = NodeEdit::get_all_node_input_pins(graph_, m_CurrentNode);
-    auto outputPins = NodeEdit::get_all_node_output_pins(graph_, m_CurrentNode);
 
     auto navigateTo = [&](const std::string &next_id) {
       if (!next_id.empty()) {
@@ -133,22 +160,33 @@ namespace ModuleUI {
 
     ImGui::BeginGroup();
     ImGui::TextDisabled("  Inputs (%zu)", inputPins.size());
-    for (const auto &[type, id] : inputPins) {
-      std::string prev = NodeEdit::get_previous_node(graph_, m_CurrentNode, id);
-      bool connected = !prev.empty();
+    for (size_t i = 0; i < inputPins.size(); ++i) {
+      const auto &[type, id] = inputPins[i];
+      const auto &prevList = prevNodes[i];
+      bool connected = !prevList.empty();
 
       ImGui::PushStyleColor(ImGuiCol_Text, connected ? ImVec4(0.9f, 0.75f, 0.3f, 1) : ImVec4(0.45f, 0.45f, 0.45f, 1));
-
       std::string btn = "< " + type + "##in_" + id;
       if (ImGui::SmallButton(btn.c_str()) && connected)
-        navigateTo(prev);
-
+        navigateTo(prevList[0]);
       ImGui::PopStyleColor();
 
-      if (connected && ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("-> %s", prev.c_str());
-      } else if (!connected && ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("(not connected)");
+      if (connected) {
+        for (size_t k = 0; k < prevList.size(); ++k) {
+          const std::string &prev = prevList[k];
+          ImGui::SameLine(0, k == 0 ? -1 : 4);
+          std::string label = prev.size() > 22 ? prev.substr(0, 20) + ".." : prev;
+          ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.9f, 0.75f, 0.3f, 0.75f));
+          std::string nodeBtn = label + "##innav_" + id + "_" + std::to_string(k);
+          if (ImGui::SmallButton(nodeBtn.c_str()))
+            navigateTo(prev);
+          ImGui::PopStyleColor();
+          if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", prev.c_str());
+        }
+      } else {
+        ImGui::SameLine();
+        ImGui::TextDisabled("-");
       }
     }
     ImGui::EndGroup();
@@ -157,22 +195,33 @@ namespace ModuleUI {
 
     ImGui::BeginGroup();
     ImGui::TextDisabled("  Outputs (%zu)", outputPins.size());
-    for (const auto &[type, id] : outputPins) {
-      std::string next = NodeEdit::get_next_node(graph_, m_CurrentNode, id);
-      bool connected = !next.empty();
+    for (size_t i = 0; i < outputPins.size(); ++i) {
+      const auto &[type, id] = outputPins[i];
+      const auto &nextList = nextNodes[i];
+      bool connected = !nextList.empty();
 
       ImGui::PushStyleColor(ImGuiCol_Text, connected ? ImVec4(0.4f, 0.75f, 1.0f, 1) : ImVec4(0.45f, 0.45f, 0.45f, 1));
-
       std::string btn = type + "> ##out_" + id;
       if (ImGui::SmallButton(btn.c_str()) && connected)
-        navigateTo(next);
-
+        navigateTo(nextList[0]);
       ImGui::PopStyleColor();
 
-      if (connected && ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("-> %s", next.c_str());
-      } else if (!connected && ImGui::IsItemHovered()) {
-        ImGui::SetTooltip("(not connected)");
+      if (connected) {
+        for (size_t k = 0; k < nextList.size(); ++k) {
+          const std::string &next = nextList[k];
+          ImGui::SameLine(0, k == 0 ? -1 : 4);
+          std::string label = next.size() > 22 ? next.substr(0, 20) + ".." : next;
+          ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.75f, 1.0f, 0.75f));
+          std::string nodeBtn = label + "##outnav_" + id + "_" + std::to_string(k);
+          if (ImGui::SmallButton(nodeBtn.c_str()))
+            navigateTo(next);
+          ImGui::PopStyleColor();
+          if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", next.c_str());
+        }
+      } else {
+        ImGui::SameLine();
+        ImGui::TextDisabled("-");
       }
     }
     ImGui::EndGroup();
@@ -181,17 +230,7 @@ namespace ModuleUI {
     ImGui::Separator();
     ImGui::Spacing();
 
-    ImGui::TextDisabled("datas");
-    std::string json_str = inst->datas.dump(2);
-    ImGui::InputTextMultiline(
-        "##json",
-        const_cast<char *>(json_str.c_str()),
-        json_str.size() + 1,
-        ImVec2(-1, avail.y - ImGui::GetCursorPosY() - 8.0f),
-        ImGuiInputTextFlags_ReadOnly);
-
     ImGui::EndChild();
     CherryApp.PopComponentPool();
   }
-
 };  // namespace ModuleUI
