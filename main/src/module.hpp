@@ -5,6 +5,7 @@
 
 #include "../ui/instances/node_debugger/node_debugger.hpp"
 #include "../ui/instances/node_editor/node_editor.hpp"
+#include "../ui/instances/node_editor_wrapper/node_editor_wrapper.hpp"
 #include "./helpers.hpp"
 
 #ifndef SAMPLE_MODULE_HPP

@@ -232,7 +232,7 @@ void NodeEdit::ie_add_effect_to_connection(ArgumentValues &args, ReturnValues &r
 
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    // TODO: error
+    get_current_context()->interface->log_error("Graph session not found! (" + session_id + ")");
     return;
   }
 

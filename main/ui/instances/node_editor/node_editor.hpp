@@ -52,6 +52,7 @@ namespace ModuleUI {
 
     bool refreshed = false;
     bool save_incoming = false;
+    bool app_window_render_initialized = false;
 
     // Backend
     std::shared_ptr<NodeEdit::NodeEditGraphSession> backend_node_graph_session;

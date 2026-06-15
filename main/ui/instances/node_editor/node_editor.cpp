@@ -37,7 +37,6 @@ namespace ModuleUI {
       const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
     m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
 
-    // TODO IF save/refresh not handled
     if (graph) {
       if (!graph->disable_native_save_system) {
         m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
@@ -45,8 +44,6 @@ namespace ModuleUI {
       }
     }
     m_AppWindow->SetSaveMode(true);
-    m_AppWindow->SetInternalPaddingY(0.0f);
-    m_AppWindow->SetInternalPaddingX(0.0f);
 
     m_AppWindow->m_CloseCallback = [=]() {
       Cherry::DeleteAppWindow(m_AppWindow);
@@ -64,6 +61,7 @@ namespace ModuleUI {
     Refresh();
 
     std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
+
     this->ctx = vxe::get_current_context();
   }  // namespace ModuleUI
 
@@ -92,19 +90,17 @@ namespace ModuleUI {
   void NodeEditorAppWindow::RenderMenubar() {
     CherryGUI::SetCursorPosX(CherryGUI::GetCursorPosX() + 3.0f);
 
-    CherryNextComponent.SetProperty("padding_y", "5.5f");
-    CherryNextComponent.SetProperty("padding_x", "6.0f");
-    CherryNextComponent.SetProperty("size_x", "18");
-    CherryNextComponent.SetProperty("size_y", "18");
-    if (CherryKit::ButtonImage(NodeEdit::get_path("/resources/icons/icon_save.png")).GetDataAs<bool>("isClicked")) {
+    CherryNextComponent.SetProperty("padding_y", "6.0f");
+    CherryNextComponent.SetProperty("padding_x", "10.0f");
+    if (CherryKit::ButtonImageText("Save", NodeEdit::get_path("/resources/icons/icon_save.png"))
+            .GetDataAs<bool>("isClicked")) {
       save_incoming = true;
     }
 
-    CherryNextComponent.SetProperty("padding_y", "5.5f");
-    CherryNextComponent.SetProperty("padding_x", "6.0f");
-    CherryNextComponent.SetProperty("size_x", "18");
-    CherryNextComponent.SetProperty("size_y", "18");
-    if (CherryKit::ButtonImage(NodeEdit::get_path("/resources/icons/icon_refresh.png")).GetDataAs<bool>("isClicked")) {
+    CherryNextComponent.SetProperty("padding_y", "6.0f");
+    CherryNextComponent.SetProperty("padding_x", "10.0f");
+    if (CherryKit::ButtonImageText("Refresh", NodeEdit::get_path("/resources/icons/icon_refresh.png"))
+            .GetDataAs<bool>("isClicked")) {
       Refresh();
     }
   }
@@ -114,6 +110,17 @@ namespace ModuleUI {
   }
 
   void NodeEditorAppWindow::Render() {
+    if (!app_window_render_initialized) {
+      if (!backend_node_graph_session->parent_appwindow.empty()) {
+        auto parent = Cherry::GetAppWindowByName(backend_node_graph_session->parent_appwindow);
+        if (parent) {
+          m_AppWindow->SetParent(parent);
+        }
+      }
+
+      app_window_render_initialized = true;
+    }
+
     if (backend_node_graph_session) {
       if (!backend_node_graph_session->graph.graph_title.empty()) {
         ui_node_graph.SetGraphTitle(backend_node_graph_session->graph.graph_title);
