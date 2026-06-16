@@ -164,6 +164,9 @@ namespace NodeEdit {
   NODEEDIT_API void ie_save_nodegraph(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_refresh_nodegraph(ArgumentValues &args, ReturnValues &ret);
 
+  NODEEDIT_API void ie_focus_at(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_zoom_at(ArgumentValues &args, ReturnValues &ret);
+
 }  // namespace NodeEdit
 
 #endif  // SAMPLE_MODULE_HPP

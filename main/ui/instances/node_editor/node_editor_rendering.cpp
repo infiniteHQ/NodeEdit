@@ -43,14 +43,14 @@ namespace ModuleUI {
 
     CherryNextComponent.SetProperty("padding_y", "6.0f");
     CherryNextComponent.SetProperty("padding_x", "10.0f");
-    if (CherryKit::ButtonImageText("save", NodeEdit::get_path("/resources/icons/icon_save.png"))
+    if (CherryKit::ButtonImageText("Save", NodeEdit::get_path("/resources/icons/icon_save.png"))
             .GetDataAs<bool>("isClicked")) {
       save_incoming_ = true;
     }
 
     CherryNextComponent.SetProperty("padding_y", "6.0f");
     CherryNextComponent.SetProperty("padding_x", "10.0f");
-    if (CherryKit::ButtonImageText("refresh", NodeEdit::get_path("/resources/icons/icon_refresh.png"))
+    if (CherryKit::ButtonImageText("Refresh", NodeEdit::get_path("/resources/icons/icon_refresh.png"))
             .GetDataAs<bool>("isClicked")) {
       refresh();
     }
@@ -69,6 +69,14 @@ namespace ModuleUI {
     }
 
     if (backend_node_graph_session_) {
+      if (backend_node_graph_session_->graph.zoom_request.pending) {
+        focus_at(
+            backend_node_graph_session_->graph.zoom_request.x,
+            backend_node_graph_session_->graph.zoom_request.y,
+            backend_node_graph_session_->graph.zoom_request.zoom);
+        backend_node_graph_session_->graph.zoom_request.pending = false;
+      }
+
       if (!backend_node_graph_session_->graph.graph_title.empty()) {
         ui_node_graph_.SetGraphTitle(backend_node_graph_session_->graph.graph_title);
       }

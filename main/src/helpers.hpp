@@ -122,6 +122,13 @@ namespace NodeEdit {
     std::string pin_id_B;
   };
 
+  struct ZoomRequest {
+    bool pending = false;
+    float x;
+    float y;
+    float zoom;
+  };
+
   struct Graph {
     std::vector<NodeInstance> instances;
     std::vector<Connection> connections;
@@ -129,6 +136,7 @@ namespace NodeEdit {
     // effects
     std::vector<ConnectionEffect> connection_effects;
     std::vector<NodeEffect> node_effects;
+    ZoomRequest zoom_request;
 
     // ctx modifications/extension
     GraphContextExtensions ext;

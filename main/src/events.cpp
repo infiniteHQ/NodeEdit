@@ -538,3 +538,57 @@ void NodeEdit::ie_refresh_nodegraph(ArgumentValues &args, ReturnValues &ret) {
 
   gs->ask_for_refresh = true;
 }
+
+NODEEDIT_API void NodeEdit::ie_focus_at(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+
+  if (!j.contains("session_id") || !j["session_id"].is_string())
+    return;
+  const std::string session_id = j["session_id"].get<std::string>();
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    return;
+  }
+
+  if (!j.contains("x") || !j["x"].is_number_integer())
+    return;
+
+  if (!j.contains("y") || !j["y"].is_number_integer())
+    return;
+
+  const int x = j["x"].get<int>();
+  const int y = j["y"].get<int>();
+
+  gs->graph.zoom_request.x = x;
+  gs->graph.zoom_request.y = y;
+  gs->graph.zoom_request.zoom = -1;
+  gs->graph.zoom_request.pending = true;
+}
+
+NODEEDIT_API void NodeEdit::ie_zoom_at(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+
+  if (!j.contains("session_id") || !j["session_id"].is_string())
+    return;
+  const std::string session_id = j["session_id"].get<std::string>();
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    return;
+  }
+
+  if (!j.contains("x") || !j["x"].is_number_integer())
+    return;
+
+  if (!j.contains("y") || !j["y"].is_number_integer())
+    return;
+
+  const int x = j["x"].get<int>();
+  const int y = j["y"].get<int>();
+
+  gs->graph.zoom_request.x = x;
+  gs->graph.zoom_request.y = y;
+  gs->graph.zoom_request.zoom = 1;
+  gs->graph.zoom_request.pending = true;
+}
