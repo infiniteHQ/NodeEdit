@@ -40,15 +40,15 @@ void NodeEdit::open_graph(const std::string &path) {
 
 void NodeEdit::open_graphDEBUG(const std::string &path) {
   {
-    // auto inst = ModuleUI::NodeEditorWrapperAppWindow::create();
-    // Cherry::AddAppWindow(inst->get_app_window());
+    auto inst = ModuleUI::NodeEditorWrapperAppWindow::create();
+    Cherry::AddAppWindow(inst->get_app_window());
   }
   std::string id;
   {
     nlohmann::json j;
     j["path"] = path;
-    // j["disable_native_saving_system"] = true;
-    // j["parent_appwindow"] = "TEST";
+    j["disable_native_saving_system"] = true;
+    j["parent_appwindow"] = "TEST";
     auto ret = ReturnValues();
     auto args = ArgumentValues(j.dump());
     vxe::call_input_event("infinitehq.nodeedit", "open_graph", args, ret);
