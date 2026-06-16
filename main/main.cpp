@@ -64,7 +64,7 @@ class Module : public ModuleInterface {
     this->reset_module();
 
     for (auto i : NodeEdit::get_current_context()->editor_instances) {
-      CherryApp.DeleteAppWindow(i->GetAppWindow());
+      CherryApp.DeleteAppWindow(i->get_app_window());
     }
 
     NodeEdit::destroy_context(ctx);

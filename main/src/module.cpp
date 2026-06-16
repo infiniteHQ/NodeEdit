@@ -40,8 +40,8 @@ void NodeEdit::open_graph(const std::string &path) {
 
 void NodeEdit::open_graphDEBUG(const std::string &path) {
   {
-    // auto inst = ModuleUI::NodeEditorWrapperAppWindow::Create();
-    // Cherry::AddAppWindow(inst->GetAppWindow());
+    // auto inst = ModuleUI::NodeEditorWrapperAppWindow::create();
+    // Cherry::AddAppWindow(inst->get_app_window());
   }
   std::string id;
   {
@@ -108,13 +108,13 @@ NodeEdit::open_graph_and_get_session(const std::string &path, const std::string 
   gs->context_id = ctx_name;
 
   {
-    auto inst = ModuleUI::NodeEditorAppWindow::Create("Node graph", ctx, gs);
-    Cherry::AddAppWindow(inst->GetAppWindow());
+    auto inst = ModuleUI::NodeEditorAppWindow::create("Node graph", ctx, gs);
+    Cherry::AddAppWindow(inst->get_app_window());
     get_current_context()->editor_instances.push_back(inst);
   }
   {
-    auto inst = ModuleUI::NodeEditorDebugger::Create("Node debug", gs);
-    Cherry::AddAppWindow(inst->GetAppWindow());
+    auto inst = ModuleUI::NodeEditorDebugger::create("Node debug", gs);
+    Cherry::AddAppWindow(inst->get_app_window());
     get_current_context()->editor_debuggers.push_back(inst);
   }
 
@@ -134,7 +134,7 @@ example)
 */
 
 void NodeEdit::setup_example_context() {
-  // Create node context
+  // create node context
   {
     auto args = ArgumentValues(R"({
     "name": "efusion_blueprint"

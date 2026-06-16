@@ -13,12 +13,12 @@ namespace ModuleUI {
     NodeEditorWrapperAppWindow();
 
     void menubar();
-    std::shared_ptr<Cherry::AppWindow> &GetAppWindow();
-    static std::shared_ptr<NodeEditorWrapperAppWindow> Create();
+    std::shared_ptr<Cherry::AppWindow> &get_app_window();
+    static std::shared_ptr<NodeEditorWrapperAppWindow> create();
 
    private:
     std::shared_ptr<VxContext> ctx;
-    std::shared_ptr<Cherry::AppWindow> m_AppWindow;
+    std::shared_ptr<Cherry::AppWindow> app_window_;
     bool opened;
   };
 };  // namespace ModuleUI

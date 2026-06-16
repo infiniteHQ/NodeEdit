@@ -1,3 +1,13 @@
+//
+//  node_editor_rendering.cpp
+//  Source file for main rendering functions of node editor window.
+//
+//	Copyright (c) 2026 Infinite
+//
+//	This work is licensed under the terms of the Apache-2.0 license.
+//	For a copy, see <https://github.com/infiniteHQ/Vortex/blob/main/LICENSE>.
+//
+
 #include "node_editor.hpp"
 
 #include <filesystem>
@@ -16,6 +26,7 @@ namespace ModuleUI {
     { "roundsquare", Cherry::NodeSystem::PinShape::RoundSquare },
     { "diamond", Cherry::NodeSystem::PinShape::Diamond }
   };
+
   static const std::unordered_map<std::string, Cherry::NodeSystem::NodeType> type_map = {
     { "blueprint", Cherry::NodeSystem::NodeType::Blueprint },
     { "comment", Cherry::NodeSystem::NodeType::Comment },
@@ -35,190 +46,45 @@ namespace ModuleUI {
       const std::string &name,
       const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
       const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
-    m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
+    app_window_ = std::make_shared<Cherry::AppWindow>(name, name);
 
     if (graph) {
       if (!graph->disable_native_save_system) {
-        m_AppWindow->SetLeftMenubarCallback([this]() { RenderMenubar(); });
-        m_AppWindow->SetRightMenubarCallback([this]() { RenderRightMenubar(); });
+        app_window_->SetLeftMenubarCallback([this]() { render_menubar(); });
+        app_window_->SetRightMenubarCallback([this]() { render_right_menubar(); });
       }
     }
-    m_AppWindow->SetSaveMode(true);
 
-    m_AppWindow->m_CloseCallback = [=]() {
-      Cherry::DeleteAppWindow(m_AppWindow);
-      m_AppWindow->SetVisibility(false);
+    app_window_->SetSaveMode(true);
+
+    app_window_->m_CloseCallback = [=]() {
+      Cherry::DeleteAppWindow(app_window_);
+      app_window_->SetVisibility(false);
     };
 
-    backend_node_ctx = ctx;
-    load_node_contextFromBackend();
-    backend_node_graph_session = graph;
+    backend_node_ctx_ = ctx;
+    load_node_context_from_backend();
+    backend_node_graph_session_ = graph;
 
-    ui_node_graph.m_NodeSpawnCallback = [this](const std::string &sch_id, float x, float y, const std::string &connID) {
-      SpawnNodeInstance(sch_id, x, y, connID);
+    ui_node_graph_.m_NodeSpawnCallback = [this](const std::string &sch_id, float x, float y, const std::string &connID) {
+      spawn_node_instance(sch_id, x, y, connID);
     };
 
-    Refresh();
+    refresh();
 
-    std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
-
-    this->ctx = vxe::get_current_context();
-  }  // namespace ModuleUI
-
-  std::shared_ptr<Cherry::AppWindow> &NodeEditorAppWindow::GetAppWindow() {
-    return m_AppWindow;
+    std::shared_ptr<Cherry::AppWindow> win = app_window_;
   }
 
-  std::shared_ptr<NodeEditorAppWindow> NodeEditorAppWindow::Create(
-      const std::string &name,
-      const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
-    auto instance = std::shared_ptr<NodeEditorAppWindow>(new NodeEditorAppWindow(name, ctx, graph));
-    instance->SetupRenderCallback();
-    return instance;
+  void NodeEditorAppWindow::refresh_context_from_backend() {
+    load_node_context_from_backend();
   }
 
-  void NodeEditorAppWindow::SetupRenderCallback() {
-    auto self = shared_from_this();
-    m_AppWindow->SetRenderCallback([self]() {
-      if (self) {
-        self->Render();
-      }
-    });
-  }
-
-  void NodeEditorAppWindow::RenderMenubar() {
-    CherryGUI::SetCursorPosX(CherryGUI::GetCursorPosX() + 3.0f);
-
-    CherryNextComponent.SetProperty("padding_y", "6.0f");
-    CherryNextComponent.SetProperty("padding_x", "10.0f");
-    if (CherryKit::ButtonImageText("Save", NodeEdit::get_path("/resources/icons/icon_save.png"))
-            .GetDataAs<bool>("isClicked")) {
-      save_incoming = true;
-    }
-
-    CherryNextComponent.SetProperty("padding_y", "6.0f");
-    CherryNextComponent.SetProperty("padding_x", "10.0f");
-    if (CherryKit::ButtonImageText("Refresh", NodeEdit::get_path("/resources/icons/icon_refresh.png"))
-            .GetDataAs<bool>("isClicked")) {
-      Refresh();
-    }
-  }
-
-  void NodeEditorAppWindow::RefreshContextFromBackend() {
-    load_node_contextFromBackend();
-  }
-
-  void NodeEditorAppWindow::Render() {
-    if (!app_window_render_initialized) {
-      if (!backend_node_graph_session->parent_appwindow.empty()) {
-        auto parent = Cherry::GetAppWindowByName(backend_node_graph_session->parent_appwindow);
-        if (parent) {
-          m_AppWindow->SetParent(parent);
-        }
-      }
-
-      app_window_render_initialized = true;
-    }
-
-    if (backend_node_graph_session) {
-      if (!backend_node_graph_session->graph.graph_title.empty()) {
-        ui_node_graph.SetGraphTitle(backend_node_graph_session->graph.graph_title);
-      }
-
-      if (backend_node_graph_session->disable_native_save_system) {
-        if (backend_node_graph_session->ask_for_refresh) {
-          Refresh();
-          backend_node_graph_session->ask_for_refresh = false;
-        }
-
-        if (backend_node_graph_session->ask_for_save) {
-          save_incoming = true;
-          backend_node_graph_session->ask_for_save = false;
-        }
-      }
-    }
-
-    CherryApp.PushComponentPool(&m_ComponentPool);
-    auto &cmp = CherryKit::NodeAreaOpen("", 0, 0, &ui_node_ctx, &ui_node_graph);
-    if (refreshed) {
-      cmp.SetProperty("refresh", "true");
-      refreshed = false;
-    }
-    if (save_incoming) {
-      cmp.SetProperty("save", "true");
-      save_incoming = false;
-    }
-    if (cmp.GetDataAs<bool>("graph_saved")) {
-      Save();
-      cmp.SetData("graph_saved", "false;");
-    }
-
-    if (backend_node_graph_session) {
-      if (backend_node_graph_session->graph.refresh_ctx) {
-        RefreshContextFromBackend();
-        backend_node_graph_session->graph.refresh_ctx = false;
-      }
-
-      if (backend_node_graph_session->graph.refresh_effects) {
-        ui_node_graph.ClearAllEffects();
-
-        for (const auto &e : backend_node_graph_session->graph.node_effects) {
-          Cherry::NodeSystem::NodeEffect ne;
-          ne.InstanceID = e.instance_id;
-
-          if (e.type == "message") {
-            ne.params.type = Cherry::NodeSystem::EffectType::Node::Message;
-          }
-
-          ne.params.messageText = e.text;
-          ne.params.messageColor = e.bg_color;
-          ne.params.textColor = e.text_color;
-          ui_node_graph.AddNodeEffect(ne);
-        }
-
-        for (const auto &e : backend_node_graph_session->graph.connection_effects) {
-          Cherry::NodeSystem::ConnectionEffect ce;
-          ce.NodeInstanceIDA = e.node_instance_id_A;
-          ce.PinIDA = e.pin_id_A;
-          ce.NodeInstanceIDB = e.node_instance_id_B;
-          ce.PinIDB = e.pin_id_B;
-          if (e.type == "flow") {
-            ce.params.type = Cherry::NodeSystem::EffectType::Connection::Flow;
-            ce.params.flowColor = e.flow_color;
-            ce.params.flowSpeed = e.flow_speed;
-            ce.params.flowIntensity = e.flow_intensity;
-            ce.params.flowReverse = e.flow_reverse;
-          } else if (e.type == "pulse") {
-            ce.params.type = Cherry::NodeSystem::EffectType::Connection::Pulsating;
-            ce.params.pulsatingColor = e.pulsating_color;
-            ce.params.pulsatingRate = e.pulsating_rate;
-            ce.params.pulsatingIntensity = e.pulsating_intensity;
-          }
-          ui_node_graph.AddConnectionEffect(ce);
-        }
-
-        backend_node_graph_session->graph.refresh_effects = false;
-      }
-    }
-
-    CherryApp.PopComponentPool();
-  }
-
-  void NodeEditorAppWindow::RenderRightMenubar() {
-    //
-  }
-
-  void NodeEditorAppWindow::RenderBottombar() {
-    //
-  }
-
-  void NodeEditorAppWindow::load_node_contextFromBackend() {
-    if (!backend_node_ctx) {
+  void NodeEditorAppWindow::load_node_context_from_backend() {
+    if (!backend_node_ctx_) {
       return;
     }
-    auto &pin_formats = backend_node_ctx->pin_formats;
-    auto &schemas = backend_node_ctx->schemas;
+    auto &pin_formats = backend_node_ctx_->pin_formats;
+    auto &schemas = backend_node_ctx_->schemas;
 
     for (auto &pf : pin_formats) {
       Cherry::NodeSystem::PinFormat pin_format;
@@ -233,11 +99,11 @@ namespace ModuleUI {
       pin_format.m_TypeDescription = pf.description;
       pin_format.m_TypeID = pf.type;
       pin_format.m_TypeName = pf.name;
-      ui_node_ctx.SetupPinFormat(pin_format);
+      ui_node_ctx_.SetupPinFormat(pin_format);
     }
 
     for (auto &s : schemas) {
-      auto sch = ui_node_ctx.CreateSchema(s.id);
+      auto sch = ui_node_ctx_.CreateSchema(s.id);
       sch->SetLabel(s.label);
       sch->SetLabelHexColor(s.label_color);
       sch->SetSecondLabel(s.second_label);
@@ -284,16 +150,16 @@ namespace ModuleUI {
         p.proper_logo = s.spawn_possibility.proper_logo;
         p.proper_name = s.spawn_possibility.proper_name;
         p.proper_description = s.spawn_possibility.proper_description;
-        ui_node_graph.AddPossibility(p);
+        ui_node_graph_.AddPossibility(p);
       }
     }
 
     // Load graph context extensions
-    if (!backend_node_graph_session) {
+    if (!backend_node_graph_session_) {
       return;
     }
-    auto &ext_pin_formats = backend_node_graph_session->graph.ext.pin_formats;
-    auto &ext_schemas = backend_node_graph_session->graph.ext.schemas;
+    auto &ext_pin_formats = backend_node_graph_session_->graph.ext.pin_formats;
+    auto &ext_schemas = backend_node_graph_session_->graph.ext.schemas;
 
     for (auto &pf : ext_pin_formats) {
       Cherry::NodeSystem::PinFormat pin_format;
@@ -308,11 +174,11 @@ namespace ModuleUI {
       pin_format.m_TypeDescription = pf.description;
       pin_format.m_TypeID = pf.type;
       pin_format.m_TypeName = pf.name;
-      ui_node_ctx.SetupPinFormat(pin_format);
+      ui_node_ctx_.SetupPinFormat(pin_format);
     }
 
     for (auto &s : ext_schemas) {
-      auto sch = ui_node_ctx.CreateSchema(s.id);
+      auto sch = ui_node_ctx_.CreateSchema(s.id);
       sch->SetLabel(s.label);
       sch->SetLabelHexColor(s.label_color);
       sch->SetSecondLabel(s.second_label);
@@ -359,29 +225,29 @@ namespace ModuleUI {
         p.proper_logo = s.spawn_possibility.proper_logo;
         p.proper_name = s.spawn_possibility.proper_name;
         p.proper_description = s.spawn_possibility.proper_description;
-        ui_node_graph.AddPossibility(p);
+        ui_node_graph_.AddPossibility(p);
       }
     }
   }
 
-  void NodeEditorAppWindow::Refresh() {
-    if (!backend_node_graph_session) {
+  void NodeEditorAppWindow::refresh() {
+    if (!backend_node_graph_session_) {
       return;
     }
 
-    NodeEdit::refresh_graph_session(backend_node_graph_session);
+    NodeEdit::refresh_graph_session(backend_node_graph_session_);
 
-    for (const auto &extpf : backend_node_graph_session->graph.ext.pin_formats) {
+    for (const auto &extpf : backend_node_graph_session_->graph.ext.pin_formats) {
       NodeEdit::NodeEditPinFormat pf;
       pf.type = extpf.type;
       pf.name = extpf.name;
       pf.color = extpf.color;
       pf.shape = extpf.shape;
       pf.description = extpf.description;
-      NodeEdit::add_pin_format_to_graph_ctx_ext(backend_node_graph_session, pf);
+      NodeEdit::add_pin_format_to_graph_ctx_ext(backend_node_graph_session_, pf);
     }
 
-    for (const auto &exts : backend_node_graph_session->graph.ext.schemas) {
+    for (const auto &exts : backend_node_graph_session_->graph.ext.schemas) {
       NodeEdit::NodeEditSchema s;
       s.id = exts.id;
       s.type = exts.type;
@@ -423,13 +289,13 @@ namespace ModuleUI {
         s.spawn_possibility.schema_id = exts.spawn_possibility.schema_id;
       }
 
-      NodeEdit::add_schema_to_graph_ctx_ext(backend_node_graph_session, s);
+      NodeEdit::add_schema_to_graph_ctx_ext(backend_node_graph_session_, s);
     }
 
-    auto &instances = backend_node_graph_session->graph.instances;
-    auto &connections = backend_node_graph_session->graph.connections;
+    auto &instances = backend_node_graph_session_->graph.instances;
+    auto &connections = backend_node_graph_session_->graph.connections;
 
-    ui_node_graph.m_InstanciatedNodes.clear();
+    ui_node_graph_.m_InstanciatedNodes.clear();
     for (auto &i : instances) {
       Cherry::NodeSystem::NodeInstance n;
       n.InstanceID = i.instance_id;
@@ -437,35 +303,35 @@ namespace ModuleUI {
       n.Position.y = i.pos_y;
       n.TypeID = i.type_id;
       // TODO custom data of nodes
-      ui_node_graph.m_InstanciatedNodes.push_back(n);
+      ui_node_graph_.m_InstanciatedNodes.push_back(n);
       node_instances_counter_++;
     }
 
-    ui_node_graph.m_Connections.clear();
+    ui_node_graph_.m_Connections.clear();
     for (auto &conn : connections) {
       Cherry::NodeSystem::NodeConnection c;
       c.NodeInstanceIDA = conn.node_instance_id_A;
       c.NodeInstanceIDB = conn.node_instance_id_B;
       c.PinIDA = conn.pin_id_A;
       c.PinIDB = conn.pin_id_B;
-      ui_node_graph.m_Connections.push_back(c);
+      ui_node_graph_.m_Connections.push_back(c);
     }
 
-    refreshed = true;
+    refreshed_ = true;
   }
 
-  void NodeEditorAppWindow::Save() {
-    if (!backend_node_graph_session) {
+  void NodeEditorAppWindow::save() {
+    if (!backend_node_graph_session_) {
       return;
     }
 
-    auto &instances = backend_node_graph_session->graph.instances;
-    auto &connections = backend_node_graph_session->graph.connections;
+    auto &instances = backend_node_graph_session_->graph.instances;
+    auto &connections = backend_node_graph_session_->graph.connections;
 
     connections.clear();
     instances.clear();
 
-    for (auto n : ui_node_graph.m_InstanciatedNodes) {
+    for (auto n : ui_node_graph_.m_InstanciatedNodes) {
       NodeEdit::NodeEditInstance i;
 
       i.type_id = n.TypeID;
@@ -477,7 +343,7 @@ namespace ModuleUI {
       instances.push_back(i);
     }
 
-    for (auto c : ui_node_graph.m_Connections) {
+    for (auto c : ui_node_graph_.m_Connections) {
       NodeEdit::NodeEditConnection conn;
 
       conn.node_instance_id_A = c.NodeInstanceIDA;
@@ -488,11 +354,11 @@ namespace ModuleUI {
       connections.push_back(conn);
     }
 
-    NodeEdit::save_graph_session(backend_node_graph_session);
+    NodeEdit::save_graph_session(backend_node_graph_session_);
   }
 
   // TODO : Optimize that with a local unordered_set ?
-  std::string NodeEditorAppWindow::GenerateUniqueNodeInstanceID() {
+  std::string NodeEditorAppWindow::generate_unique_node_instance_id() {
     static thread_local std::mt19937 rng(std::random_device{}());
     static std::uniform_int_distribution<int> dist(0, 999999);
 
@@ -506,7 +372,7 @@ namespace ModuleUI {
       const std::string candidate = oss.str();
 
       const bool exists = std::any_of(
-          ui_node_graph.m_InstanciatedNodes.begin(), ui_node_graph.m_InstanciatedNodes.end(), [&](const auto &ni) {
+          ui_node_graph_.m_InstanciatedNodes.begin(), ui_node_graph_.m_InstanciatedNodes.end(), [&](const auto &ni) {
             return ni.InstanceID == candidate;
           });
 
@@ -515,15 +381,15 @@ namespace ModuleUI {
     }
   }
 
-  void NodeEditorAppWindow::SpawnNodeInstance(
+  void NodeEditorAppWindow::spawn_node_instance(
       const std::string &sch_id,
       const float &x,
       const float &y,
       const std::string &connID) {
-    // Save local UI state from the edit graph pos
+    // save local UI state from the edit graph pos
     Cherry::NodeSystem::NodeInstance inst;
     inst.TypeID = sch_id;
-    inst.InstanceID = GenerateUniqueNodeInstanceID();
+    inst.InstanceID = generate_unique_node_instance_id();
     inst.Position = Cherry::NodeSystem::Vec2(50, 50);
     inst.Size = Cherry::NodeSystem::Vec2(50, 50);
 
@@ -531,8 +397,8 @@ namespace ModuleUI {
       // TODO: Auto connect
     }
 
-    ui_node_graph.AddNodeInstance(inst);
+    ui_node_graph_.AddNodeInstance(inst);
 
-    refreshed = true;
+    refreshed_ = true;
   }
 };  // namespace ModuleUI

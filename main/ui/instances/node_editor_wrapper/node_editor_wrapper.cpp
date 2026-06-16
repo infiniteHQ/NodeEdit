@@ -8,25 +8,25 @@
 
 namespace ModuleUI {
   NodeEditorWrapperAppWindow::NodeEditorWrapperAppWindow() {
-    m_AppWindow = std::make_shared<Cherry::AppWindow>("TEST", "TEST");
-    m_AppWindow->SetDockingMode(true);
+    app_window_ = std::make_shared<Cherry::AppWindow>("TEST", "TEST");
+    app_window_->SetDockingMode(true);
 
-    m_AppWindow->SetLeftMenubarCallback([this]() { ImGui::Text("GHE;llofsoig"); });
-    m_AppWindow->SetInternalPaddingY(0.0f);
-    m_AppWindow->SetInternalPaddingX(0.0f);
+    app_window_->SetLeftMenubarCallback([this]() { ImGui::Text("GHE;llofsoig"); });
+    app_window_->SetInternalPaddingY(0.0f);
+    app_window_->SetInternalPaddingX(0.0f);
 
-    m_AppWindow->m_CloseCallback = [=]() {
-      Cherry::DeleteAppWindow(m_AppWindow);
-      m_AppWindow->SetVisibility(false);
+    app_window_->m_CloseCallback = [=]() {
+      Cherry::DeleteAppWindow(app_window_);
+      app_window_->SetVisibility(false);
     };
     this->ctx = vxe::get_current_context();
   }  // namespace ModuleUI
 
-  std::shared_ptr<Cherry::AppWindow> &NodeEditorWrapperAppWindow::GetAppWindow() {
-    return m_AppWindow;
+  std::shared_ptr<Cherry::AppWindow> &NodeEditorWrapperAppWindow::get_app_window() {
+    return app_window_;
   }
 
-  std::shared_ptr<NodeEditorWrapperAppWindow> NodeEditorWrapperAppWindow::Create() {
+  std::shared_ptr<NodeEditorWrapperAppWindow> NodeEditorWrapperAppWindow::create() {
     auto instance = std::shared_ptr<NodeEditorWrapperAppWindow>(new NodeEditorWrapperAppWindow());
     return instance;
   }

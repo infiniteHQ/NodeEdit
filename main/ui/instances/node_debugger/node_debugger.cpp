@@ -11,43 +11,43 @@ namespace ModuleUI {
   NodeEditorDebugger::NodeEditorDebugger(
       const std::string &name,
       const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
-    m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
+    app_window_ = std::make_shared<Cherry::AppWindow>(name, name);
 
-    m_AppWindow->m_CloseCallback = [=]() {
-      Cherry::DeleteAppWindow(m_AppWindow);
-      m_AppWindow->SetVisibility(false);
+    app_window_->m_CloseCallback = [=]() {
+      Cherry::DeleteAppWindow(app_window_);
+      app_window_->SetVisibility(false);
     };
 
     graph_ = graph;
 
-    std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
+    std::shared_ptr<Cherry::AppWindow> win = app_window_;
 
     this->ctx = vxe::get_current_context();
   }  // namespace ModuleUI
 
-  std::shared_ptr<Cherry::AppWindow> &NodeEditorDebugger::GetAppWindow() {
-    return m_AppWindow;
+  std::shared_ptr<Cherry::AppWindow> &NodeEditorDebugger::get_app_window() {
+    return app_window_;
   }
 
-  std::shared_ptr<NodeEditorDebugger> NodeEditorDebugger::Create(
+  std::shared_ptr<NodeEditorDebugger> NodeEditorDebugger::create(
       const std::string &name,
       const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
     auto instance = std::shared_ptr<NodeEditorDebugger>(new NodeEditorDebugger(name, graph));
-    instance->SetupRenderCallback();
+    instance->setup_render_callback();
     return instance;
   }
 
-  void NodeEditorDebugger::SetupRenderCallback() {
+  void NodeEditorDebugger::setup_render_callback() {
     auto self = shared_from_this();
-    m_AppWindow->SetRenderCallback([self]() {
+    app_window_->SetRenderCallback([self]() {
       if (self) {
-        self->Render();
+        self->render();
       }
     });
   }
 
-  void NodeEditorDebugger::Render() {
-    CherryApp.PushComponentPool(&m_ComponentPool);
+  void NodeEditorDebugger::render() {
+    CherryApp.PushComponentPool(&component_pool_);
 
     const float PANEL_W = 260.0f;
     ImVec2 avail = ImGui::GetContentRegionAvail();
