@@ -43,6 +43,10 @@ void NodeEdit::open_graphDEBUG(const std::string &path) {
     auto inst = ModuleUI::NodeEditorWrapperAppWindow::create();
     Cherry::AddAppWindow(inst->get_app_window());
   }
+  {
+    auto inst = ModuleUI::NodeEditorOtherRandomWindow::create();
+    Cherry::AddAppWindow(inst->get_app_window());
+  }
   std::string id;
   {
     nlohmann::json j;
