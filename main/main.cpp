@@ -58,7 +58,7 @@ class Module : public ModuleInterface {
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_save_nodegraph, "save_nodegraph"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_focus_at, "focus_at"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_zoom_at, "zoom_at"));
-    // TODO -> spawn_at (id/x/y)
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_spawn_at, "spawn_at"));
 
     NodeEdit::setup_example_context();
   }

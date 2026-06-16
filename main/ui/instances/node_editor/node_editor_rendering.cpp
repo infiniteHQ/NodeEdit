@@ -77,6 +77,15 @@ namespace ModuleUI {
         backend_node_graph_session_->graph.zoom_request.pending = false;
       }
 
+      if (backend_node_graph_session_->graph.spawn_request.pending) {
+        spawn_node_instance(
+            backend_node_graph_session_->graph.spawn_request.sch_id,
+            backend_node_graph_session_->graph.spawn_request.x,
+            backend_node_graph_session_->graph.spawn_request.y,
+            backend_node_graph_session_->graph.spawn_request.conn_id);
+        backend_node_graph_session_->graph.spawn_request.pending = false;
+      }
+
       if (!backend_node_graph_session_->graph.graph_title.empty()) {
         ui_node_graph_.SetGraphTitle(backend_node_graph_session_->graph.graph_title);
       }

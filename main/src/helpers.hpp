@@ -129,6 +129,14 @@ namespace NodeEdit {
     float zoom;
   };
 
+  struct SpawnRequest {
+    bool pending = false;
+    float x;
+    float y;
+    std::string sch_id;
+    std::string conn_id;
+  };
+
   struct Graph {
     std::vector<NodeInstance> instances;
     std::vector<Connection> connections;
@@ -137,6 +145,7 @@ namespace NodeEdit {
     std::vector<ConnectionEffect> connection_effects;
     std::vector<NodeEffect> node_effects;
     ZoomRequest zoom_request;
+    SpawnRequest spawn_request;
 
     // ctx modifications/extension
     GraphContextExtensions ext;

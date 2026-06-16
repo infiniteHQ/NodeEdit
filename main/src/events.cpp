@@ -592,3 +592,40 @@ NODEEDIT_API void NodeEdit::ie_zoom_at(ArgumentValues &args, ReturnValues &ret) 
   gs->graph.zoom_request.zoom = 1;
   gs->graph.zoom_request.pending = true;
 }
+
+NODEEDIT_API void NodeEdit::ie_spawn_at(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+
+  if (!j.contains("session_id") || !j["session_id"].is_string())
+    return;
+  const std::string session_id = j["session_id"].get<std::string>();
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    return;
+  }
+
+  if (!j.contains("schema_id") || !j["schema_id"].is_string())
+    return;
+
+  if (!j.contains("x") || !j["x"].is_number_integer())
+    return;
+
+  if (!j.contains("y") || !j["y"].is_number_integer())
+    return;
+
+  const std::string schema_id = j["schema_id"].get<std::string>();
+  const int x = j["x"].get<int>();
+  const int y = j["y"].get<int>();
+
+  gs->graph.spawn_request.x = x;
+  gs->graph.spawn_request.y = y;
+  gs->graph.spawn_request.sch_id = schema_id;
+
+  if (j.contains("connection_id") && j["connection_id"].is_string()) {
+    const std::string connection_id = j["connection_id"].get<std::string>();
+    gs->graph.spawn_request.conn_id = connection_id;
+  }
+
+  gs->graph.spawn_request.pending = true;
+}

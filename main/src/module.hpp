@@ -166,6 +166,7 @@ namespace NodeEdit {
 
   NODEEDIT_API void ie_focus_at(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_zoom_at(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_spawn_at(ArgumentValues &args, ReturnValues &ret);
 
 }  // namespace NodeEdit
 
