@@ -23,14 +23,14 @@ namespace ModuleUI {
    public:
     NodeEditorAppWindow(
         const std::string &name,
-        const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
-        const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
+        const std::shared_ptr<NodeEdit::NodeContext> &ctx,
+        const std::shared_ptr<NodeEdit::GraphSession> &graph);
 
     // UI
     static std::shared_ptr<NodeEditorAppWindow> create(
         const std::string &name,
-        const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
-        const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
+        const std::shared_ptr<NodeEdit::NodeContext> &ctx,
+        const std::shared_ptr<NodeEdit::GraphSession> &graph);
     void menubar();
     std::shared_ptr<Cherry::AppWindow> &get_app_window();
     void setup_render_callback();
@@ -58,8 +58,8 @@ namespace ModuleUI {
     bool app_window_render_initialized_ = false;
 
     // Backend
-    std::shared_ptr<NodeEdit::NodeEditGraphSession> backend_node_graph_session_;
-    std::shared_ptr<NodeEdit::NodeEditContext> backend_node_ctx_;
+    std::shared_ptr<NodeEdit::GraphSession> backend_node_graph_session_;
+    std::shared_ptr<NodeEdit::NodeContext> backend_node_ctx_;
 
     // UI  NodeSystem
     Cherry::NodeSystem::NodeContext ui_node_ctx_;

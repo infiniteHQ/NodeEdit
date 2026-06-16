@@ -8,9 +8,7 @@
 
 namespace ModuleUI {
 
-  NodeEditorDebugger::NodeEditorDebugger(
-      const std::string &name,
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
+  NodeEditorDebugger::NodeEditorDebugger(const std::string &name, const std::shared_ptr<NodeEdit::GraphSession> &graph) {
     app_window_ = std::make_shared<Cherry::AppWindow>(name, name);
 
     app_window_->m_CloseCallback = [=]() {
@@ -31,7 +29,7 @@ namespace ModuleUI {
 
   std::shared_ptr<NodeEditorDebugger> NodeEditorDebugger::create(
       const std::string &name,
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
+      const std::shared_ptr<NodeEdit::GraphSession> &graph) {
     auto instance = std::shared_ptr<NodeEditorDebugger>(new NodeEditorDebugger(name, graph));
     instance->setup_render_callback();
     return instance;

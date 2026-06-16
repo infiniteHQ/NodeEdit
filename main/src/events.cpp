@@ -21,7 +21,7 @@ void NodeEdit::ie_setup_pin_format(ArgumentValues &args, ReturnValues &ret) {
       return;
     }
 
-    NodeEditPinFormat pf;
+    PinFormat pf;
     if (args.get_json().contains("type")) {
       const std::string type = args.get_json()["type"];
       pf.type = type;
@@ -84,7 +84,7 @@ void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &ret) {
     return;
   }
 
-  NodeEditSchema s;
+  Schema s;
 
   if (!j.contains("id"))
     return;
@@ -124,7 +124,7 @@ void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &ret) {
 
   if (j.contains("input_pins")) {
     for (const auto &pin_json : j["input_pins"]) {
-      NodeEditPin pin;
+      Pin pin;
       if (pin_json.contains("id"))
         pin.id = pin_json["id"];
       if (pin_json.contains("name"))
@@ -137,7 +137,7 @@ void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &ret) {
 
   if (j.contains("output_pins")) {
     for (const auto &pin_json : j["output_pins"]) {
-      NodeEditPin pin;
+      Pin pin;
       if (pin_json.contains("id"))
         pin.id = pin_json["id"];
       if (pin_json.contains("name"))
@@ -205,7 +205,7 @@ void NodeEdit::ie_add_effect_to_node(ArgumentValues &args, ReturnValues &ret) {
     return;
   }
 
-  NodeEdit::NodeEditNodeEffect e;
+  NodeEdit::NodeEffect e;
 
   if (args.get_json().contains("bg_color"))
     e.bg_color = args.get_json()["bg_color"];
@@ -236,7 +236,7 @@ void NodeEdit::ie_add_effect_to_connection(ArgumentValues &args, ReturnValues &r
     return;
   }
 
-  NodeEdit::NodeEditConnectionEffect e;
+  NodeEdit::ConnectionEffect e;
 
   if (args.get_json().contains("flow_color"))
     e.flow_color = args.get_json()["flow_color"];

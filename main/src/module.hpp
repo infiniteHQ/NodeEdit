@@ -24,8 +24,8 @@ namespace NodeEdit {
     std::shared_ptr<ModuleInterface> interface;
     std::vector<std::shared_ptr<ModuleUI::NodeEditorAppWindow>> editor_instances;
     std::vector<std::shared_ptr<ModuleUI::NodeEditorDebugger>> editor_debuggers;
-    std::vector<std::shared_ptr<NodeEditContext>> contexts;
-    std::vector<std::shared_ptr<NodeEditGraphSession>> graph_sessions;
+    std::vector<std::shared_ptr<NodeContext>> contexts;
+    std::vector<std::shared_ptr<GraphSession>> graph_sessions;
   };
 }  // namespace NodeEdit
 // context pointer
@@ -41,22 +41,22 @@ namespace NodeEdit {
   NODEEDIT_API std::shared_ptr<NodeEdit::Context> get_current_context();
 
   // Node context API
-  NODEEDIT_API std::shared_ptr<NodeEditContext> create_node_context(const std::string &name);
-  NODEEDIT_API std::shared_ptr<NodeEditContext> get_node_context(const std::string &name);
+  NODEEDIT_API std::shared_ptr<NodeContext> create_node_context(const std::string &name);
+  NODEEDIT_API std::shared_ptr<NodeContext> get_node_context(const std::string &name);
   NODEEDIT_API void destroy_node_context(const std::string &name);
   NODEEDIT_API void load_context_from_file(const std::string &path);
   NODEEDIT_API void load_node_context(const nlohmann::json &path);
-  NODEEDIT_API void add_schema_to_context(const std::string &ctx_id, const NodeEditSchema &schema);
-  NODEEDIT_API void add_pin_format_to_context(const std::string &ctx_id, const NodeEditPinFormat &pin_format);
+  NODEEDIT_API void add_schema_to_context(const std::string &ctx_id, const Schema &schema);
+  NODEEDIT_API void add_pin_format_to_context(const std::string &ctx_id, const PinFormat &pin_format);
 
   // utils
   NODEEDIT_API std::string get_path(const std::string &path);
-  NODEEDIT_API nlohmann::json dump_graph_to_json(const NodeEdit::NodeEditGraph &graph);
+  NODEEDIT_API nlohmann::json dump_graph_to_json(const NodeEdit::Graph &graph);
   NODEEDIT_API nlohmann::json dump_context_to_json(const std::string ctx);
-  NODEEDIT_API NodeEditGraph populate_graph(const nlohmann::json &j);
+  NODEEDIT_API Graph populate_graph(const nlohmann::json &j);
   NODEEDIT_API std::string get_graph_context_name(const nlohmann::json &j);
   NODEEDIT_API nlohmann::json get_graph_in_json(const nlohmann::json &j);
-  NODEEDIT_API std::shared_ptr<NodeEdit::NodeEditGraphSession> open_graph_and_get_session(
+  NODEEDIT_API std::shared_ptr<NodeEdit::GraphSession> open_graph_and_get_session(
       const std::string &path,
       const std::string &parent = "",
       const bool &disable_native_save = false);
@@ -65,86 +65,80 @@ namespace NodeEdit {
   NODEEDIT_API void create_graph_session_from_file(const std::string &path);
   NODEEDIT_API bool is_graph_file(const std::string &path);
   NODEEDIT_API bool is_context_exist(const std::string &ctx_name);
-  NODEEDIT_API std::shared_ptr<NodeEdit::NodeEditGraphSession> get_graph_session_by_id(const std::string &session_id);
+  NODEEDIT_API std::shared_ptr<NodeEdit::GraphSession> get_graph_session_by_id(const std::string &session_id);
 
   // debug
   NODEEDIT_API void setup_example_context();
 
   // save system
-  NODEEDIT_API void save_graph_session(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
-  NODEEDIT_API void refresh_graph_session(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph);
+  NODEEDIT_API void save_graph_session(const std::shared_ptr<NodeEdit::GraphSession> &graph);
+  NODEEDIT_API void refresh_graph_session(const std::shared_ptr<NodeEdit::GraphSession> &graph);
 
   // node graph api
   NODEEDIT_API std::vector<std::string> get_next_nodes(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &nodeid,
       const std::string &outputid);  // instance_id
 
   NODEEDIT_API std::vector<std::string> get_previous_nodes(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &nodeid,
       const std::string &inputid);  // instance_id
 
   NODEEDIT_API std::string search_node_output_pin_by_type(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &nodeid,
-      const std::string &type);  //  id (from NodeEditPin)
+      const std::string &type);  //  id (from Pin)
 
   NODEEDIT_API std::string search_node_input_pin_by_type(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &nodeid,
-      const std::string &type);  // id (from NodeEditPin)
+      const std::string &type);  // id (from Pin)
 
   NODEEDIT_API std::string search_node_type(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &type);  // return instance_id
 
   // helpers
-  NODEEDIT_API const NodeEdit::NodeEditSchema *find_schema(const NodeEdit::NodeEditContext &ctx, const std::string &type_id);
-  NODEEDIT_API const NodeEdit::NodeEditContext *find_context(const std::string &context_id);
-  NODEEDIT_API const NodeEdit::NodeEditInstance *find_instance(
-      const NodeEdit::NodeEditGraph &graph,
-      const std::string &instance_id);
+  NODEEDIT_API const NodeEdit::Schema *find_schema(const NodeEdit::NodeContext &ctx, const std::string &type_id);
+  NODEEDIT_API const NodeEdit::NodeContext *find_context(const std::string &context_id);
+  NODEEDIT_API const NodeEdit::NodeInstance *find_instance(const NodeEdit::Graph &graph, const std::string &instance_id);
 
   NODEEDIT_API std::vector<std::pair<std::string, std::string>> get_all_node_input_pins(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &nodeid);
 
   NODEEDIT_API std::vector<std::pair<std::string, std::string>> get_all_node_output_pins(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &nodeid);
 
-  NODEEDIT_API void add_schema_to_graph_ctx_ext(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
-      const NodeEditSchema &schema);
+  NODEEDIT_API void add_schema_to_graph_ctx_ext(const std::shared_ptr<NodeEdit::GraphSession> &graph, const Schema &schema);
 
   NODEEDIT_API void add_pin_format_to_graph_ctx_ext(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
-      const NodeEditPinFormat &pin_format);
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
+      const PinFormat &pin_format);
 
   // Effect API
-  NODEEDIT_API void add_effect_to_node(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
-      const NodeEditNodeEffect &e);
+  NODEEDIT_API void add_effect_to_node(const std::shared_ptr<NodeEdit::GraphSession> &graph, const NodeEffect &e);
 
   NODEEDIT_API void add_effect_to_connection(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
-      const NodeEditConnectionEffect &e);
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
+      const ConnectionEffect &e);
 
   NODEEDIT_API void remove_node_effects_from_node(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &nodeid);
 
   NODEEDIT_API void remove_connection_effects_from_node(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &nodeid);
 
   NODEEDIT_API void remove_connection_effects_from_pin(
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &nodeid,
       const std::string &pin_id);
 
-  NODEEDIT_API void set_graph_title(const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph, const std::string &title);
+  NODEEDIT_API void set_graph_title(const std::shared_ptr<NodeEdit::GraphSession> &graph, const std::string &title);
 
   // events
   NODEEDIT_API void ie_create_node_context(ArgumentValues &args, ReturnValues &ret);

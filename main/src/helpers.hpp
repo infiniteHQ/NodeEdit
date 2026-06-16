@@ -11,7 +11,7 @@
 namespace NodeEdit {
 
   // node ctx
-  struct NodeEditPinFormat {
+  struct PinFormat {
     std::string type;  // Must be unique on the NodeContext
     bool delegate = false;
     std::string description;
@@ -24,14 +24,14 @@ namespace NodeEdit {
     std::string shape;
   };
 
-  struct NodeEditPin {
+  struct Pin {
     std::string type;
     // std::string color_variant;
     std::string name;  // optionnal: custom name
     std::string id;
   };
 
-  struct NodeEditNodeEffect {
+  struct NodeEffect {
     std::string instance_id;
 
     std::string type;  // message
@@ -40,7 +40,7 @@ namespace NodeEdit {
     std::string bg_color;
   };
 
-  struct NodeEditConnectionEffect {
+  struct ConnectionEffect {
     std::string node_instance_id_A;
     std::string pin_id_A;
     std::string node_instance_id_B;
@@ -58,7 +58,7 @@ namespace NodeEdit {
     std::string flow_color = "#44AAFFFF";
   };
 
-  struct NodeEditSpawnPossibility {
+  struct SpawnPossibility {
     std::string proper_name;
     std::string proper_description;
     std::string proper_logo;
@@ -66,13 +66,13 @@ namespace NodeEdit {
     std::string schema_id;
   };
 
-  struct NodeEditSchema {
-    std::vector<NodeEditPin> input_pins;
-    std::vector<NodeEditPin> output_pins;
-    NodeEditPin header_pin;
+  struct Schema {
+    std::vector<Pin> input_pins;
+    std::vector<Pin> output_pins;
+    Pin header_pin;
 
     bool spawnable = false;
-    NodeEditSpawnPossibility spawn_possibility;
+    SpawnPossibility spawn_possibility;
 
     // props
     std::string id;
@@ -91,21 +91,21 @@ namespace NodeEdit {
     std::string type;    // blueprint, simple, three, comment, houdini
   };
 
-  struct NodeEditContext {
-    std::vector<NodeEditSchema> schemas;
-    std::vector<NodeEditPinFormat> pin_formats;
+  struct NodeContext {
+    std::vector<Schema> schemas;
+    std::vector<PinFormat> pin_formats;
     bool allow_comments;
     bool allow_sequences;
     std::string id;
   };
 
-  struct NodeEditGraphContextExtensions {
-    std::vector<NodeEditSchema> schemas;
-    std::vector<NodeEditPinFormat> pin_formats;
+  struct GraphContextExtensions {
+    std::vector<Schema> schemas;
+    std::vector<PinFormat> pin_formats;
   };
 
   // node graph
-  struct NodeEditInstance {
+  struct NodeInstance {
     std::string type_id;
     std::string instance_id;
     float pos_x;
@@ -115,23 +115,23 @@ namespace NodeEdit {
     nlohmann::json datas;
   };
 
-  struct NodeEditConnection {
+  struct Connection {
     std::string node_instance_id_A;
     std::string pin_id_A;
     std::string node_instance_id_B;
     std::string pin_id_B;
   };
 
-  struct NodeEditGraph {
-    std::vector<NodeEditInstance> instances;
-    std::vector<NodeEditConnection> connections;
+  struct Graph {
+    std::vector<NodeInstance> instances;
+    std::vector<Connection> connections;
 
     // effects
-    std::vector<NodeEditConnectionEffect> connection_effects;
-    std::vector<NodeEditNodeEffect> node_effects;
+    std::vector<ConnectionEffect> connection_effects;
+    std::vector<NodeEffect> node_effects;
 
     // ctx modifications/extension
-    NodeEditGraphContextExtensions ext;
+    GraphContextExtensions ext;
 
     std::string graph_title;
 
@@ -139,8 +139,8 @@ namespace NodeEdit {
     bool refresh_ctx;
   };
 
-  struct NodeEditGraphSession {
-    NodeEditGraph graph;
+  struct GraphSession {
+    Graph graph;
     std::string session_id;
     std::string context_id;
     std::string parent_appwindow;

@@ -44,8 +44,8 @@ namespace ModuleUI {
 
   NodeEditorAppWindow::NodeEditorAppWindow(
       const std::string &name,
-      const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
+      const std::shared_ptr<NodeEdit::NodeContext> &ctx,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph) {
     app_window_ = std::make_shared<Cherry::AppWindow>(name, name);
 
     if (graph) {
@@ -238,7 +238,7 @@ namespace ModuleUI {
     NodeEdit::refresh_graph_session(backend_node_graph_session_);
 
     for (const auto &extpf : backend_node_graph_session_->graph.ext.pin_formats) {
-      NodeEdit::NodeEditPinFormat pf;
+      NodeEdit::PinFormat pf;
       pf.type = extpf.type;
       pf.name = extpf.name;
       pf.color = extpf.color;
@@ -248,7 +248,7 @@ namespace ModuleUI {
     }
 
     for (const auto &exts : backend_node_graph_session_->graph.ext.schemas) {
-      NodeEdit::NodeEditSchema s;
+      NodeEdit::Schema s;
       s.id = exts.id;
       s.type = exts.type;
       s.status = exts.status;
@@ -265,7 +265,7 @@ namespace ModuleUI {
       s.header_pin.type = exts.header_pin.type;
 
       for (const auto &extpi : exts.input_pins) {
-        NodeEdit::NodeEditPin pi;
+        NodeEdit::Pin pi;
         pi.id = extpi.id;
         pi.name = extpi.name;
         pi.type = extpi.type;
@@ -273,7 +273,7 @@ namespace ModuleUI {
       }
 
       for (const auto &extpo : exts.output_pins) {
-        NodeEdit::NodeEditPin po;
+        NodeEdit::Pin po;
         po.id = extpo.id;
         po.name = extpo.name;
         po.type = extpo.type;
@@ -332,7 +332,7 @@ namespace ModuleUI {
     instances.clear();
 
     for (auto n : ui_node_graph_.m_InstanciatedNodes) {
-      NodeEdit::NodeEditInstance i;
+      NodeEdit::NodeInstance i;
 
       i.type_id = n.TypeID;
       i.instance_id = n.InstanceID;
@@ -344,7 +344,7 @@ namespace ModuleUI {
     }
 
     for (auto c : ui_node_graph_.m_Connections) {
-      NodeEdit::NodeEditConnection conn;
+      NodeEdit::Connection conn;
 
       conn.node_instance_id_A = c.NodeInstanceIDA;
       conn.node_instance_id_B = c.NodeInstanceIDB;

@@ -22,8 +22,8 @@ namespace ModuleUI {
 
   std::shared_ptr<NodeEditorAppWindow> NodeEditorAppWindow::create(
       const std::string &name,
-      const std::shared_ptr<NodeEdit::NodeEditContext> &ctx,
-      const std::shared_ptr<NodeEdit::NodeEditGraphSession> &graph) {
+      const std::shared_ptr<NodeEdit::NodeContext> &ctx,
+      const std::shared_ptr<NodeEdit::GraphSession> &graph) {
     auto instance = std::shared_ptr<NodeEditorAppWindow>(new NodeEditorAppWindow(name, ctx, graph));
     instance->setup_render_callback();
     return instance;
