@@ -38,6 +38,7 @@ namespace ModuleUI {
     void render_menubar();
     void render_right_menubar();
     void render_bottombar();
+    void focus_at(const float &x, const float &y, const float &zoom = -1);
 
     // Main utilities
     void load_graph(const std::string &json_path);

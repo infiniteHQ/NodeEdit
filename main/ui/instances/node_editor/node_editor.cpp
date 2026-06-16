@@ -66,6 +66,13 @@ namespace ModuleUI {
     load_node_context_from_backend();
     backend_node_graph_session_ = graph;
 
+    // TODO custom icon feature
+    if (backend_node_graph_session_->parent_appwindow.empty()) {
+      app_window_->SetIcon(NodeEdit::get_path("resources/icons/edit.png"));
+    } else {
+      app_window_->SetIcon(NodeEdit::get_path("resources/icons/edit_gray.png"));
+    }
+
     ui_node_graph_.m_NodeSpawnCallback = [this](const std::string &sch_id, float x, float y, const std::string &connID) {
       spawn_node_instance(sch_id, x, y, connID);
     };
@@ -379,6 +386,10 @@ namespace ModuleUI {
       if (!exists)
         return candidate;
     }
+  }
+
+  void NodeEditorAppWindow::focus_at(const float &x, const float &y, const float &zoom) {
+    ui_node_graph_.FocusAt(x, y, zoom);
   }
 
   void NodeEditorAppWindow::spawn_node_instance(

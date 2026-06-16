@@ -21,6 +21,7 @@ namespace ModuleUI {
     std::shared_ptr<Cherry::AppWindow> app_window_;
     bool opened;
   };
+
   class NodeEditorOtherRandomWindow : public std::enable_shared_from_this<NodeEditorOtherRandomWindow> {
    public:
     NodeEditorOtherRandomWindow();
