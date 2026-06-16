@@ -1,6 +1,8 @@
 #include <vxcore/include/vortex.h>
 #include <vxcore/include/vortex_internals.h>
 
+#include <atomic>
+#include <format>
 #include <vxgui/editor/main/editor.hpp>
 
 #include "../ui/instances/node_debugger/node_debugger.hpp"
@@ -66,6 +68,7 @@ namespace NodeEdit {
   NODEEDIT_API bool is_graph_file(const std::string &path);
   NODEEDIT_API bool is_context_exist(const std::string &ctx_name);
   NODEEDIT_API std::shared_ptr<NodeEdit::GraphSession> get_graph_session_by_id(const std::string &session_id);
+  NODEEDIT_API std::string generate_session_id();
 
   // debug
   NODEEDIT_API void setup_example_context();

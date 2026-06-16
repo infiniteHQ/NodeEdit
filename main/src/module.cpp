@@ -104,7 +104,7 @@ NodeEdit::open_graph_and_get_session(const std::string &path, const std::string 
   graph.refresh_effects = true;
 
   auto gs = std::make_shared<NodeEdit::GraphSession>();
-  gs->session_id = "0101";  // TODO generate uniques ids
+  gs->session_id = generate_session_id();
   gs->path = fullpath;
   gs->graph = graph;
   gs->disable_native_save_system = disable_native_save;
@@ -125,6 +125,12 @@ NodeEdit::open_graph_and_get_session(const std::string &path, const std::string 
   get_current_context()->graph_sessions.push_back(gs);
 
   return gs;
+}
+
+std::string NodeEdit::generate_session_id() {
+  static std::atomic<uint32_t> counter{ 0 };
+  auto id = counter.fetch_add(1, std::memory_order_relaxed);
+  return std::format("{:010d}", id);
 }
 
 /*
