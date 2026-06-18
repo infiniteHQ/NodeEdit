@@ -12,8 +12,6 @@ namespace ModuleUI {
     app_window_->SetDockingMode(true);
 
     app_window_->SetLeftMenubarCallback([this]() { ImGui::Text("GHE;llofsoig"); });
-    app_window_->SetInternalPaddingY(0.0f);
-    app_window_->SetInternalPaddingX(0.0f);
 
     app_window_->m_CloseCallback = [=]() {
       Cherry::DeleteAppWindow(app_window_);

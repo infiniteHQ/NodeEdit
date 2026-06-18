@@ -40,19 +40,22 @@ void NodeEdit::open_graph(const std::string &path) {
 
 void NodeEdit::open_graphDEBUG(const std::string &path) {
   {
-    // auto inst = ModuleUI::NodeEditorWrapperAppWindow::create();
-    // Cherry::AddAppWindow(inst->get_app_window());
+    auto inst = ModuleUI::NodeEditorWrapperAppWindow::create();
+    Cherry::AddAppWindow(inst->get_app_window());
   }
   {
-    // auto inst = ModuleUI::NodeEditorOtherRandomWindow::create();
-    // Cherry::AddAppWindow(inst->get_app_window());
+    auto inst = ModuleUI::NodeEditorOtherRandomWindow::create();
+    Cherry::AddAppWindow(inst->get_app_window());
   }
   std::string id;
   {
     nlohmann::json j;
     j["path"] = path;
-    // j["disable_native_saving_system"] = true;
-    // j["parent_appwindow"] = "TEST";
+    j["disable_native_saving_system"] = true;
+    j["graph_title"] = "ADGSDFH";
+    j["parent_appwindow"] = "TEST";
+    j["logo_path"] = NodeEdit::get_path("resources/icons/icon_magnifying_glass.png");
+
     auto ret = ReturnValues();
     auto args = ArgumentValues(j.dump());
     vxe::call_input_event("infinitehq.nodeedit", "open_graph", args, ret);
@@ -68,8 +71,11 @@ void NodeEdit::open_graphDEBUG(const std::string &path) {
   }
 }
 
-std::shared_ptr<NodeEdit::GraphSession>
-NodeEdit::open_graph_and_get_session(const std::string &path, const std::string &parent, const bool &disable_native_save) {
+std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_and_get_session(
+    const std::string &path,
+    const std::string &parent,
+    const bool &disable_native_save,
+    const std::string &logo_path) {
   if (!is_graph_file(path)) {
     get_current_context()->interface->log_error("No graph file in selected file ! (" + path + ")");
   }
@@ -110,6 +116,7 @@ NodeEdit::open_graph_and_get_session(const std::string &path, const std::string 
   gs->disable_native_save_system = disable_native_save;
   gs->parent_appwindow = parent;
   gs->context_id = ctx_name;
+  gs->logo_path = logo_path;
 
   {
     auto inst = ModuleUI::NodeEditorAppWindow::create("Node graph", ctx, gs);

@@ -66,11 +66,14 @@ namespace ModuleUI {
     load_node_context_from_backend();
     backend_node_graph_session_ = graph;
 
-    // TODO custom icon feature
-    if (backend_node_graph_session_->parent_appwindow.empty()) {
-      app_window_->SetIcon(NodeEdit::get_path("resources/icons/edit.png"));
+    if (backend_node_graph_session_->logo_path.empty()) {
+      if (backend_node_graph_session_->parent_appwindow.empty()) {
+        app_window_->SetIcon(NodeEdit::get_path("resources/icons/edit.png"));
+      } else {
+        app_window_->SetIcon(NodeEdit::get_path("resources/icons/edit_gray.png"));
+      }
     } else {
-      app_window_->SetIcon(NodeEdit::get_path("resources/icons/edit_gray.png"));
+      app_window_->SetIcon(backend_node_graph_session_->logo_path);
     }
 
     ui_node_graph_.m_NodeSpawnCallback = [this](const std::string &sch_id, float x, float y, const std::string &connID) {
@@ -308,6 +311,8 @@ namespace ModuleUI {
       n.InstanceID = i.instance_id;
       n.Position.x = i.pos_x;
       n.Position.y = i.pos_y;
+      n.Size.x = i.size_x;
+      n.Size.y = i.size_y;
       n.TypeID = i.type_id;
       // TODO custom data of nodes
       ui_node_graph_.m_InstanciatedNodes.push_back(n);
@@ -345,6 +350,8 @@ namespace ModuleUI {
       i.instance_id = n.InstanceID;
       i.pos_x = n.Position.x;
       i.pos_y = n.Position.y;
+      i.size_x = n.Size.x;
+      i.size_y = n.Size.y;
       // TODO custom data of nodes
 
       instances.push_back(i);

@@ -172,6 +172,7 @@ void NodeEdit::ie_open_graph(ArgumentValues &args, ReturnValues &ret) {
 
   bool disable_native_saving_system = false;
   std::string parent_appwindow = "";  // nothing by default
+  std::string logo_path = "";         // nothing by default
 
   if (args.get_json().contains("disable_native_saving_system") &&
       args.get_json()["disable_native_saving_system"].is_boolean()) {
@@ -182,7 +183,10 @@ void NodeEdit::ie_open_graph(ArgumentValues &args, ReturnValues &ret) {
     parent_appwindow = args.get_json()["parent_appwindow"];
   }
 
-  auto gs = NodeEdit::open_graph_and_get_session(path, parent_appwindow, disable_native_saving_system);
+  if (args.get_json().contains("logo_path") && args.get_json()["logo_path"].is_string()) {
+    logo_path = args.get_json()["logo_path"];
+  }
+  auto gs = NodeEdit::open_graph_and_get_session(path, parent_appwindow, disable_native_saving_system, logo_path);
   std::string id = gs->session_id;
 
   if (args.get_json().contains("graph_title") && args.get_json()["graph_title"].is_string()) {
