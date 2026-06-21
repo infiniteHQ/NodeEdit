@@ -38,16 +38,18 @@ void NodeEdit::open_graph(const std::string &path) {
   NodeEdit::open_graph_and_get_session(path);
 }
 
+static std::vector<std::shared_ptr<ModuleUI::NodeEditorWrapperAppWindow>> s_instances;
 void NodeEdit::open_graphDEBUG(const std::string &path) {
-  {
-    auto inst = ModuleUI::NodeEditorWrapperAppWindow::create();
-    Cherry::AddAppWindow(inst->get_app_window());
-  }
-  {
-    auto inst = ModuleUI::NodeEditorOtherRandomWindow::create();
-    Cherry::AddAppWindow(inst->get_app_window());
-  }
   std::string id;
+  auto inst = ModuleUI::NodeEditorWrapperAppWindow::create();
+  Cherry::AddAppWindow(inst->get_app_window());
+  s_instances.push_back(inst);
+
+  {
+    auto i = ModuleUI::NodeEditorOtherRandomWindow::create();
+    Cherry::AddAppWindow(i->get_app_window());
+  }
+
   {
     nlohmann::json j;
     j["path"] = path;
@@ -61,7 +63,9 @@ void NodeEdit::open_graphDEBUG(const std::string &path) {
     vxe::call_input_event("infinitehq.nodeedit", "open_graph", args, ret);
 
     id = ret.get_json()["session_id"];
+    inst->set_instance_id(id);
   }
+
   {
     nlohmann::json j;
     j["session_id"] = id;

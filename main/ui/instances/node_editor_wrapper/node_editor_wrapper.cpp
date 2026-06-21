@@ -11,7 +11,31 @@ namespace ModuleUI {
     app_window_ = std::make_shared<Cherry::AppWindow>("TEST", "TEST");
     app_window_->SetDockingMode(true);
 
-    app_window_->SetLeftMenubarCallback([this]() { ImGui::Text("GHE;llofsoig"); });
+    app_window_->SetLeftMenubarCallback([this]() {
+      CherryGUI::SetCursorPosX(CherryGUI::GetCursorPosX() + 3.0f);
+
+      CherryNextComponent.SetProperty("padding_y", "6.0f");
+      CherryNextComponent.SetProperty("padding_x", "10.0f");
+      if (CherryKit::ButtonImageText("Save", NodeEdit::get_path("/resources/icons/icon_save.png"))
+              .GetDataAs<bool>("isClicked")) {
+        nlohmann::json j;
+        j["session_id"] = graph_session_id_;
+        auto args = ArgumentValues(j.dump());
+        auto ret = ReturnValues();
+        vxe::call_input_event("infinitehq.nodeedit", "save_nodegraph", args, ret);
+      }
+
+      CherryNextComponent.SetProperty("padding_y", "6.0f");
+      CherryNextComponent.SetProperty("padding_x", "10.0f");
+      if (CherryKit::ButtonImageText("Refresh", NodeEdit::get_path("/resources/icons/icon_refresh.png"))
+              .GetDataAs<bool>("isClicked")) {
+        nlohmann::json j;
+        j["session_id"] = graph_session_id_;
+        auto args = ArgumentValues(j.dump());
+        auto ret = ReturnValues();
+        vxe::call_input_event("infinitehq.nodeedit", "refresh_nodegraph", args, ret);
+      }
+    });
 
     app_window_->m_CloseCallback = [=]() {
       Cherry::DeleteAppWindow(app_window_);
@@ -20,7 +44,7 @@ namespace ModuleUI {
     this->ctx = vxe::get_current_context();
   }  // namespace ModuleUI
 
-  std::shared_ptr<Cherry::AppWindow> &NodeEditorWrapperAppWindow::get_app_window() {
+  std::shared_ptr<Cherry::AppWindow>& NodeEditorWrapperAppWindow::get_app_window() {
     return app_window_;
   }
 

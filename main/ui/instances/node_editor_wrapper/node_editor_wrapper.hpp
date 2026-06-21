@@ -13,13 +13,18 @@ namespace ModuleUI {
     NodeEditorWrapperAppWindow();
 
     void menubar();
-    std::shared_ptr<Cherry::AppWindow> &get_app_window();
+    std::shared_ptr<Cherry::AppWindow>& get_app_window();
     static std::shared_ptr<NodeEditorWrapperAppWindow> create();
+
+    void set_instance_id(const std::string& gsid) {
+      graph_session_id_ = gsid;
+    }
 
    private:
     std::shared_ptr<VxContext> ctx;
     std::shared_ptr<Cherry::AppWindow> app_window_;
     bool opened;
+    std::string graph_session_id_ = "undefined";
   };
 
   class NodeEditorOtherRandomWindow : public std::enable_shared_from_this<NodeEditorOtherRandomWindow> {
@@ -27,7 +32,7 @@ namespace ModuleUI {
     NodeEditorOtherRandomWindow();
 
     void menubar();
-    std::shared_ptr<Cherry::AppWindow> &get_app_window();
+    std::shared_ptr<Cherry::AppWindow>& get_app_window();
     static std::shared_ptr<NodeEditorOtherRandomWindow> create();
     void render();
 
