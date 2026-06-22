@@ -1,6 +1,6 @@
 //
-//  node_editor_rendering.cpp
-//  Source file for main rendering functions of node editor window.
+//  node_editor.cpp
+//  Source file of node editor window interface (backend and frontend support).
 //
 //	Copyright (c) 2026 Infinite
 //
@@ -50,17 +50,20 @@ namespace ModuleUI {
 
     if (graph) {
       if (!graph->disable_native_save_system) {
+        app_window_->SetSaveMode(true);
         app_window_->SetLeftMenubarCallback([this]() { render_menubar(); });
         app_window_->SetRightMenubarCallback([this]() { render_right_menubar(); });
       }
+
+      if (!graph->disable_native_close_system) {
+        app_window_->m_CloseCallback = [=]() {
+          Cherry::DeleteAppWindow(app_window_);
+          app_window_->SetVisibility(false);
+        };
+      } else {
+        app_window_->SetClosable(false);
+      }
     }
-
-    app_window_->SetSaveMode(true);
-
-    app_window_->m_CloseCallback = [=]() {
-      Cherry::DeleteAppWindow(app_window_);
-      app_window_->SetVisibility(false);
-    };
 
     backend_node_ctx_ = ctx;
     load_node_context_from_backend();

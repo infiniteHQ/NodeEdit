@@ -164,6 +164,7 @@ namespace NodeEdit {
     std::string path;  // json file
     std::string logo_path;
     bool disable_native_save_system = false;
+    bool disable_native_close_system = false;
     bool ask_for_save = false;
     bool ask_for_refresh = false;
   };

@@ -11,9 +11,12 @@ namespace ModuleUI {
     app_window_ = std::make_shared<Cherry::AppWindow>("TEST", "TEST");
     app_window_->SetDockingMode(true);
 
-    app_window_->SetLeftMenubarCallback([this]() {
-      CherryGUI::SetCursorPosX(CherryGUI::GetCursorPosX() + 3.0f);
+    app_window_->SetClosable(true);
 
+    app_window_->SetInternalPaddingX(0.0f);
+    app_window_->SetInternalPaddingY(0.0f);
+
+    app_window_->SetLeftMenubarCallback([this]() {
       CherryNextComponent.SetProperty("padding_y", "6.0f");
       CherryNextComponent.SetProperty("padding_x", "10.0f");
       if (CherryKit::ButtonImageText("Save", NodeEdit::get_path("/resources/icons/icon_save.png"))

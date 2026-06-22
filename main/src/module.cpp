@@ -117,6 +117,7 @@ std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_and_get_session(
   gs->session_id = generate_session_id();
   gs->path = fullpath;
   gs->graph = graph;
+  gs->disable_native_close_system = true;
   gs->disable_native_save_system = disable_native_save;
   gs->parent_appwindow = parent;
   gs->context_id = ctx_name;
