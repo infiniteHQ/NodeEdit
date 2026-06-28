@@ -62,6 +62,7 @@ namespace ModuleUI {
         auto parent = Cherry::GetAppWindowByName(backend_node_graph_session_->parent_appwindow);
         if (parent) {
           app_window_->SetParent(parent);
+          app_window_->m_WindowRebuilded = false;
         }
       }
 

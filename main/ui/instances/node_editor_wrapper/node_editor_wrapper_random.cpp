@@ -6,12 +6,15 @@
 #include "node_editor_wrapper.hpp"
 
 namespace ModuleUI {
-  NodeEditorOtherRandomWindow::NodeEditorOtherRandomWindow() {
-    app_window_ = std::make_shared<Cherry::AppWindow>("ASDASD", "ASDASD");
 
-    app_window_->SetLeftMenubarCallback([this]() { ImGui::Text("GHE;llofsoig"); });
-    app_window_->SetInternalPaddingY(0.0f);
-    app_window_->SetInternalPaddingX(0.0f);
+  static int it = 1;
+  NodeEditorOtherRandomWindow::NodeEditorOtherRandomWindow() {
+    it++;
+    app_window_ = std::make_shared<Cherry::AppWindow>(std::to_string(it), std::to_string(it));
+
+    // app_window_->SetLeftMenubarCallback([this]() { ImGui::Text("GHE;llofsoig"); });
+    // app_window_->SetInternalPaddingY(0.0f);
+    // app_window_->SetInternalPaddingX(0.0f);
 
     app_window_->m_CloseCallback = [=]() {
       Cherry::DeleteAppWindow(app_window_);
@@ -46,6 +49,7 @@ namespace ModuleUI {
       auto parent = Cherry::GetAppWindowByName("TEST");
       if (parent) {
         app_window_->SetParent(parent);
+        app_window_->m_WindowRebuilded = false;
       }
       i = true;
     }
