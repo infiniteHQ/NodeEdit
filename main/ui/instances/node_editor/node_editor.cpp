@@ -48,7 +48,8 @@ namespace ModuleUI {
       const std::shared_ptr<NodeEdit::GraphSession> &graph) {
     app_window_ = std::make_shared<Cherry::AppWindow>(name, name);
 
-    app_window_->SetDefaultBehavior(DefaultAppWindowBehaviors::DefaultDocking, "down");
+    app_window_->SetInternalPaddingY(0.0f);
+    app_window_->SetInternalPaddingX(0.0f);
 
     if (graph) {
       if (!graph->disable_native_save_system) {

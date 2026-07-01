@@ -104,6 +104,9 @@ namespace ModuleUI {
       }
     }
 
+    CherryStyle::AddMarginX(0.0f);
+    CherryStyle::AddMarginY(3.0f);
+
     CherryApp.PushComponentPool(&component_pool_);
     auto &cmp = CherryKit::NodeAreaOpen("", 0, 0, &ui_node_ctx_, &ui_node_graph_);
     if (refreshed_) {

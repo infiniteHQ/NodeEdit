@@ -13,6 +13,18 @@ namespace ModuleUI {
     app_window_ = std::make_shared<Cherry::AppWindow>(std::to_string(it), std::to_string(it));
 
     // app_window_->SetLeftMenubarCallback([this]() { ImGui::Text("GHE;llofsoig"); });
+    if (it == 2) {
+      app_window_->SetDefaultBehavior(DefaultAppWindowBehaviors::DefaultDocking, "left");
+    }
+    if (it == 3) {
+      app_window_->SetDefaultBehavior(DefaultAppWindowBehaviors::DefaultDocking, "right");
+    }
+    if (it == 4) {
+      app_window_->SetDefaultBehavior(DefaultAppWindowBehaviors::DefaultDocking, "right_up");
+    }
+    if (it == 5) {
+      app_window_->SetDefaultBehavior(DefaultAppWindowBehaviors::DefaultDocking, "left_down");
+    }
     // app_window_->SetInternalPaddingY(0.0f);
     // app_window_->SetInternalPaddingX(0.0f);
 
@@ -43,8 +55,6 @@ namespace ModuleUI {
   }
 
   void NodeEditorOtherRandomWindow::render() {
-    static bool i = false;
-
     if (!i) {
       auto parent = Cherry::GetAppWindowByName("TEST");
       if (parent) {

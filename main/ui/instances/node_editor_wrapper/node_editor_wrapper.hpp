@@ -37,6 +37,7 @@ namespace ModuleUI {
     void render();
 
     void setup_render_callback();
+    bool i = false;
 
    private:
     std::shared_ptr<VxContext> ctx;

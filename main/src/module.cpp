@@ -49,6 +49,20 @@ void NodeEdit::open_graphDEBUG(const std::string &path) {
     auto i = ModuleUI::NodeEditorOtherRandomWindow::create();
     Cherry::AddAppWindow(i->get_app_window());
   }
+  {
+    auto i = ModuleUI::NodeEditorOtherRandomWindow::create();
+    Cherry::AddAppWindow(i->get_app_window());
+  }
+
+  {
+    auto i = ModuleUI::NodeEditorOtherRandomWindow::create();
+    Cherry::AddAppWindow(i->get_app_window());
+  }
+
+  {
+    auto i = ModuleUI::NodeEditorOtherRandomWindow::create();
+    Cherry::AddAppWindow(i->get_app_window());
+  }
 
   {
     nlohmann::json j;
