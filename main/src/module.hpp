@@ -143,11 +143,20 @@ namespace NodeEdit {
       const std::string &pin_id);
 
   NODEEDIT_API void set_graph_title(const std::shared_ptr<NodeEdit::GraphSession> &graph, const std::string &title);
+  NODEEDIT_API void clear_all_graph_ext_schemas(const std::shared_ptr<NodeEdit::GraphSession> &graph);
+  NODEEDIT_API void delete_graph_ext_schema(
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
+      const std::string &schema_id);
+  NODEEDIT_API void clear_all_graph_ext_pin_formats(const std::shared_ptr<NodeEdit::GraphSession> &graph);
+  NODEEDIT_API void delete_graph_ext_pin_format(
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
+      const std::string &pin_format_type);
 
   // events
   NODEEDIT_API void ie_create_node_context(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_setup_pin_format(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_setup_schema(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_setup_schema_to_graph_ext(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_open_graph(ArgumentValues &args, ReturnValues &ret);
 
   NODEEDIT_API void ie_add_effect_to_node(ArgumentValues &args, ReturnValues &ret);
@@ -171,6 +180,11 @@ namespace NodeEdit {
   NODEEDIT_API void ie_focus_at(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_zoom_at(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_spawn_at(ArgumentValues &args, ReturnValues &ret);
+
+  NODEEDIT_API void ie_clear_all_graph_ext_schemas(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_delete_graph_ext_schema(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_clear_all_graph_ext_pin_formats(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_delete_graph_ext_pin_format(ArgumentValues &args, ReturnValues &ret);
 
 }  // namespace NodeEdit
 

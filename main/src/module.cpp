@@ -49,26 +49,12 @@ void NodeEdit::open_graphDEBUG(const std::string &path) {
     auto i = ModuleUI::NodeEditorOtherRandomWindow::create();
     Cherry::AddAppWindow(i->get_app_window());
   }
-  {
-    auto i = ModuleUI::NodeEditorOtherRandomWindow::create();
-    Cherry::AddAppWindow(i->get_app_window());
-  }
-
-  {
-    auto i = ModuleUI::NodeEditorOtherRandomWindow::create();
-    Cherry::AddAppWindow(i->get_app_window());
-  }
-
-  {
-    auto i = ModuleUI::NodeEditorOtherRandomWindow::create();
-    Cherry::AddAppWindow(i->get_app_window());
-  }
 
   {
     nlohmann::json j;
     j["path"] = path;
     j["disable_native_saving_system"] = true;
-    j["graph_title"] = "ADGSDFH";
+    j["graph_title"] = "C++ Simple Program";
     j["parent_appwindow"] = "TEST";
     j["logo_path"] = NodeEdit::get_path("resources/icons/icon_magnifying_glass.png");
 
@@ -173,7 +159,7 @@ void NodeEdit::setup_example_context() {
   // create node context
   {
     auto args = ArgumentValues(R"({
-    "name": "efusion_blueprint"
+    "name": "testcpp"
   })");
     auto ret = ReturnValues();
     vxe::call_input_event("infinitehq.nodeedit", "create_node_context", args, ret);
@@ -182,7 +168,7 @@ void NodeEdit::setup_example_context() {
   // Setup pin formats
   {
     auto args = ArgumentValues(R"({
-    "context_name": "efusion_blueprint",
+    "context_name": "testcpp",
     "type":         "bool",
     "name":         "Boolean",
     "color":        "#00FF00",
@@ -194,7 +180,7 @@ void NodeEdit::setup_example_context() {
   }
   {
     auto args = ArgumentValues(R"({
-    "context_name": "efusion_blueprint",
+    "context_name": "testcpp",
     "type":         "eee",
     "name":         "Boolean",
     "color":        "#FF0000",
@@ -209,7 +195,7 @@ void NodeEdit::setup_example_context() {
   // Setup schemas
   {
     auto args = ArgumentValues(R"({
-    "context_name": "efusion_blueprint",
+    "context_name": "testcpp",
     "id": "is_cool",
     "type": "blueprint",
     "status": "active",
@@ -870,4 +856,47 @@ std::shared_ptr<NodeEdit::GraphSession> NodeEdit::get_graph_session_by_id(const 
     }
   }
   return nullptr;
+}
+
+void NodeEdit::clear_all_graph_ext_schemas(const std::shared_ptr<NodeEdit::GraphSession> &graph) {
+  if (!graph) {
+    return;
+  }
+  graph->graph.ext.schemas.clear();
+  graph->graph.refresh_ctx = true;
+}
+
+void NodeEdit::delete_graph_ext_schema(const std::shared_ptr<NodeEdit::GraphSession> &graph, const std::string &schema_id) {
+  if (!graph) {
+    return;
+  }
+  auto &schemas = graph->graph.ext.schemas;
+  schemas.erase(
+      std::remove_if(schemas.begin(), schemas.end(), [&schema_id](const Schema &s) { return s.id == schema_id; }),
+      schemas.end());
+  graph->graph.refresh_ctx = true;
+}
+
+void NodeEdit::clear_all_graph_ext_pin_formats(const std::shared_ptr<NodeEdit::GraphSession> &graph) {
+  if (!graph) {
+    return;
+  }
+  graph->graph.ext.pin_formats.clear();
+  graph->graph.refresh_ctx = true;
+}
+
+void NodeEdit::delete_graph_ext_pin_format(
+    const std::shared_ptr<NodeEdit::GraphSession> &graph,
+    const std::string &pin_format_type) {
+  if (!graph) {
+    return;
+  }
+  auto &pin_formats = graph->graph.ext.pin_formats;
+  pin_formats.erase(
+      std::remove_if(
+          pin_formats.begin(),
+          pin_formats.end(),
+          [&pin_format_type](const PinFormat &pf) { return pf.type == pin_format_type; }),
+      pin_formats.end());
+  graph->graph.refresh_ctx = true;
 }

@@ -109,6 +109,10 @@ void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &ret) {
     s.label_color = j["label_color"];
   if (j.contains("header_color"))
     s.header_color = j["header_color"];
+  if (j.contains("border_color"))
+    s.border_color = j["border_color"];
+  if (j.contains("background_color"))
+    s.background_color = j["background_color"];
   if (j.contains("spawnable"))
     s.spawnable = j["spawnable"];
 
@@ -163,6 +167,105 @@ void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &ret) {
   }
 
   NodeEdit::add_schema_to_context(c->id, s);
+}
+
+void NodeEdit::ie_setup_schema_to_graph_ext(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+
+  if (!j.contains("session_id"))
+    return;
+  const std::string session_id = j["session_id"];
+
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    get_current_context()->interface->log_error(
+        "Cannot find graph session for id: (" + gs->session_id + "). Context not found.");
+    // TODO err in return values
+    return;
+  }
+
+  Schema s;
+
+  if (!j.contains("id"))
+    return;
+  s.id = j["id"];
+  if (!j.contains("type"))
+    return;
+  s.type = j["type"];
+
+  if (j.contains("header_logo_path"))
+    s.header_logo_path = j["header_logo_path"];
+  if (j.contains("status"))
+    s.status = j["status"];
+  if (j.contains("description_color"))
+    s.description_color = j["description_color"];
+  if (j.contains("second_label"))
+    s.second_label = j["second_label"];
+  if (j.contains("second_label_color"))
+    s.second_label_color = j["second_label_color"];
+  if (j.contains("label"))
+    s.label = j["label"];
+  if (j.contains("label_color"))
+    s.label_color = j["label_color"];
+  if (j.contains("header_color"))
+    s.header_color = j["header_color"];
+  if (j.contains("border_color"))
+    s.border_color = j["border_color"];
+  if (j.contains("background_color"))
+    s.background_color = j["background_color"];
+  if (j.contains("spawnable"))
+    s.spawnable = j["spawnable"];
+
+  if (j.contains("header_pin")) {
+    const auto &hp = j["header_pin"];
+    if (hp.contains("id"))
+      s.header_pin.id = hp["id"];
+    if (hp.contains("name"))
+      s.header_pin.name = hp["name"];
+    if (hp.contains("type"))
+      s.header_pin.type = hp["type"];
+  }
+
+  if (j.contains("input_pins")) {
+    for (const auto &pin_json : j["input_pins"]) {
+      Pin pin;
+      if (pin_json.contains("id"))
+        pin.id = pin_json["id"];
+      if (pin_json.contains("name"))
+        pin.name = pin_json["name"];
+      if (pin_json.contains("type"))
+        pin.type = pin_json["type"];
+      s.input_pins.push_back(pin);
+    }
+  }
+
+  if (j.contains("output_pins")) {
+    for (const auto &pin_json : j["output_pins"]) {
+      Pin pin;
+      if (pin_json.contains("id"))
+        pin.id = pin_json["id"];
+      if (pin_json.contains("name"))
+        pin.name = pin_json["name"];
+      if (pin_json.contains("type"))
+        pin.type = pin_json["type"];
+      s.output_pins.push_back(pin);
+    }
+  }
+
+  if (j.contains("spawn_possibility")) {
+    const auto &sp = j["spawn_possibility"];
+    if (sp.contains("category"))
+      s.spawn_possibility.category = sp["category"];
+    if (sp.contains("proper_description"))
+      s.spawn_possibility.proper_description = sp["proper_description"];
+    if (sp.contains("proper_logo"))
+      s.spawn_possibility.proper_logo = sp["proper_logo"];
+    if (sp.contains("proper_name"))
+      s.spawn_possibility.proper_name = sp["proper_name"];
+    if (sp.contains("schema_id"))
+      s.spawn_possibility.schema_id = sp["schema_id"];
+  }
+  NodeEdit::add_schema_to_graph_ctx_ext(gs, s);
 }
 
 void NodeEdit::ie_open_graph(ArgumentValues &args, ReturnValues &ret) {
@@ -632,4 +735,70 @@ NODEEDIT_API void NodeEdit::ie_spawn_at(ArgumentValues &args, ReturnValues &ret)
   }
 
   gs->graph.spawn_request.pending = true;
+}
+
+void NodeEdit::ie_clear_all_graph_ext_schemas(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id"))
+    return;
+  const std::string session_id = j["session_id"];
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    get_current_context()->interface->log_error(
+        "Cannot find graph session for id: (" + session_id + "). Context not found.");
+    // TODO err in return values
+    return;
+  }
+  NodeEdit::clear_all_graph_ext_schemas(gs);
+}
+
+void NodeEdit::ie_delete_graph_ext_schema(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id"))
+    return;
+  const std::string session_id = j["session_id"];
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    get_current_context()->interface->log_error(
+        "Cannot find graph session for id: (" + session_id + "). Context not found.");
+    // TODO err in return values
+    return;
+  }
+  if (!j.contains("schema_id"))
+    return;
+  const std::string schema_id = j["schema_id"];
+  NodeEdit::delete_graph_ext_schema(gs, schema_id);
+}
+
+void NodeEdit::ie_delete_graph_ext_pin_format(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id"))
+    return;
+  const std::string session_id = j["session_id"];
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    get_current_context()->interface->log_error(
+        "Cannot find graph session for id: (" + session_id + "). Context not found.");
+    // TODO err in return values
+    return;
+  }
+  if (!j.contains("pin_format_type"))
+    return;
+  const std::string pin_format_type = j["pin_format_type"];
+  NodeEdit::delete_graph_ext_pin_format(gs, pin_format_type);
+}
+
+void NodeEdit::ie_clear_all_graph_ext_pin_formats(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id"))
+    return;
+  const std::string session_id = j["session_id"];
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    get_current_context()->interface->log_error(
+        "Cannot find graph session for id: (" + session_id + "). Context not found.");
+    // TODO err in return values
+    return;
+  }
+  NodeEdit::clear_all_graph_ext_pin_formats(gs);
 }

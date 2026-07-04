@@ -25,16 +25,16 @@ class Module : public ModuleInterface {
         "Edit this graph",
         NodeEdit::get_path("resources/icons/edit.png")));
 
-    this->add_content_browser_item_handler(ItemHandlerInterface(
-        "infinitehq_nodeedit:graph",
-        NodeEdit::open_graphDEBUG,
-        "Edit DEBUG",
-        "Edit this graph",
-        NodeEdit::get_path("resources/icons/edit.png")));
-
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_create_node_context, "create_node_context"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_setup_pin_format, "setup_pin_format"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_setup_schema, "setup_schema"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_setup_schema_to_graph_ext, "setup_schema_to_graph_ext"));
+
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_clear_all_graph_ext_schemas, "clear_all_graph_ext_schemas"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_delete_graph_ext_schema, "delete_graph_ext_schema"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_clear_all_graph_ext_pin_formats, "clear_all_graph_ext_pin_formats"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_setup_schema_to_graph_ext, "delete_graph_ext_pin_format"));
+
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_open_graph, "open_graph"));
 
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_add_effect_to_node, "add_effect_to_node"));

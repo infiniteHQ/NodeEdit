@@ -38,6 +38,28 @@ namespace ModuleUI {
         auto ret = ReturnValues();
         vxe::call_input_event("infinitehq.nodeedit", "refresh_nodegraph", args, ret);
       }
+
+      CherryNextComponent.SetProperty("padding_y", "6.0f");
+      CherryNextComponent.SetProperty("padding_x", "10.0f");
+      if (CherryKit::ButtonImageText("Compile", NodeEdit::get_path("/resources/icons/icon_refresh.png"))
+              .GetDataAs<bool>("isClicked")) {
+        nlohmann::json j;
+        j["session_id"] = graph_session_id_;
+        auto args = ArgumentValues(j.dump());
+        auto ret = ReturnValues();
+        vxe::call_input_event("infinitehq.nodeedit", "refresh_nodegraph", args, ret);
+      }
+
+      CherryNextComponent.SetProperty("padding_y", "6.0f");
+      CherryNextComponent.SetProperty("padding_x", "10.0f");
+      if (CherryKit::ButtonImageText("Run", NodeEdit::get_path("/resources/icons/icon_refresh.png"))
+              .GetDataAs<bool>("isClicked")) {
+        nlohmann::json j;
+        j["session_id"] = graph_session_id_;
+        auto args = ArgumentValues(j.dump());
+        auto ret = ReturnValues();
+        vxe::call_input_event("infinitehq.nodeedit", "refresh_nodegraph", args, ret);
+      }
     });
 
     app_window_->m_CloseCallback = [=]() {
