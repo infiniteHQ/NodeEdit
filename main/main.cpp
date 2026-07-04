@@ -60,6 +60,12 @@ class Module : public ModuleInterface {
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_zoom_at, "zoom_at"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_spawn_at, "spawn_at"));
 
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_pin_format, "get_pin_format"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_schema, "get_schema"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_ext_pin_format, "get_ext_pin_format"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_ext_schema, "get_ext_schema"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_ext_schemas, "get_all_ext_schemas"));
+
     NodeEdit::setup_example_context();
   }
 

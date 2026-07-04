@@ -107,6 +107,20 @@ namespace NodeEdit {
   NODEEDIT_API const NodeEdit::Schema *find_schema(const NodeEdit::NodeContext &ctx, const std::string &type_id);
   NODEEDIT_API const NodeEdit::NodeContext *find_context(const std::string &context_id);
   NODEEDIT_API const NodeEdit::NodeInstance *find_instance(const NodeEdit::Graph &graph, const std::string &instance_id);
+  NODEEDIT_API const NodeEdit::PinFormat *find_pin_format(const NodeEdit::NodeContext &ctx, const std::string &type);
+
+  NODEEDIT_API nlohmann::json pin_format_to_json(const PinFormat &pf);
+  NODEEDIT_API nlohmann::json schema_to_json(const Schema &s);
+
+  NODEEDIT_API const PinFormat *get_pin_format(const std::string &ctx_id, const std::string &pin_format_type);
+  NODEEDIT_API const Schema *get_schema(const std::string &ctx_id, const std::string &schema_id);
+
+  NODEEDIT_API const PinFormat *get_ext_pin_format(
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
+      const std::string &pin_format_type);
+  NODEEDIT_API const Schema *get_ext_schema(
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
+      const std::string &schema_id);
 
   NODEEDIT_API std::vector<std::pair<std::string, std::string>> get_all_node_input_pins(
       const std::shared_ptr<NodeEdit::GraphSession> &graph,
@@ -122,6 +136,7 @@ namespace NodeEdit {
       const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const PinFormat &pin_format);
 
+  NODEEDIT_API nlohmann::json get_all_ext_schemas(const std::shared_ptr<NodeEdit::GraphSession> &graph);
   // Effect API
   NODEEDIT_API void add_effect_to_node(const std::shared_ptr<NodeEdit::GraphSession> &graph, const NodeEffect &e);
 
@@ -185,6 +200,12 @@ namespace NodeEdit {
   NODEEDIT_API void ie_delete_graph_ext_schema(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_clear_all_graph_ext_pin_formats(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_delete_graph_ext_pin_format(ArgumentValues &args, ReturnValues &ret);
+
+  NODEEDIT_API void ie_get_pin_format(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_schema(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_ext_pin_format(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_ext_schema(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_ext_schemas(ArgumentValues &args, ReturnValues &ret);
 
 }  // namespace NodeEdit
 

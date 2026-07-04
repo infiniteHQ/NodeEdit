@@ -594,6 +594,13 @@ const NodeEdit::Schema *NodeEdit::find_schema(const NodeEdit::NodeContext &ctx, 
   return nullptr;
 }
 
+const NodeEdit::PinFormat *NodeEdit::find_pin_format(const NodeEdit::NodeContext &ctx, const std::string &type) {
+  for (const auto &pf : ctx.pin_formats)
+    if (pf.type == type)
+      return &pf;
+  return nullptr;
+}
+
 const NodeEdit::NodeContext *NodeEdit::find_context(const std::string &context_id) {
   for (const auto &ctx : get_current_context()->contexts)
     if (ctx->id == context_id)
@@ -899,4 +906,118 @@ void NodeEdit::delete_graph_ext_pin_format(
           [&pin_format_type](const PinFormat &pf) { return pf.type == pin_format_type; }),
       pin_formats.end());
   graph->graph.refresh_ctx = true;
+}
+
+nlohmann::json NodeEdit::pin_format_to_json(const NodeEdit::PinFormat &pf) {
+  nlohmann::json c;
+  c["type"] = pf.type;
+  c["delegate"] = pf.delegate;
+  c["description"] = pf.description;
+  c["name"] = pf.name;
+  c["color"] = pf.color;
+  c["shape"] = pf.shape;
+  return c;
+}
+
+nlohmann::json NodeEdit::schema_to_json(const NodeEdit::Schema &s) {
+  nlohmann::json schema;
+
+  schema["input_pins"] = nlohmann::json::array();
+  for (const auto &pin : s.input_pins) {
+    nlohmann::json p;
+    p["type"] = pin.type;
+    p["name"] = pin.name;
+    p["id"] = pin.id;
+    schema["input_pins"].push_back(p);
+  }
+
+  schema["output_pins"] = nlohmann::json::array();
+  for (const auto &pin : s.output_pins) {
+    nlohmann::json p;
+    p["type"] = pin.type;
+    p["name"] = pin.name;
+    p["id"] = pin.id;
+    schema["output_pins"].push_back(p);
+  }
+
+  schema["header_pin"]["type"] = s.header_pin.type;
+  schema["header_pin"]["name"] = s.header_pin.name;
+  schema["header_pin"]["id"] = s.header_pin.id;
+
+  schema["spawnable"] = s.spawnable;
+  if (s.spawnable) {
+    nlohmann::json sp;
+    sp["proper_name"] = s.spawn_possibility.proper_name;
+    sp["proper_description"] = s.spawn_possibility.proper_description;
+    sp["proper_logo"] = s.spawn_possibility.proper_logo;
+    sp["category"] = s.spawn_possibility.category;
+    sp["schema_id"] = s.spawn_possibility.schema_id;
+    schema["spawn_possibility"] = sp;
+  }
+
+  schema["id"] = s.id;
+  schema["header_color"] = s.header_color;
+  schema["border_color"] = s.border_color;
+  schema["background_color"] = s.background_color;
+  schema["label"] = s.label;
+  schema["label_color"] = s.label_color;
+  schema["second_label"] = s.second_label;
+  schema["second_label_color"] = s.second_label_color;
+  schema["description_color"] = s.description_color;
+  schema["header_logo_path"] = s.header_logo_path;
+  schema["status"] = s.status;
+  schema["type"] = s.type;
+
+  return schema;
+}
+
+const NodeEdit::PinFormat *NodeEdit::get_pin_format(const std::string &ctx_id, const std::string &pin_format_type) {
+  const auto *ctx = NodeEdit::find_context(ctx_id);
+  if (!ctx) {
+    return nullptr;
+  }
+  return NodeEdit::find_pin_format(*ctx, pin_format_type);
+}
+
+const NodeEdit::Schema *NodeEdit::get_schema(const std::string &ctx_id, const std::string &schema_id) {
+  const auto *ctx = NodeEdit::find_context(ctx_id);
+  if (!ctx) {
+    return nullptr;
+  }
+  return NodeEdit::find_schema(*ctx, schema_id);
+}
+
+const NodeEdit::PinFormat *NodeEdit::get_ext_pin_format(
+    const std::shared_ptr<NodeEdit::GraphSession> &graph,
+    const std::string &pin_format_type) {
+  if (!graph) {
+    return nullptr;
+  }
+  for (const auto &pf : graph->graph.ext.pin_formats)
+    if (pf.type == pin_format_type)
+      return &pf;
+  return nullptr;
+}
+
+const NodeEdit::Schema *NodeEdit::get_ext_schema(
+    const std::shared_ptr<NodeEdit::GraphSession> &graph,
+    const std::string &schema_id) {
+  if (!graph) {
+    return nullptr;
+  }
+  for (const auto &s : graph->graph.ext.schemas)
+    if (s.id == schema_id)
+      return &s;
+  return nullptr;
+}
+
+nlohmann::json NodeEdit::get_all_ext_schemas(const std::shared_ptr<NodeEdit::GraphSession> &graph) {
+  nlohmann::json arr = nlohmann::json::array();
+  if (!graph) {
+    return arr;
+  }
+  for (const auto &s : graph->graph.ext.schemas) {
+    arr.push_back(NodeEdit::schema_to_json(s));
+  }
+  return arr;
 }

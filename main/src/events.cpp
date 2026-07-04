@@ -802,3 +802,108 @@ void NodeEdit::ie_clear_all_graph_ext_pin_formats(ArgumentValues &args, ReturnVa
   }
   NodeEdit::clear_all_graph_ext_pin_formats(gs);
 }
+
+void NodeEdit::ie_get_pin_format(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("context_id"))
+    return;
+  const std::string context_id = j["context_id"];
+  if (!j.contains("type"))
+    return;
+  const std::string type = j["type"];
+
+  const auto *pf = NodeEdit::get_pin_format(context_id, type);
+  if (!pf) {
+    get_current_context()->interface->log_error(
+        "Cannot find pin format for type: (" + type + ") in context: (" + context_id + ").");
+    // TODO err in return values
+    return;
+  }
+  ret.set_json(NodeEdit::pin_format_to_json(*pf));
+}
+
+void NodeEdit::ie_get_schema(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("context_id"))
+    return;
+  const std::string context_id = j["context_id"];
+  if (!j.contains("schema_id"))
+    return;
+  const std::string schema_id = j["schema_id"];
+
+  const auto *s = NodeEdit::get_schema(context_id, schema_id);
+  if (!s) {
+    get_current_context()->interface->log_error(
+        "Cannot find schema for id: (" + schema_id + ") in context: (" + context_id + ").");
+    // TODO err in return values
+    return;
+  }
+  ret.set_json(NodeEdit::schema_to_json(*s));
+}
+
+void NodeEdit::ie_get_ext_pin_format(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id"))
+    return;
+  const std::string session_id = j["session_id"];
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    get_current_context()->interface->log_error(
+        "Cannot find graph session for id: (" + session_id + "). Context not found.");
+    // TODO err in return values
+    return;
+  }
+  if (!j.contains("type"))
+    return;
+  const std::string type = j["type"];
+
+  const auto *pf = NodeEdit::get_ext_pin_format(gs, type);
+  if (!pf) {
+    get_current_context()->interface->log_error(
+        "Cannot find ext pin format for type: (" + type + ") in session: (" + session_id + ").");
+    // TODO err in return values
+    return;
+  }
+  ret.set_json(NodeEdit::pin_format_to_json(*pf));
+}
+
+void NodeEdit::ie_get_ext_schema(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id"))
+    return;
+  const std::string session_id = j["session_id"];
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    get_current_context()->interface->log_error(
+        "Cannot find graph session for id: (" + session_id + "). Context not found.");
+    // TODO err in return values
+    return;
+  }
+  if (!j.contains("schema_id"))
+    return;
+  const std::string schema_id = j["schema_id"];
+
+  const auto *s = NodeEdit::get_ext_schema(gs, schema_id);
+  if (!s) {
+    get_current_context()->interface->log_error(
+        "Cannot find ext schema for id: (" + schema_id + ") in session: (" + session_id + ").");
+    // TODO err in return values
+    return;
+  }
+  ret.set_json(NodeEdit::schema_to_json(*s));
+}
+
+void NodeEdit::ie_get_all_ext_schemas(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id"))
+    return;
+  const std::string session_id = j["session_id"];
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    get_current_context()->interface->log_error(
+        "Cannot find graph session for id: (" + session_id + "). Context not found.");
+    // TODO err in return values
+    return;
+  }
+  ret.set_json({ { "schemas", NodeEdit::get_all_ext_schemas(gs) } });
+}
