@@ -61,10 +61,18 @@ class Module : public ModuleInterface {
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_spawn_at, "spawn_at"));
 
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_pin_format, "get_pin_format"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_pin_formats, "get_all_pin_formats"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_schema, "get_schema"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_schemas, "get_all_schemas"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_ext_schemas, "get_all_ext_schemas"));
+
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_graph_ext_pin_formats, "get_all_graph_ext_pin_formats"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_ext_pin_format, "get_ext_pin_format"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_ext_schema, "get_ext_schema"));
-    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_ext_schemas, "get_all_ext_schemas"));
+
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_find_node_by_schema_id, "find_node_by_schema_id"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_node_type_id, "get_node_type_id"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_node_data, "get_node_data"));
 
     NodeEdit::setup_example_context();
   }

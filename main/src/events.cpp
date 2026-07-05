@@ -907,3 +907,78 @@ void NodeEdit::ie_get_all_ext_schemas(ArgumentValues &args, ReturnValues &ret) {
   }
   ret.set_json({ { "schemas", NodeEdit::get_all_ext_schemas(gs) } });
 }
+
+void NodeEdit::ie_get_all_pin_formats(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("context_id"))
+    return;
+  const std::string context_id = j["context_id"];
+
+  ret.set_json({ { "pin_formats", NodeEdit::get_all_pin_formats(context_id) } });
+}
+
+void NodeEdit::ie_get_all_schemas(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("context_id"))
+    return;
+  const std::string context_id = j["context_id"];
+
+  ret.set_json({ { "schemas", NodeEdit::get_all_schemas(context_id) } });
+}
+
+void NodeEdit::ie_get_all_graph_ext_pin_formats(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id"))
+    return;
+  const std::string session_id = j["session_id"];
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs) {
+    get_current_context()->interface->log_error(
+        "Cannot find graph session for id: (" + session_id + "). Context not found.");
+    // TODO err in return values
+    return;
+  }
+  ret.set_json({ { "pin_formats", NodeEdit::get_all_graph_ext_pin_formats(gs) } });
+}
+
+void NodeEdit::ie_find_node_by_schema_id(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id") || !j["session_id"].is_string())
+    return;
+  const std::string session_id = j["session_id"].get<std::string>();
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs)
+    return;
+  if (!j.contains("schema_id") || !j["schema_id"].is_string())
+    return;
+  const std::string schema_id = j["schema_id"].get<std::string>();
+  ret.set_json({ { "node_id", NodeEdit::find_node_by_schema_id(gs, schema_id) } });
+}
+
+void NodeEdit::ie_get_node_type_id(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id") || !j["session_id"].is_string())
+    return;
+  const std::string session_id = j["session_id"].get<std::string>();
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs)
+    return;
+  if (!j.contains("node_id") || !j["node_id"].is_string())
+    return;
+  const std::string node_id = j["node_id"].get<std::string>();
+  ret.set_json({ { "type_id", NodeEdit::get_node_type_id(gs, node_id) } });
+}
+
+void NodeEdit::ie_get_node_data(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id") || !j["session_id"].is_string())
+    return;
+  const std::string session_id = j["session_id"].get<std::string>();
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs)
+    return;
+  if (!j.contains("node_id") || !j["node_id"].is_string())
+    return;
+  const std::string node_id = j["node_id"].get<std::string>();
+  ret.set_json({ { "datas", NodeEdit::get_node_data(gs, node_id) } });
+}

@@ -842,7 +842,13 @@ void NodeEdit::add_schema_to_graph_ctx_ext(
     return;
   }
 
-  graph->graph.ext.schemas.push_back(schema);
+  auto &schemas = graph->graph.ext.schemas;
+  // avoid duplication
+  schemas.erase(
+      std::remove_if(schemas.begin(), schemas.end(), [&schema](const Schema &s) { return s.id == schema.id; }),
+      schemas.end());
+
+  schemas.push_back(schema);
   graph->graph.refresh_ctx = true;
 }
 
@@ -852,10 +858,17 @@ void NodeEdit::add_pin_format_to_graph_ctx_ext(
   if (!graph) {
     return;
   }
-  graph->graph.ext.pin_formats.push_back(pin_format);
+
+  auto &pin_formats = graph->graph.ext.pin_formats;
+  // avoid duplication
+  pin_formats.erase(
+      std::remove_if(
+          pin_formats.begin(), pin_formats.end(), [&pin_format](const PinFormat &pf) { return pf.type == pin_format.type; }),
+      pin_formats.end());
+
+  pin_formats.push_back(pin_format);
   graph->graph.refresh_ctx = true;
 }
-
 std::shared_ptr<NodeEdit::GraphSession> NodeEdit::get_graph_session_by_id(const std::string &session_id) {
   for (const auto &gs : get_current_context()->graph_sessions) {
     if (gs->session_id == session_id) {
@@ -1020,4 +1033,64 @@ nlohmann::json NodeEdit::get_all_ext_schemas(const std::shared_ptr<NodeEdit::Gra
     arr.push_back(NodeEdit::schema_to_json(s));
   }
   return arr;
+}
+
+nlohmann::json NodeEdit::get_all_pin_formats(const std::string &ctx_id) {
+  nlohmann::json arr = nlohmann::json::array();
+  const auto *ctx = NodeEdit::find_context(ctx_id);
+  if (!ctx) {
+    return arr;
+  }
+  for (const auto &pf : ctx->pin_formats) {
+    arr.push_back(NodeEdit::pin_format_to_json(pf));
+  }
+  return arr;
+}
+
+nlohmann::json NodeEdit::get_all_schemas(const std::string &ctx_id) {
+  nlohmann::json arr = nlohmann::json::array();
+  const auto *ctx = NodeEdit::find_context(ctx_id);
+  if (!ctx) {
+    return arr;
+  }
+  for (const auto &s : ctx->schemas) {
+    arr.push_back(NodeEdit::schema_to_json(s));
+  }
+  return arr;
+}
+
+nlohmann::json NodeEdit::get_all_graph_ext_pin_formats(const std::shared_ptr<NodeEdit::GraphSession> &graph) {
+  nlohmann::json arr = nlohmann::json::array();
+  if (!graph) {
+    return arr;
+  }
+  for (const auto &pf : graph->graph.ext.pin_formats) {
+    arr.push_back(NodeEdit::pin_format_to_json(pf));
+  }
+  return arr;
+}
+
+std::string NodeEdit::find_node_by_schema_id(
+    const std::shared_ptr<NodeEdit::GraphSession> &graph,
+    const std::string &schema_id) {
+  if (!graph)
+    return {};
+  for (const auto &inst : graph->graph.instances)
+    if (inst.type_id == schema_id)
+      return inst.instance_id;
+  return {};
+}
+
+std::string NodeEdit::get_node_type_id(const std::shared_ptr<NodeEdit::GraphSession> &graph, const std::string &node_id) {
+  if (!graph)
+    return {};
+  const auto *inst = find_instance(graph->graph, node_id);
+  return inst ? inst->type_id : std::string();
+}
+
+nlohmann::json NodeEdit::get_node_data(const std::shared_ptr<NodeEdit::GraphSession> &graph, const std::string &node_id) {
+  if (!graph)
+    return nlohmann::json::object();
+  const auto *inst = find_instance(graph->graph, node_id);
+  return inst ? inst->datas : nlohmann::json::object();
 }

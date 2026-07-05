@@ -166,6 +166,13 @@ namespace NodeEdit {
   NODEEDIT_API void delete_graph_ext_pin_format(
       const std::shared_ptr<NodeEdit::GraphSession> &graph,
       const std::string &pin_format_type);
+  NODEEDIT_API nlohmann::json get_all_pin_formats(const std::string &ctx_id);
+  NODEEDIT_API nlohmann::json get_all_schemas(const std::string &ctx_id);
+  NODEEDIT_API nlohmann::json get_all_graph_ext_pin_formats(const std::shared_ptr<NodeEdit::GraphSession> &graph);
+
+  NODEEDIT_API std::string find_node_by_schema_id(const std::shared_ptr<GraphSession> &graph, const std::string &schema_id);
+  NODEEDIT_API std::string get_node_type_id(const std::shared_ptr<GraphSession> &graph, const std::string &node_id);
+  NODEEDIT_API nlohmann::json get_node_data(const std::shared_ptr<GraphSession> &graph, const std::string &node_id);
 
   // events
   NODEEDIT_API void ie_create_node_context(ArgumentValues &args, ReturnValues &ret);
@@ -206,6 +213,13 @@ namespace NodeEdit {
   NODEEDIT_API void ie_get_ext_pin_format(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_get_ext_schema(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_get_all_ext_schemas(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_pin_formats(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_schemas(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_graph_ext_pin_formats(ArgumentValues &args, ReturnValues &ret);
+
+  NODEEDIT_API void ie_find_node_by_schema_id(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_node_type_id(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_node_data(ArgumentValues &args, ReturnValues &ret);
 
 }  // namespace NodeEdit
 
