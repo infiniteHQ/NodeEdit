@@ -62,7 +62,8 @@ namespace NodeEdit {
       const std::string &path,
       const std::string &parent = "",
       const bool &disable_native_save = false,
-      const std::string &logo_path = "");
+      const std::string &logo_path = "",
+      const std::string &custom_name = "");
   NODEEDIT_API void open_graph(const std::string &path);
   NODEEDIT_API void open_graphDEBUG(const std::string &path);
   NODEEDIT_API void create_graph_session_from_file(const std::string &path);

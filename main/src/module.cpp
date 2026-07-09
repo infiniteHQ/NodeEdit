@@ -79,7 +79,8 @@ std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_and_get_session(
     const std::string &path,
     const std::string &parent,
     const bool &disable_native_save,
-    const std::string &logo_path) {
+    const std::string &logo_path,
+    const std::string &custom_name) {
   if (!is_graph_file(path)) {
     get_current_context()->interface->log_error("No graph file in selected file ! (" + path + ")");
   }
@@ -123,13 +124,18 @@ std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_and_get_session(
   gs->context_id = ctx_name;
   gs->logo_path = logo_path;
 
+  std::string name = "Node graph";
+  if (!custom_name.empty()) {
+    name = custom_name;
+  }
+
   {
-    auto inst = ModuleUI::NodeEditorAppWindow::create("Node graph", ctx, gs);
+    auto inst = ModuleUI::NodeEditorAppWindow::create(name, ctx, gs);
     Cherry::AddAppWindow(inst->get_app_window());
     get_current_context()->editor_instances.push_back(inst);
   }
   {
-    auto inst = ModuleUI::NodeEditorDebugger::create("Node debug", gs);
+    auto inst = ModuleUI::NodeEditorDebugger::create(name + "_debug", gs);
     Cherry::AddAppWindow(inst->get_app_window());
     get_current_context()->editor_debuggers.push_back(inst);
   }
