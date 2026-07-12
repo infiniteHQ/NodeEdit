@@ -74,6 +74,32 @@ class Module : public ModuleInterface {
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_node_type_id, "get_node_type_id"));
     this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_node_data, "get_node_data"));
 
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_next_nodes_silently, "get_next_nodes_silently"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_previous_nodes_silently, "get_previous_nodes_silently"));
+    this->add_input_event(
+        ModuleInputEvent(NodeEdit::ie_search_node_output_pin_by_type_silently, "search_node_output_pin_by_type_silently"));
+    this->add_input_event(
+        ModuleInputEvent(NodeEdit::ie_search_node_input_pin_by_type_silently, "search_node_input_pin_by_type_silently"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_search_node_type_silently, "search_node_type_silently"));
+    this->add_input_event(
+        ModuleInputEvent(NodeEdit::ie_get_all_node_input_pins_silently, "get_all_node_input_pins_silently"));
+    this->add_input_event(
+        ModuleInputEvent(NodeEdit::ie_get_all_node_output_pins_silently, "get_all_node_output_pins_silently"));
+
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_ext_pin_format_silently, "get_ext_pin_format_silently"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_ext_schema_silently, "get_ext_schema_silently"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_all_ext_schemas_silently, "get_all_ext_schemas_silently"));
+    this->add_input_event(
+        ModuleInputEvent(NodeEdit::ie_get_all_graph_ext_pin_formats_silently, "get_all_graph_ext_pin_formats_silently"));
+
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_find_node_by_schema_id_silently, "find_node_by_schema_id_silently"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_node_type_id_silently, "get_node_type_id_silently"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_node_data_silently, "get_node_data_silently"));
+
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_clear_silent_session_cache, "clear_silent_session_cache"));
+    this->add_input_event(ModuleInputEvent(NodeEdit::ie_get_connection_source_pin, "get_connection_source_pin"));
+    this->add_input_event(
+        ModuleInputEvent(NodeEdit::ie_get_connection_source_pin_silently, "get_connection_source_pin_silently"));
     NodeEdit::setup_example_context();
   }
 

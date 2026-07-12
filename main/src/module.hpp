@@ -28,6 +28,8 @@ namespace NodeEdit {
     std::vector<std::shared_ptr<ModuleUI::NodeEditorDebugger>> editor_debuggers;
     std::vector<std::shared_ptr<NodeContext>> contexts;
     std::vector<std::shared_ptr<GraphSession>> graph_sessions;
+    std::unordered_map<std::string, std::shared_ptr<GraphSession>> silent_sessions;
+    std::unordered_map<std::string, fs::file_time_type> silent_sessions_mtime;
   };
 }  // namespace NodeEdit
 // context pointer
@@ -71,6 +73,11 @@ namespace NodeEdit {
   NODEEDIT_API bool is_context_exist(const std::string &ctx_name);
   NODEEDIT_API std::shared_ptr<NodeEdit::GraphSession> get_graph_session_by_id(const std::string &session_id);
   NODEEDIT_API std::string generate_session_id();
+
+  NODEEDIT_API std::shared_ptr<NodeEdit::GraphSession> open_graph_session_headless(const std::string &path);
+  NODEEDIT_API std::shared_ptr<NodeEdit::GraphSession> get_or_create_silent_session(const std::string &path);
+  NODEEDIT_API void clear_silent_session_cache();
+  NODEEDIT_API void evict_silent_session(const std::string &path);
 
   // debug
   NODEEDIT_API void setup_example_context();
@@ -175,6 +182,11 @@ namespace NodeEdit {
   NODEEDIT_API std::string get_node_type_id(const std::shared_ptr<GraphSession> &graph, const std::string &node_id);
   NODEEDIT_API nlohmann::json get_node_data(const std::shared_ptr<GraphSession> &graph, const std::string &node_id);
 
+  NODEEDIT_API std::string get_connection_source_pin(
+      const std::shared_ptr<NodeEdit::GraphSession> &graph,
+      const std::string &nodeid,
+      const std::string &inputid);
+
   // events
   NODEEDIT_API void ie_create_node_context(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_setup_pin_format(ArgumentValues &args, ReturnValues &ret);
@@ -222,6 +234,27 @@ namespace NodeEdit {
   NODEEDIT_API void ie_get_node_type_id(ArgumentValues &args, ReturnValues &ret);
   NODEEDIT_API void ie_get_node_data(ArgumentValues &args, ReturnValues &ret);
 
+  NODEEDIT_API void ie_get_next_nodes_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_previous_nodes_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_search_node_output_pin_by_type_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_search_node_input_pin_by_type_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_search_node_type_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_node_input_pins_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_node_output_pins_silently(ArgumentValues &args, ReturnValues &ret);
+
+  NODEEDIT_API void ie_get_ext_pin_format_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_ext_schema_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_ext_schemas_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_all_graph_ext_pin_formats_silently(ArgumentValues &args, ReturnValues &ret);
+
+  NODEEDIT_API void ie_find_node_by_schema_id_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_node_type_id_silently(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_node_data_silently(ArgumentValues &args, ReturnValues &ret);
+
+  NODEEDIT_API void ie_clear_silent_session_cache(ArgumentValues &args, ReturnValues &ret);
+
+  NODEEDIT_API void ie_get_connection_source_pin(ArgumentValues &args, ReturnValues &ret);
+  NODEEDIT_API void ie_get_connection_source_pin_silently(ArgumentValues &args, ReturnValues &ret);
 }  // namespace NodeEdit
 
 #endif  // SAMPLE_MODULE_HPP

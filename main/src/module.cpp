@@ -1100,3 +1100,111 @@ nlohmann::json NodeEdit::get_node_data(const std::shared_ptr<NodeEdit::GraphSess
   const auto *inst = find_instance(graph->graph, node_id);
   return inst ? inst->datas : nlohmann::json::object();
 }
+
+std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_session_headless(const std::string &path) {
+  if (!is_graph_file(path)) {
+    get_current_context()->interface->log_error("No graph file in selected file ! (" + path + ")");
+    return nullptr;
+  }
+
+  std::string fullpath = path + "/graph.nodegraph";
+
+  std::ifstream file(fullpath);
+  if (!file.is_open()) {
+    get_current_context()->interface->log_error("Failed to open file : (" + fullpath + ")");
+    return nullptr;
+  }
+
+  nlohmann::json j;
+  try {
+    file >> j;
+  } catch (const nlohmann::json::parse_error &e) {
+    get_current_context()->interface->log_error("Failed to parse graph file : (" + fullpath + ") -> " + e.what());
+    return nullptr;
+  }
+
+  std::string ctx_name = get_graph_context_name(j);
+
+  if (!is_context_exist(ctx_name)) {
+    get_current_context()->interface->log_error(
+        "This graph contain an unknown graph context : (" + fullpath + "). Did you have a missing module ?");
+    return nullptr;
+  }
+
+  auto graph = populate_graph(get_graph_in_json(j));
+  graph.graph_title = "Node graph";
+
+  auto gs = std::make_shared<NodeEdit::GraphSession>();
+  gs->session_id = "silent_" + generate_session_id();
+  gs->path = fullpath;
+  gs->graph = graph;
+  gs->context_id = ctx_name;
+  gs->disable_native_close_system = true;
+  gs->disable_native_save_system = true;
+
+  return gs;
+}
+
+std::shared_ptr<NodeEdit::GraphSession> NodeEdit::get_or_create_silent_session(const std::string &path) {
+  if (!is_graph_file(path)) {
+    get_current_context()->interface->log_error("No graph file in selected file ! (" + path + ")");
+    return nullptr;
+  }
+
+  std::string fullpath = path + "/graph.nodegraph";
+  auto &ctx = *get_current_context();
+
+  std::error_code ec;
+  auto mtime = fs::last_write_time(fullpath, ec);
+
+  auto it = ctx.silent_sessions.find(fullpath);
+  if (it != ctx.silent_sessions.end()) {
+    auto mit = ctx.silent_sessions_mtime.find(fullpath);
+    bool still_valid = !ec && mit != ctx.silent_sessions_mtime.end() && mit->second == mtime;
+
+    if (still_valid) {
+      return it->second;
+    }
+
+    ctx.silent_sessions.erase(it);
+    ctx.silent_sessions_mtime.erase(fullpath);
+  }
+
+  auto gs = NodeEdit::open_graph_session_headless(path);
+  if (!gs) {
+    return nullptr;
+  }
+
+  ctx.silent_sessions[fullpath] = gs;
+  if (!ec) {
+    ctx.silent_sessions_mtime[fullpath] = mtime;
+  }
+
+  return gs;
+}
+
+void NodeEdit::evict_silent_session(const std::string &path) {
+  std::string fullpath = path + "/graph.nodegraph";
+  auto &ctx = *get_current_context();
+  ctx.silent_sessions.erase(fullpath);
+  ctx.silent_sessions_mtime.erase(fullpath);
+}
+
+void NodeEdit::clear_silent_session_cache() {
+  auto &ctx = *get_current_context();
+  ctx.silent_sessions.clear();
+  ctx.silent_sessions_mtime.clear();
+}
+
+std::string NodeEdit::get_connection_source_pin(
+    const std::shared_ptr<NodeEdit::GraphSession> &graph,
+    const std::string &nodeid,
+    const std::string &inputid) {
+  if (!graph)
+    return {};
+  for (const auto &conn : graph->graph.connections) {
+    if (conn.node_instance_id_B == nodeid && conn.pin_id_B == inputid)
+      return conn.pin_id_A;
+  }
+  return {};
+}

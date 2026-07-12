@@ -989,3 +989,321 @@ void NodeEdit::ie_get_node_data(ArgumentValues &args, ReturnValues &ret) {
   const std::string node_id = j["node_id"].get<std::string>();
   ret.set_json({ { "datas", NodeEdit::get_node_data(gs, node_id) } });
 }
+
+void NodeEdit::ie_get_next_nodes_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  if (j.contains("node_id") && j.contains("output_id") && j["node_id"].is_string() && j["output_id"].is_string()) {
+    const std::string node_id = j["node_id"].get<std::string>();
+    const std::string output_id = j["output_id"].get<std::string>();
+    const std::vector<std::string> result = NodeEdit::get_next_nodes(gs, node_id, output_id);
+    ret.set_json({ { "node_ids", result } });
+  } else {
+    get_current_context()->interface->log_error("Cannot fetch next nodes, cannot find output_id or node_id");
+  }
+}
+
+void NodeEdit::ie_get_previous_nodes_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  if (j.contains("node_id") && j.contains("input_id") && j["node_id"].is_string() && j["input_id"].is_string()) {
+    const std::string node_id = j["node_id"].get<std::string>();
+    const std::string input_id = j["input_id"].get<std::string>();
+    const std::vector<std::string> result = NodeEdit::get_previous_nodes(gs, node_id, input_id);
+    ret.set_json({ { "node_ids", result } });
+  } else {
+    get_current_context()->interface->log_error("Cannot fetch previous nodes, cannot find input_id or node_id");
+  }
+}
+
+void NodeEdit::ie_search_node_output_pin_by_type_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  if (j.contains("node_id") && j.contains("type") && j["node_id"].is_string() && j["type"].is_string()) {
+    const std::string node_id = j["node_id"].get<std::string>();
+    const std::string type = j["type"].get<std::string>();
+    const std::string result = NodeEdit::search_node_output_pin_by_type(gs, node_id, type);
+    ret.set_json({ { "pin_id", result } });
+  }
+}
+
+void NodeEdit::ie_search_node_input_pin_by_type_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  if (j.contains("node_id") && j.contains("type") && j["node_id"].is_string() && j["type"].is_string()) {
+    const std::string node_id = j["node_id"].get<std::string>();
+    const std::string type = j["type"].get<std::string>();
+    const std::string result = NodeEdit::search_node_input_pin_by_type(gs, node_id, type);
+    ret.set_json({ { "pin_id", result } });
+  }
+}
+
+void NodeEdit::ie_search_node_type_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  if (j.contains("type") && j["type"].is_string()) {
+    const std::string type = j["type"].get<std::string>();
+    const std::string result = NodeEdit::search_node_type(gs, type);
+    ret.set_json({ { "node_id", result } });
+  }
+}
+
+void NodeEdit::ie_get_all_node_input_pins_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  if (j.contains("node_id") && j["node_id"].is_string()) {
+    const std::string node_id = j["node_id"].get<std::string>();
+    const std::vector<std::pair<std::string, std::string>> result = NodeEdit::get_all_node_input_pins(gs, node_id);
+
+    nlohmann::json pins = nlohmann::json::array();
+    for (const auto &[pin_type, pin_id] : result) {
+      pins.push_back({ { "pin_type", pin_type }, { "pin_id", pin_id } });
+    }
+
+    ret.set_json({ { "input_pins", pins } });
+  }
+}
+
+void NodeEdit::ie_get_all_node_output_pins_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  if (j.contains("node_id") && j["node_id"].is_string()) {
+    const std::string node_id = j["node_id"].get<std::string>();
+    const std::vector<std::pair<std::string, std::string>> result = NodeEdit::get_all_node_output_pins(gs, node_id);
+
+    nlohmann::json pins = nlohmann::json::array();
+    for (const auto &[pin_type, pin_id] : result) {
+      pins.push_back({ { "pin_type", pin_type }, { "pin_id", pin_id } });
+    }
+
+    ret.set_json({ { "output_pins", pins } });
+  }
+}
+
+void NodeEdit::ie_get_ext_pin_format_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  if (!j.contains("type"))
+    return;
+  const std::string type = j["type"];
+
+  const auto *pf = NodeEdit::get_ext_pin_format(gs, type);
+  if (!pf) {
+    get_current_context()->interface->log_error(
+        "Cannot find ext pin format for type: (" + type + ") in path: (" + path + ").");
+    return;
+  }
+  ret.set_json(NodeEdit::pin_format_to_json(*pf));
+}
+
+void NodeEdit::ie_get_ext_schema_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  if (!j.contains("schema_id"))
+    return;
+  const std::string schema_id = j["schema_id"];
+
+  const auto *s = NodeEdit::get_ext_schema(gs, schema_id);
+  if (!s) {
+    get_current_context()->interface->log_error(
+        "Cannot find ext schema for id: (" + schema_id + ") in path: (" + path + ").");
+    return;
+  }
+  ret.set_json(NodeEdit::schema_to_json(*s));
+}
+
+void NodeEdit::ie_get_all_ext_schemas_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  ret.set_json({ { "schemas", NodeEdit::get_all_ext_schemas(gs) } });
+}
+
+void NodeEdit::ie_get_all_graph_ext_pin_formats_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+
+  ret.set_json({ { "pin_formats", NodeEdit::get_all_graph_ext_pin_formats(gs) } });
+}
+
+void NodeEdit::ie_find_node_by_schema_id_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs)
+    return;
+
+  if (!j.contains("schema_id") || !j["schema_id"].is_string())
+    return;
+  const std::string schema_id = j["schema_id"].get<std::string>();
+  ret.set_json({ { "node_id", NodeEdit::find_node_by_schema_id(gs, schema_id) } });
+}
+
+void NodeEdit::ie_get_node_type_id_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs)
+    return;
+
+  if (!j.contains("node_id") || !j["node_id"].is_string())
+    return;
+  const std::string node_id = j["node_id"].get<std::string>();
+  ret.set_json({ { "type_id", NodeEdit::get_node_type_id(gs, node_id) } });
+}
+
+void NodeEdit::ie_get_node_data_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs)
+    return;
+
+  if (!j.contains("node_id") || !j["node_id"].is_string())
+    return;
+  const std::string node_id = j["node_id"].get<std::string>();
+  ret.set_json({ { "datas", NodeEdit::get_node_data(gs, node_id) } });
+}
+
+void NodeEdit::ie_clear_silent_session_cache(ArgumentValues &args, ReturnValues &ret) {
+  NodeEdit::clear_silent_session_cache();
+}
+
+void NodeEdit::ie_get_connection_source_pin(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("session_id") || !j["session_id"].is_string())
+    return;
+  const std::string session_id = j["session_id"].get<std::string>();
+  auto gs = NodeEdit::get_graph_session_by_id(session_id);
+  if (!gs)
+    return;
+  if (!j.contains("node_id") || !j.contains("input_id"))
+    return;
+  const std::string node_id = j["node_id"].get<std::string>();
+  const std::string input_id = j["input_id"].get<std::string>();
+  ret.set_json({ { "pin_id", NodeEdit::get_connection_source_pin(gs, node_id, input_id) } });
+}
+
+void NodeEdit::ie_get_connection_source_pin_silently(ArgumentValues &args, ReturnValues &ret) {
+  const auto &j = args.get_json();
+  if (!j.contains("path") || !j["path"].is_string())
+    return;
+  const std::string path = j["path"].get<std::string>();
+
+  auto gs = NodeEdit::get_or_create_silent_session(path);
+  if (!gs) {
+    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    return;
+  }
+  if (!j.contains("node_id") || !j.contains("input_id"))
+    return;
+  const std::string node_id = j["node_id"].get<std::string>();
+  const std::string input_id = j["input_id"].get<std::string>();
+  ret.set_json({ { "pin_id", NodeEdit::get_connection_source_pin(gs, node_id, input_id) } });
+}
