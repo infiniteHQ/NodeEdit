@@ -26,7 +26,7 @@ std::shared_ptr<NodeEdit::Context> NodeEdit::get_current_context() {
 }
 
 std::string NodeEdit::get_path(const std::string &path) {
-  return get_current_context()->interface->cook_path(path);
+  return get_current_context()->m_interface->cook_path(path);
 }
 
 bool NodeEdit::is_graph_file(const std::string &path) {
@@ -82,14 +82,14 @@ std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_and_get_session(
     const std::string &logo_path,
     const std::string &custom_name) {
   if (!is_graph_file(path)) {
-    get_current_context()->interface->log_error("No graph file in selected file ! (" + path + ")");
+    get_current_context()->m_interface->log_error("No graph file in selected file ! (" + path + ")");
   }
 
   std::string fullpath = path + "/graph.nodegraph";
 
   std::ifstream file(fullpath);
   if (!file.is_open()) {
-    get_current_context()->interface->log_error("Failed to open file : (" + fullpath + ")");
+    get_current_context()->m_interface->log_error("Failed to open file : (" + fullpath + ")");
     return nullptr;
   }
 
@@ -97,14 +97,14 @@ std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_and_get_session(
   try {
     file >> j;
   } catch (const nlohmann::json::parse_error &e) {
-    get_current_context()->interface->log_error("Failed to parse graph file : (" + fullpath + ") -> " + e.what());
+    get_current_context()->m_interface->log_error("Failed to parse graph file : (" + fullpath + ") -> " + e.what());
     return nullptr;
   }
 
   std::string ctx_name = get_graph_context_name(j);
 
   if (!is_context_exist(ctx_name)) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "This graph contain an unknown graph context : (" + fullpath + "). Did you have a missing module ?");
   }
 
@@ -238,7 +238,7 @@ std::shared_ptr<NodeEdit::NodeContext> NodeEdit::create_node_context(const std::
   auto existing =
       std::find_if(contexts.begin(), contexts.end(), [&name](const auto &ptr) { return ptr && ptr->id == name; });
   if (existing != contexts.end()) {
-    get_current_context()->interface->log_error(name + " node graph context already exist !");
+    get_current_context()->m_interface->log_error(name + " node graph context already exist !");
   }
 
   auto ctx = std::make_shared<NodeContext>();
@@ -276,7 +276,7 @@ void NodeEdit::add_schema_to_context(const std::string &ctx_id, const NodeEdit::
   });
 
   if (c == contexts.end()) {
-    get_current_context()->interface->log_error(ctx_id + " does not exist! Cannot add schema to this context.");
+    get_current_context()->m_interface->log_error(ctx_id + " does not exist! Cannot add schema to this context.");
     return;
   }
 
@@ -291,7 +291,7 @@ void NodeEdit::add_pin_format_to_context(const std::string &ctx_id, const NodeEd
   });
 
   if (c == contexts.end()) {
-    get_current_context()->interface->log_error(ctx_id + " does not exist! Cannot add schema to this context.");
+    get_current_context()->m_interface->log_error(ctx_id + " does not exist! Cannot add schema to this context.");
     return;
   }
 
@@ -330,7 +330,7 @@ void NodeEdit::refresh_graph_session(const std::shared_ptr<NodeEdit::GraphSessio
 
   std::ifstream file(file_path);
   if (!file.is_open()) {
-    get_current_context()->interface->log_error("Failed to open file : (" + file_path + ")");
+    get_current_context()->m_interface->log_error("Failed to open file : (" + file_path + ")");
     return;
   }
 
@@ -338,14 +338,14 @@ void NodeEdit::refresh_graph_session(const std::shared_ptr<NodeEdit::GraphSessio
   try {
     file >> j;
   } catch (const nlohmann::json::parse_error &e) {
-    get_current_context()->interface->log_error("Failed to parse graph file : (" + file_path + ") -> " + e.what());
+    get_current_context()->m_interface->log_error("Failed to parse graph file : (" + file_path + ") -> " + e.what());
     return;
   }
 
   std::string ctx_name = get_graph_context_name(j);
 
   if (!is_context_exist(ctx_name)) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "This graph contain an unknown graph context : (" + file_path + "). Did you have a missing module ?");
     return;
   }
@@ -1103,7 +1103,7 @@ nlohmann::json NodeEdit::get_node_data(const std::shared_ptr<NodeEdit::GraphSess
 
 std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_session_headless(const std::string &path) {
   if (!is_graph_file(path)) {
-    get_current_context()->interface->log_error("No graph file in selected file ! (" + path + ")");
+    get_current_context()->m_interface->log_error("No graph file in selected file ! (" + path + ")");
     return nullptr;
   }
 
@@ -1111,7 +1111,7 @@ std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_session_headless(co
 
   std::ifstream file(fullpath);
   if (!file.is_open()) {
-    get_current_context()->interface->log_error("Failed to open file : (" + fullpath + ")");
+    get_current_context()->m_interface->log_error("Failed to open file : (" + fullpath + ")");
     return nullptr;
   }
 
@@ -1119,14 +1119,14 @@ std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_session_headless(co
   try {
     file >> j;
   } catch (const nlohmann::json::parse_error &e) {
-    get_current_context()->interface->log_error("Failed to parse graph file : (" + fullpath + ") -> " + e.what());
+    get_current_context()->m_interface->log_error("Failed to parse graph file : (" + fullpath + ") -> " + e.what());
     return nullptr;
   }
 
   std::string ctx_name = get_graph_context_name(j);
 
   if (!is_context_exist(ctx_name)) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "This graph contain an unknown graph context : (" + fullpath + "). Did you have a missing module ?");
     return nullptr;
   }
@@ -1147,7 +1147,7 @@ std::shared_ptr<NodeEdit::GraphSession> NodeEdit::open_graph_session_headless(co
 
 std::shared_ptr<NodeEdit::GraphSession> NodeEdit::get_or_create_silent_session(const std::string &path) {
   if (!is_graph_file(path)) {
-    get_current_context()->interface->log_error("No graph file in selected file ! (" + path + ")");
+    get_current_context()->m_interface->log_error("No graph file in selected file ! (" + path + ")");
     return nullptr;
   }
 

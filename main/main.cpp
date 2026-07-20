@@ -1,7 +1,7 @@
 #include "./src/module.hpp"
 
 // main.cpp
-class Module : public ModuleInterface {
+class infinitehq_nodeedit : public ModuleInterface {
  public:
   std::shared_ptr<NodeEdit::Context> ctx;
 
@@ -9,7 +9,7 @@ class Module : public ModuleInterface {
     ctx = NodeEdit::create_context();
 
     auto m = ModuleInterface::get_editor_module_by_name(this->name());
-    NodeEdit::get_current_context()->interface = m;
+    NodeEdit::get_current_context()->m_interface = m;
 
     this->add_content_browser_item_identifier(ItemIdentifierInterface(
         NodeEdit::is_graph_file,
@@ -117,10 +117,10 @@ class Module : public ModuleInterface {
 
 #ifdef _WIN32
 extern "C" __declspec(dllexport) ModuleInterface *create_em() {
-  return new Module();
+  return new infinitehq_nodeedit();
 }
 #else
 extern "C" ModuleInterface *create_em() {
-  return new Module();
+  return new infinitehq_nodeedit();
 }
 #endif

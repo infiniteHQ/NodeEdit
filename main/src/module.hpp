@@ -23,7 +23,7 @@
 
 namespace NodeEdit {
   struct Context {
-    std::shared_ptr<ModuleInterface> interface;
+    std::shared_ptr<ModuleInterface> m_interface;
     std::vector<std::shared_ptr<ModuleUI::NodeEditorAppWindow>> editor_instances;
     std::vector<std::shared_ptr<ModuleUI::NodeEditorDebugger>> editor_debuggers;
     std::vector<std::shared_ptr<NodeContext>> contexts;

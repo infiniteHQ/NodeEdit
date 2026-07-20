@@ -79,7 +79,7 @@ void NodeEdit::ie_setup_schema(ArgumentValues &args, ReturnValues &ret) {
 
   auto c = NodeEdit::get_node_context(ctx_name);
   if (!c) {
-    get_current_context()->interface->log_error("Cannot create schema for ctx: (" + ctx_name + "). Context not found.");
+    get_current_context()->m_interface->log_error("Cannot create schema for ctx: (" + ctx_name + "). Context not found.");
     // TODO err in return values
     return;
   }
@@ -178,7 +178,7 @@ void NodeEdit::ie_setup_schema_to_graph_ext(ArgumentValues &args, ReturnValues &
 
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find graph session for id: (" + gs->session_id + "). Context not found.");
     // TODO err in return values
     return;
@@ -346,7 +346,7 @@ void NodeEdit::ie_add_effect_to_connection(ArgumentValues &args, ReturnValues &r
 
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error("Graph session not found! (" + session_id + ")");
+    get_current_context()->m_interface->log_error("Graph session not found! (" + session_id + ")");
     return;
   }
 
@@ -476,7 +476,7 @@ void NodeEdit::ie_get_next_nodes(ArgumentValues &args, ReturnValues &ret) {
   const std::string session_id = j["session_id"].get<std::string>();
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error("Graph session not found! (" + session_id + ")");
+    get_current_context()->m_interface->log_error("Graph session not found! (" + session_id + ")");
     return;
   }
   if (j.contains("node_id") && j.contains("output_id") && j["node_id"].is_string() && j["output_id"].is_string()) {
@@ -485,7 +485,7 @@ void NodeEdit::ie_get_next_nodes(ArgumentValues &args, ReturnValues &ret) {
     const std::vector<std::string> result = NodeEdit::get_next_nodes(gs, node_id, output_id);
     ret.set_json({ { "node_ids", result } });
   } else {
-    get_current_context()->interface->log_error("Cannot fetch next nodes, cannot find output_id or node_id");
+    get_current_context()->m_interface->log_error("Cannot fetch next nodes, cannot find output_id or node_id");
   }
 }
 
@@ -496,7 +496,7 @@ void NodeEdit::ie_get_previous_nodes(ArgumentValues &args, ReturnValues &ret) {
   const std::string session_id = j["session_id"].get<std::string>();
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error("Graph session not found! (" + session_id + ")");
+    get_current_context()->m_interface->log_error("Graph session not found! (" + session_id + ")");
     return;
   }
   if (j.contains("node_id") && j.contains("input_id") && j["node_id"].is_string() && j["input_id"].is_string()) {
@@ -505,7 +505,7 @@ void NodeEdit::ie_get_previous_nodes(ArgumentValues &args, ReturnValues &ret) {
     const std::vector<std::string> result = NodeEdit::get_previous_nodes(gs, node_id, input_id);
     ret.set_json({ { "node_ids", result } });
   } else {
-    get_current_context()->interface->log_error("Cannot fetch previous nodes, cannot find input_id or node_id");
+    get_current_context()->m_interface->log_error("Cannot fetch previous nodes, cannot find input_id or node_id");
   }
 }
 
@@ -751,7 +751,7 @@ void NodeEdit::ie_clear_all_graph_ext_schemas(ArgumentValues &args, ReturnValues
   const std::string session_id = j["session_id"];
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find graph session for id: (" + session_id + "). Context not found.");
     // TODO err in return values
     return;
@@ -766,7 +766,7 @@ void NodeEdit::ie_delete_graph_ext_schema(ArgumentValues &args, ReturnValues &re
   const std::string session_id = j["session_id"];
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find graph session for id: (" + session_id + "). Context not found.");
     // TODO err in return values
     return;
@@ -784,7 +784,7 @@ void NodeEdit::ie_delete_graph_ext_pin_format(ArgumentValues &args, ReturnValues
   const std::string session_id = j["session_id"];
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find graph session for id: (" + session_id + "). Context not found.");
     // TODO err in return values
     return;
@@ -802,7 +802,7 @@ void NodeEdit::ie_clear_all_graph_ext_pin_formats(ArgumentValues &args, ReturnVa
   const std::string session_id = j["session_id"];
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find graph session for id: (" + session_id + "). Context not found.");
     // TODO err in return values
     return;
@@ -821,7 +821,7 @@ void NodeEdit::ie_get_pin_format(ArgumentValues &args, ReturnValues &ret) {
 
   const auto *pf = NodeEdit::get_pin_format(context_id, type);
   if (!pf) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find pin format for type: (" + type + ") in context: (" + context_id + ").");
     // TODO err in return values
     return;
@@ -840,7 +840,7 @@ void NodeEdit::ie_get_schema(ArgumentValues &args, ReturnValues &ret) {
 
   const auto *s = NodeEdit::get_schema(context_id, schema_id);
   if (!s) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find schema for id: (" + schema_id + ") in context: (" + context_id + ").");
     // TODO err in return values
     return;
@@ -855,7 +855,7 @@ void NodeEdit::ie_get_ext_pin_format(ArgumentValues &args, ReturnValues &ret) {
   const std::string session_id = j["session_id"];
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find graph session for id: (" + session_id + "). Context not found.");
     // TODO err in return values
     return;
@@ -866,7 +866,7 @@ void NodeEdit::ie_get_ext_pin_format(ArgumentValues &args, ReturnValues &ret) {
 
   const auto *pf = NodeEdit::get_ext_pin_format(gs, type);
   if (!pf) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find ext pin format for type: (" + type + ") in session: (" + session_id + ").");
     // TODO err in return values
     return;
@@ -881,7 +881,7 @@ void NodeEdit::ie_get_ext_schema(ArgumentValues &args, ReturnValues &ret) {
   const std::string session_id = j["session_id"];
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find graph session for id: (" + session_id + "). Context not found.");
     // TODO err in return values
     return;
@@ -892,7 +892,7 @@ void NodeEdit::ie_get_ext_schema(ArgumentValues &args, ReturnValues &ret) {
 
   const auto *s = NodeEdit::get_ext_schema(gs, schema_id);
   if (!s) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find ext schema for id: (" + schema_id + ") in session: (" + session_id + ").");
     // TODO err in return values
     return;
@@ -907,7 +907,7 @@ void NodeEdit::ie_get_all_ext_schemas(ArgumentValues &args, ReturnValues &ret) {
   const std::string session_id = j["session_id"];
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find graph session for id: (" + session_id + "). Context not found.");
     // TODO err in return values
     return;
@@ -940,7 +940,7 @@ void NodeEdit::ie_get_all_graph_ext_pin_formats(ArgumentValues &args, ReturnValu
   const std::string session_id = j["session_id"];
   auto gs = NodeEdit::get_graph_session_by_id(session_id);
   if (!gs) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find graph session for id: (" + session_id + "). Context not found.");
     // TODO err in return values
     return;
@@ -998,7 +998,7 @@ void NodeEdit::ie_get_next_nodes_silently(ArgumentValues &args, ReturnValues &re
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1008,7 +1008,7 @@ void NodeEdit::ie_get_next_nodes_silently(ArgumentValues &args, ReturnValues &re
     const std::vector<std::string> result = NodeEdit::get_next_nodes(gs, node_id, output_id);
     ret.set_json({ { "node_ids", result } });
   } else {
-    get_current_context()->interface->log_error("Cannot fetch next nodes, cannot find output_id or node_id");
+    get_current_context()->m_interface->log_error("Cannot fetch next nodes, cannot find output_id or node_id");
   }
 }
 
@@ -1020,7 +1020,7 @@ void NodeEdit::ie_get_previous_nodes_silently(ArgumentValues &args, ReturnValues
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1030,7 +1030,7 @@ void NodeEdit::ie_get_previous_nodes_silently(ArgumentValues &args, ReturnValues
     const std::vector<std::string> result = NodeEdit::get_previous_nodes(gs, node_id, input_id);
     ret.set_json({ { "node_ids", result } });
   } else {
-    get_current_context()->interface->log_error("Cannot fetch previous nodes, cannot find input_id or node_id");
+    get_current_context()->m_interface->log_error("Cannot fetch previous nodes, cannot find input_id or node_id");
   }
 }
 
@@ -1042,7 +1042,7 @@ void NodeEdit::ie_search_node_output_pin_by_type_silently(ArgumentValues &args, 
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1062,7 +1062,7 @@ void NodeEdit::ie_search_node_input_pin_by_type_silently(ArgumentValues &args, R
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1082,7 +1082,7 @@ void NodeEdit::ie_search_node_type_silently(ArgumentValues &args, ReturnValues &
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1101,7 +1101,7 @@ void NodeEdit::ie_get_all_node_input_pins_silently(ArgumentValues &args, ReturnV
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1126,7 +1126,7 @@ void NodeEdit::ie_get_all_node_output_pins_silently(ArgumentValues &args, Return
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1151,7 +1151,7 @@ void NodeEdit::ie_get_ext_pin_format_silently(ArgumentValues &args, ReturnValues
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1161,7 +1161,7 @@ void NodeEdit::ie_get_ext_pin_format_silently(ArgumentValues &args, ReturnValues
 
   const auto *pf = NodeEdit::get_ext_pin_format(gs, type);
   if (!pf) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find ext pin format for type: (" + type + ") in path: (" + path + ").");
     return;
   }
@@ -1176,7 +1176,7 @@ void NodeEdit::ie_get_ext_schema_silently(ArgumentValues &args, ReturnValues &re
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1186,7 +1186,7 @@ void NodeEdit::ie_get_ext_schema_silently(ArgumentValues &args, ReturnValues &re
 
   const auto *s = NodeEdit::get_ext_schema(gs, schema_id);
   if (!s) {
-    get_current_context()->interface->log_error(
+    get_current_context()->m_interface->log_error(
         "Cannot find ext schema for id: (" + schema_id + ") in path: (" + path + ").");
     return;
   }
@@ -1201,7 +1201,7 @@ void NodeEdit::ie_get_all_ext_schemas_silently(ArgumentValues &args, ReturnValue
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1216,7 +1216,7 @@ void NodeEdit::ie_get_all_graph_ext_pin_formats_silently(ArgumentValues &args, R
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
 
@@ -1298,7 +1298,7 @@ void NodeEdit::ie_get_connection_source_pin_silently(ArgumentValues &args, Retur
 
   auto gs = NodeEdit::get_or_create_silent_session(path);
   if (!gs) {
-    get_current_context()->interface->log_error("Cannot open graph silently for path: (" + path + ")");
+    get_current_context()->m_interface->log_error("Cannot open graph silently for path: (" + path + ")");
     return;
   }
   if (!j.contains("node_id") || !j.contains("input_id"))
