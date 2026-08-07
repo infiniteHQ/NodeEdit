@@ -42,6 +42,7 @@ if(WIN32)
     target_compile_definitions(module PRIVATE
         CHERRY_IMPORT_DLL
         CHERRY_MULTIAPP
+        IMGUI_SHARED
     )
 
     find_library(CHERRY_IMPORT_LIB cherry 
